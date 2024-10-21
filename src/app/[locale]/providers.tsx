@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 // Manually import messages for each locale
 import enMessages from "../../../messages/en.json";
 import frMessages from "../../../messages/fr.json";
+import itMessages from "../../../messages/it.json";
 import nlMessages from "../../../messages/nl.json";
 
 type Props = {
@@ -22,6 +23,8 @@ function selectMessages(locale: string) {
       return nlMessages;
     case "fr":
       return frMessages;
+    case "it":
+      return itMessages;
     // ... add cases for other locales as needed
     default:
       return enMessages; // Default to English messages

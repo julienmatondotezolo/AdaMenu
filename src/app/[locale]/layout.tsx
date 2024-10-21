@@ -7,8 +7,8 @@ import React from "react";
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ADA - Point of sale",
-  description: "Adaptive Point of sale system working on multiple devices",
+  title: "ADA - Menu manager",
+  description: "Adaptive Menu manager system working on multiple devices",
 };
 
 export default function RootLayout({

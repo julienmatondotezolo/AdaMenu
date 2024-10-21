@@ -1,7 +1,7 @@
 {
   "name": "next_starter",
   "version": "1.0.0",
-  "description": "Next JS template with tailwind darkmode and localization",
+  "description": "Adaptive Menu manager system working on multiple devices",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,13 +13,18 @@
   "author": "Julien Matondo",
   "license": "MIT",
   "dependencies": {
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-slot": "^1.1.0",
     "autoprefixer": "^10.4.20",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.15",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-simple-import-sort": "^12.1.1",
+    "lucide-react": "^0.453.0",
     "next": "^14.2.15",
     "next-intl": "^3.21.1",
     "next-themes": "^0.3.0",

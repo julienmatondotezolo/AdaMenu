@@ -1,13 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { AdaHeader, Categories } from "@/components";
 
 export default function Index() {
-  const indexPageText = useTranslations("Index");
-
   return (
-    <main className="relative">
-      <p>{indexPageText("welcome")}</p>
+    <main className="relative h-screen overflow-hidden">
+      <AdaHeader />
+      <Categories />
     </main>
   );
 }
