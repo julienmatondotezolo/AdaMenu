@@ -1,0 +1,47 @@
+[
+    // {
+    //     "parentCategoryId": "16e9f4a0-a165-4280-8f1a-979194311e45",
+    //     "names": {
+    //         "en": "Meat",
+    //         "it": "Carne",
+    //         "fr": "Viande",
+    //         "nl": "Vlees"
+    //     }
+    // },
+    {
+        "names": {
+            "en": "Cold",
+            "it": "Freddi",
+            "fr": "Froides",
+            "nl": "Koud"
+        },
+        "parentCategoryId": "16e9f4a0-a165-4280-8f1a-979194311e45"
+    },
+    {
+        "names": {
+            "en": "Warm",
+            "it": "Caldi",
+            "fr": "Chaudes",
+            "nl": "Warm"
+        },
+        "parentCategoryId": "16e9f4a0-a165-4280-8f1a-979194311e45"
+    },
+    {
+        "names": {
+            "en": "Veal",
+            "it": "Vitello",
+            "fr": "Veau",
+            "nl": "Kalfsvlees"
+        },
+        "parentCategoryId": "16e9f4a0-a165-4280-8f1a-979194311e45"
+    },
+    {
+        "names": {
+            "en": "Beef",
+            "it": "Carne di manzo",
+            "fr": "Viande de Bœuf",
+            "nl": "Rundsvlees"
+        },
+        "parentCategoryId": "16e9f4a0-a165-4280-8f1a-979194311e45"
+    }
+]

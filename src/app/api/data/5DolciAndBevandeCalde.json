@@ -1,0 +1,83 @@
+[
+    // {
+    //     "parentCategoryId": "fe8c8c3d-6b2d-4262-8897-01817571f951",
+    //     "names": {
+    //         "en": "Desserts and Hot Drinks",
+    //         "it": "Dolci & Bevande calde",
+    //         "fr": "Desserts et Boissons chaudes",
+    //         "nl": "Desserts en Warme dranken"
+    //     }
+    // },
+    // {
+    //     "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+    //     "names": {
+    //         "en": "Digestives",
+    //         "it": "Digestivi",
+    //         "fr": "Digestifs",
+    //         "nl": "Spijsvertering"
+    //     }
+    // },
+    {
+        "parentCategoryId": "fe8c8c3d-6b2d-4262-8897-01817571f951",
+        "names": {
+            "en": "Dessert",
+            "it": "Dolce",
+            "fr": "Dessert",
+            "nl": "Dessert"
+        }
+    },
+    {
+        "parentCategoryId": "fe8c8c3d-6b2d-4262-8897-01817571f951",
+        "names": {
+            "en": "Hot Drinks",
+            "it": "Bevande calde",
+            "fr": "Boissons Chaudes",
+            "nl": "Warme Dranken"
+        }
+    },
+    {
+        "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+        "names": {
+            "en": "Bitters",
+            "it": "Amari Digestivi",
+            "fr": "Digestifs",
+            "nl": "Spijsverteringsbitters"
+        }
+    },
+    {
+        "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+        "names": {
+            "en": "Eau de vie",
+            "it": "Eau de vie",
+            "fr": "Eau de vie",
+            "nl": "Eau de vie"
+        }
+    },
+    {
+        "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+        "names": {
+            "en": "Cognac",
+            "it": "Cognac",
+            "fr": "Cognac",
+            "nl": "Cognac"
+        }
+    },
+    {
+        "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+        "names": {
+            "en": "Liquors",
+            "it": "Liquori",
+            "fr": "Liqueurs",
+            "nl": "Likeuren"
+        }
+    },
+    {
+        "parentCategoryId": "e9f524c2-b955-4dcf-8ea5-3928a2326d0b",
+        "names": {
+            "en": "Whisky",
+            "it": "Whisky",
+            "fr": "Whisky",
+            "nl": "Whisky"
+        }
+    }
+]

@@ -1,0 +1,92 @@
+[
+    // {
+    //     "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5",
+    //     "names": {
+    //         "en": "Drinks",
+    //         "it": "Bevande",
+    //         "fr": "Boissons",
+    //         "nl": "Dranken"
+    //     }
+    // },
+    {
+        "names": {
+            "en": "Appetizers",
+            "it": "Aperitivi",
+            "fr": "Aperitif",
+            "nl": "Aperitief"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Cocktails",
+            "it": "Cocktails",
+            "fr": "Cocktails",
+            "nl": "Cocktails"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Long drinks",
+            "it": "Long drinks",
+            "fr": "Long drinks",
+            "nl": "Long drinks"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Cold drinks",
+            "it": "Bevande fredde",
+            "fr": "Cold drinks",
+            "nl": "Cold drinks"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Beers",
+            "it": "Birre",
+            "fr": "Bières",
+            "nl": "Bier"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Wine",
+            "it": "Vino",
+            "fr": "Vin",
+            "nl": "Wijn"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "To share",
+            "it": "Da condividere",
+            "fr": "A partager",
+            "nl": "Om te delen"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Cocktails",
+            "it": "Cocktails",
+            "fr": "Cocktails",
+            "nl": "Cocktails"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    },
+    {
+        "names": {
+            "en": "Cheeses",
+            "it": "Formaggi",
+            "fr": "Fromages",
+            "nl": "Kazen"
+        },
+        "parentCategoryId": "db50ab78-994e-45c5-8f58-3dccb81c50f5"
+    }
+]

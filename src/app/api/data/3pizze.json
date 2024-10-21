@@ -1,0 +1,29 @@
+[
+    // {
+    //     "parentCategoryId": "6cf50528-e3c9-4db1-8507-f2d61a33aa88",
+    //     "names": {
+    //         "en": "Pizzas",
+    //         "it": "Pizze",
+    //         "fr": "Pizzas",
+    //         "nl": "Pizza's"
+    //     }
+    // },
+    {
+        "parentCategoryId": "6cf50528-e3c9-4db1-8507-f2d61a33aa88",
+        "names": {
+            "en": "Pizzas",
+            "it": "Pizze",
+            "fr": "Pizzas",
+            "nl": "Pizza's"
+        }
+    },
+    {
+        "parentCategoryId": "6cf50528-e3c9-4db1-8507-f2d61a33aa88",
+        "names": {
+            "en": "Special Pizzas",
+            "it": "Pizze Speciale",
+            "fr": "Pizzas Spéciales",
+            "nl": "Speciale pizza's"
+        }
+    }
+]

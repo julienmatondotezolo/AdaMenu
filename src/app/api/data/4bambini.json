@@ -1,0 +1,65 @@
+[
+    // {
+    //     "parentCategoryId": "3ca3f7c4-c0ca-4602-bb9e-ca90880c73af",
+    //     "names": {
+    //         "en": "Pastes",
+    //         "it": "Paste",
+    //         "fr": "Pâtes",
+    //         "nl": "Pasta's"
+    //     }
+    // },
+    // {
+    //     "parentCategoryId": "e580ea15-da23-4004-a25b-00546a7f09e0",
+    //     "names": {
+    //         "en": "Children",
+    //         "it": "Bambini",
+    //         "fr": "Enfants",
+    //         "nl": "Kinderen"
+    //     }
+    // },
+    {
+        "names": {
+            "en": "Pasta",
+            "it": "Pasta",
+            "fr": "Pâtes",
+            "nl": "Pasta"
+        },
+        "parentCategoryId": "3ca3f7c4-c0ca-4602-bb9e-ca90880c73af"
+    },
+    {
+        "names": {
+            "en": "Meat",
+            "it": "Carne",
+            "fr": "Viande",
+            "nl": "Vlees"
+        },
+        "parentCategoryId": "e580ea15-da23-4004-a25b-00546a7f09e0"
+    },
+    {
+        "names": {
+            "en": "Pizzas",
+            "it": "Pizze",
+            "fr": "Pizzas",
+            "nl": "Pizza's"
+        },
+        "parentCategoryId": "e580ea15-da23-4004-a25b-00546a7f09e0"
+    },
+    {
+        "names": {
+            "en": "Pasta",
+            "it": "Pasta",
+            "fr": "Pâtes",
+            "nl": "Pasta"
+        },
+        "parentCategoryId": "e580ea15-da23-4004-a25b-00546a7f09e0"
+    },
+    {
+        "names": {
+            "en": "Dessert",
+            "it": "Dolce",
+            "fr": "Dessert",
+            "nl": "Dessert"
+        },
+        "parentCategoryId": "e580ea15-da23-4004-a25b-00546a7f09e0"
+    }
+]

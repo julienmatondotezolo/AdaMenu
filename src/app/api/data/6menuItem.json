@@ -1,0 +1,121 @@
+[
+    {
+        "categoryId": "76135db3-e5a8-4a45-82d5-cc3139f17796",
+        "names": {
+            "en": "Aperitivo della casa",
+            "it": "Aperitivo della casa",
+            "fr": "Aperitivo della casa",
+            "nl": "Aperitivo della casa"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 10
+    },
+    {
+        "categoryId": "44fb677d-a087-46da-a141-5ce54b544fd9",
+        "names": {
+            "en": "Non-alcoholic",
+            "it": "Cocktail analcolico",
+            "fr": "Sans alcool",
+            "nl": "Zonder alcohol"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 9
+    },
+    {
+        "categoryId": "18e41830-d222-4a46-b57e-a83a3a4c76fc",
+        "names": {
+            "en": "Campari con succo d'arancia",
+            "it": "Campari con succo d'arancia",
+            "fr": "Campari con succo d'arancia",
+            "nl": "Campari con succo d'arancia"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 12
+    },
+    {
+        "categoryId": "30b64551-6c95-419b-96aa-4fac9d089b90",
+        "names": {
+            "en": "Acqua naturale 0,5 litro",
+            "it": "Acqua naturale 0,5 litro",
+            "fr": "Acqua naturale 0,5 litro",
+            "nl": "Acqua naturale 0,5 litro"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 6
+    },
+    {
+        "categoryId": "483e63c0-293b-430c-9217-fd454375a9e1",
+        "names": {
+            "en": "Stella Artois",
+            "it": "Stella Artois",
+            "fr": "Stella Artois",
+            "nl": "Stella Artois"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 3.5
+    },
+    {
+        "categoryId": "1d93bdb8-d691-4bff-9a9b-22ba9ea0937f",
+        "names": {
+            "en": "Bicchiere Rosso - Bianco - Rosato",
+            "it": "Bicchiere Rosso - Bianco - Rosato",
+            "fr": "Bicchiere Rosso - Bianco - Rosato",
+            "nl": "Bicchiere Rosso - Bianco - Rosato"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 6
+    },
+    {
+        "categoryId": "be241bf5-6114-4e91-8fc5-08df8ec5f2d3",
+        "names": {
+            "en": "Olive verdi",
+            "it": "Olive verdi",
+            "fr": "Olive verdi",
+            "nl": "Olive verdi"
+        },
+        "descriptions": {
+            "en": "empty",
+            "it": "empty",
+            "fr": "empty",
+            "nl": "empty"
+        },
+        "allergenIds": [],
+        "price": 4
+    }
+]
