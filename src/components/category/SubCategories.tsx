@@ -5,9 +5,8 @@ function SubCategories({ category }: { category: any }) {
   const locale = useLocale();
 
   return (
-    <div className="p-4 h-20 bg-gray-200 dark:bg-gray-700">
-      <h3 className="text-md">{category.names[locale]}</h3>
-      {/* <p className="hidden md:block text-xs">{category.id}</p> */}
+    <div className="cursor-pointer p-2 h-10 md:h-16 bg-gray-200 dark:bg-gray-800">
+      <h3 className="text-xs md:text-sm">{category.names[locale]}</h3>
     </div>
   );
 }

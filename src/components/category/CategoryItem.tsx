@@ -13,14 +13,14 @@ const CategoryItem = ({ categories, categoryId, onClick }: CategoryItemProps) =>
   const indexPageText = useTranslations("Index");
 
   return (
-    <div className="h-full border-t-2 dark:border-gray-800 overflow-x-scroll">
+    <div className="h-full border-t-2 dark:border-gray-800">
       <section className="flex flex-col w-fit text-neutral-800 dark:text-neutral-200">
-        <button
+        {/* <button
           onClick={() => onClick("ALL")}
           className={`text-sm px-6 py-4 ${categoryId === "ALL" ? "text-white bg-primary border-primary box-content" : "border-b dark:border-gray-800"}`}
         >
           <p className="w-max">{indexPageText("all")}</p>
-        </button>
+        </button> */}
         {categories.map((category: any, index: any) => (
           <button
             key={index}
