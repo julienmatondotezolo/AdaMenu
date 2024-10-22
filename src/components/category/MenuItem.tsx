@@ -18,7 +18,7 @@ function MenuItem({ items }: { items: any }) {
         </article>
 
         <div className="text-sm mt-8">
-          <section className="grid grid-cols-[25px_5fr_2fr] font-semibold py-2 border-b-2">
+          <section className="grid grid-cols-[25px_5fr_2fr] font-semibold py-2 border-b mb-4 dark:border-gray-800">
             <p>Nr.</p>
             <p>Name</p>
             <p>Price</p>

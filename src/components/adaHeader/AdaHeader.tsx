@@ -31,7 +31,7 @@ const AdaHeader = () => {
   return (
     <div className="flex items-center justify-between p-2 bg-primary text-white">
       <div>
-        <small className="font-bold">Ada</small>
+        <small className="font-bold">ADA - Menu</small>
       </div>
       <div>
         <small className="font-medium">{time}</small>
