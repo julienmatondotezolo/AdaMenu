@@ -26,6 +26,7 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
 
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
+      await queryClient.invalidateQueries("menuItems");
       await queryClient.invalidateQueries("menu-items-details");
     },
   });
@@ -44,6 +45,8 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedMenuId) return;
+
     const menuObject = {
       [selectedMenuId]: {
         names: menuState.names,
@@ -169,7 +172,9 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button type="submit">Update</Button>
+            <Button type="submit" disabled={updateMenuMutation.isLoading}>
+              {updateMenuMutation.isLoading ? "Loading..." : "Update"}
+            </Button>
           </CardFooter>
         </form>
       </Card>

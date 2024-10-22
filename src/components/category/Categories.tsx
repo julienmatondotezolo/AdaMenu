@@ -66,8 +66,10 @@ function Categories() {
   const updateCategoryMutation = useMutation(updateCategory, {
     onSuccess: async (responseUpdateCategory) => {
       await queryClient.invalidateQueries("categories");
-      setCategory(responseUpdateCategory);
-      setCategoryId(responseUpdateCategory.id);
+      if (responseUpdateCategory) {
+        setCategory(responseUpdateCategory);
+        setCategoryId(responseUpdateCategory.id);
+      }
     },
   });
 
@@ -104,13 +106,16 @@ function Categories() {
 
   const handleUpdateCategory = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newCategory = category;
 
-    newCategory.parentCategoryId = selectedParentCategory;
+    const newCategoryObject = {
+      [category.id]: {
+        names: category.names,
+        parentCategoryId: selectedParentCategory,
+      },
+    };
 
     updateCategoryMutation.mutate({
-      categoryObject: newCategory,
-      categoryId: newCategory.id,
+      categoryObject: newCategoryObject,
     });
   };
 
@@ -158,7 +163,7 @@ function Categories() {
             )}
           </article>
         </div>
-        {category && (
+        {category && category.names && (
           <div className="w-full overflow-y-scroll pb-12">
             <div className="w-full">
               {/* <h1 className="text-xl font-semibold p-4 border-b-2 dark:border-gray-800">Categories</h1> */}
@@ -199,11 +204,15 @@ function Categories() {
                         <SelectContent className="w-full bg-white dark:bg-background">
                           <SelectGroup>
                             <SelectItem value={null}>NO CATEGORY</SelectItem>
-                            {categories.map((category: any, index: any) => (
-                              <SelectItem key={index} value={category.id}>
-                                {category.names[locale]}
-                              </SelectItem>
-                            ))}
+                            {categories.map(
+                              (category: any, index: any) =>
+                                // Check if category.id is not equal to categoryId before rendering
+                                category.id !== categoryId && (
+                                  <SelectItem key={index} value={category.id}>
+                                    {category.names[locale]}
+                                  </SelectItem>
+                                ),
+                            )}
                           </SelectGroup>
                         </SelectContent>
                       </Select>
@@ -229,16 +238,19 @@ function Categories() {
               <article className="w-full flex flex-wrap items-center justify-between">
                 <h3 className="text-lg font-semibold">Sub categories ({category?.subCategories.length})</h3>
                 <section className="space-x-6">
+                  {subCategoryId && (
+                    <Button variant={"outline"} onClick={openUpdateSubCategory}>
+                      Edit sub category
+                    </Button>
+                  )}
                   <Button
                     onClick={() => {
                       setDialogMode("addSubCat");
                       setOpenDialog(true);
                     }}
-                    variant={"outline"}
                   >
-                    Add sub category
+                    Add sub category +
                   </Button>
-                  {subCategoryId && <Button onClick={openUpdateSubCategory}>Edit sub category</Button>}
                 </section>
               </article>
               {category?.subCategories && (

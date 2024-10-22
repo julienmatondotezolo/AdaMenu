@@ -47,15 +47,9 @@ export async function createCategory({ categoryObject }: { categoryObject: any }
   }
 }
 
-export async function updateCategory({
-  categoryObject,
-  categoryId,
-}: {
-  categoryObject: any;
-  categoryId: string;
-}): Promise<any> {
+export async function updateCategory({ categoryObject }: { categoryObject: any }): Promise<any> {
   try {
-    const responseUpdateCategory: Response = await fetch(adaMenuUrl + `/category/${categoryId}`, {
+    const responseUpdateCategory: Response = await fetch(adaMenuUrl + `/category`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -230,5 +224,55 @@ export async function fetchAllergen(): Promise<any> {
     }
   } catch (error) {
     console.error("Impossible to fetch allergen:", error);
+  }
+}
+
+/* ========================================================================== */
+/* ============================== SUPPLEMENT ================================ */
+/* ========================================================================== */
+
+export async function fetchSupplement(): Promise<any> {
+  try {
+    const responseSupplement: Response = await fetch(adaMenuUrl + `/supplement`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseSupplement.ok) {
+      return responseSupplement.json();
+    } else {
+      return responseSupplement;
+    }
+  } catch (error) {
+    console.error("Impossible to fetch supplement:", error);
+  }
+}
+
+/* ========================================================================== */
+/* =============================== SIDEDISH ================================= */
+/* ========================================================================== */
+
+export async function fetchSidedish(): Promise<any> {
+  try {
+    const responseSidedish: Response = await fetch(adaMenuUrl + `/sidedish`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseSidedish.ok) {
+      return responseSidedish.json();
+    } else {
+      return responseSidedish;
+    }
+  } catch (error) {
+    console.error("Impossible to fetch sidedish:", error);
   }
 }

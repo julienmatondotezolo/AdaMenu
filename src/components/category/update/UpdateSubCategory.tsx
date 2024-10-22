@@ -32,13 +32,16 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const newCategory = category;
 
-    newCategory.parentCategoryId = selectedParentCategory;
+    const newCategoryObject = {
+      [category.id]: {
+        names: category.names,
+        parentCategoryId: selectedParentCategory,
+      },
+    };
 
     updateCategoryMutation.mutate({
-      categoryObject: newCategory,
-      categoryId: newCategory.id,
+      categoryObject: newCategoryObject,
     });
   };
 
@@ -91,11 +94,14 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
             >
               <option value="">Select a parent category</option>
               <option value={""}>NO CATEGORY</option>
-              {categories.map((category: any, index: any) => (
-                <option key={index} value={category.id}>
-                  {category.names[locale]}
-                </option>
-              ))}
+              {categories.map(
+                (category: any, index: any) =>
+                  category.id !== parentCategoryId && (
+                    <option key={index} value={category.id}>
+                      {category.names[locale]}
+                    </option>
+                  ),
+              )}
             </select>
           </div>
         </CardContent>
