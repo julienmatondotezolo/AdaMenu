@@ -3,7 +3,7 @@ import { useLocale } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { fetchMenuById } from "@/_services";
+import { fetchMenuById, updateMenuItem } from "@/_services";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
 
@@ -24,12 +24,19 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
     },
   });
 
+  const updateMenuMutation = useMutation(updateMenuItem, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries("menu-items-details");
+    },
+  });
+
   // Refetch when selectedMenuId changes
   useEffect(() => {
     if (selectedMenuId) fetchMenuItems({ menuId: selectedMenuId });
   }, [fetchMenuItems, selectedMenuId]);
 
   const handleCheckboxChange = (id: string) => {
+    // console.log("id:", id);
     setSelectedAllergens((prev) =>
       prev.includes(id) ? prev.filter((allergenId) => allergenId !== id) : [...prev, id],
     );
@@ -37,8 +44,20 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    menuState.allergens = selectedAllergens;
-    console.log("menuState:", menuState);
+    const menuObject = {
+      [selectedMenuId]: {
+        names: menuState.names,
+        descriptions: menuState.descriptions,
+        categoryId: menuState.category.id,
+        allergenIds: selectedAllergens,
+        price: menuState.price,
+        hidden: menuState.hidden,
+      },
+    };
+
+    updateMenuMutation.mutate({
+      menuObject,
+    });
   };
 
   if (isLoading)
@@ -140,7 +159,7 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
                     <Checkbox
                       id={allergen.id}
                       value={allergen.id}
-                      checked={menuState.allergens[index]?.id}
+                      checked={menuState.allergens.some((menuAllergen: any) => menuAllergen.id === allergen.id)}
                       onCheckedChange={() => handleCheckboxChange(allergen.id)}
                     />
                     <Label htmlFor={allergen.names[locale]}>{allergen.names[locale]}</Label>

@@ -57,14 +57,6 @@ function Categories() {
 
   const { isLoading, data: categories } = useQuery("categories", fetchAllCategories, {
     refetchOnWindowFocus: false,
-    onSuccess(data) {
-      if (data.length > 0) {
-        // const firstCategory = data[0];
-        // setCategory(firstCategory);
-        // setCategoryId(firstCategory.id);
-        // fetchMenuItems({ categoryId: firstCategory.id });
-      }
-    },
   });
 
   const { data: allergens } = useQuery("allergens", fetchAllAllergen, {

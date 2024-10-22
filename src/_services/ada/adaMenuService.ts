@@ -84,6 +84,7 @@ export async function deleteCategory({ categoryId }: { categoryId: string }): Pr
         // Authorization: `Bearer ${session.session.user.token}`,
         "ngrok-skip-browser-warning": "1",
       },
+      body: JSON.stringify([categoryId]),
     });
 
     if (responseDeleteCategory.ok) {
@@ -173,7 +174,7 @@ export async function updateMenuItem({ menuObject }: { menuObject: any }): Promi
         // Authorization: `Bearer ${session.session.user.token}`,
         "ngrok-skip-browser-warning": "1",
       },
-      body: JSON.stringify([menuObject]),
+      body: JSON.stringify(menuObject),
     });
 
     if (responseCreateMenu.ok) {
