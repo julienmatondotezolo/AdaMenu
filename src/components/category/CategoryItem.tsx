@@ -13,7 +13,7 @@ const CategoryItem = ({ categories, categoryId, onClick }: CategoryItemProps) =>
   const indexPageText = useTranslations("Index");
 
   return (
-    <div className="h-full border-t-2 dark:border-gray-800">
+    <div className="w-full h-full border-t-2 dark:border-gray-800">
       <section className="flex flex-col w-fit text-neutral-800 dark:text-neutral-200">
         {/* <button
           onClick={() => onClick("ALL")}

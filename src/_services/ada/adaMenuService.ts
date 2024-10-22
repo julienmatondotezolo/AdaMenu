@@ -26,7 +26,6 @@ export async function fetchCategories(): Promise<any> {
 }
 
 export async function createCategory({ categoryObject }: { categoryObject: any }): Promise<any> {
-  console.log("categoryObject:", categoryObject);
   try {
     const responseCreateCategory: Response = await fetch(adaMenuUrl + `/category`, {
       method: "POST",
@@ -35,7 +34,7 @@ export async function createCategory({ categoryObject }: { categoryObject: any }
         // Authorization: `Bearer ${session.session.user.token}`,
         "ngrok-skip-browser-warning": "1",
       },
-      body: JSON.stringify(categoryObject),
+      body: JSON.stringify([categoryObject]),
     });
 
     if (responseCreateCategory.ok) {
@@ -45,6 +44,34 @@ export async function createCategory({ categoryObject }: { categoryObject: any }
     }
   } catch (error) {
     console.error("Impossible to create category:", error);
+  }
+}
+
+export async function updateCategory({
+  categoryObject,
+  categoryId,
+}: {
+  categoryObject: any;
+  categoryId: string;
+}): Promise<any> {
+  try {
+    const responseUpdateCategory: Response = await fetch(adaMenuUrl + `/category/${categoryId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify(categoryObject),
+    });
+
+    if (responseUpdateCategory.ok) {
+      return responseUpdateCategory.json();
+    } else {
+      return responseUpdateCategory;
+    }
+  } catch (error) {
+    console.error("Impossible to update category:", error);
   }
 }
 
@@ -60,7 +87,7 @@ export async function deleteCategory({ categoryId }: { categoryId: string }): Pr
     });
 
     if (responseDeleteCategory.ok) {
-      return responseDeleteCategory.json();
+      return responseDeleteCategory;
     } else {
       return responseDeleteCategory;
     }
