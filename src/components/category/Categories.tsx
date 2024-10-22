@@ -27,14 +27,14 @@ import {
   SelectValue,
 } from "../ui";
 import { CategoryItem } from "./CategoryItem";
-import { CreateCategory } from "./create";
+import { CreateCategory, CreateMenu } from "./create";
 import { MenuItem } from "./MenuItem";
 import { SubCategories } from "./SubCategories";
-import { UpdateSubCategory } from "./update";
+import { UpdateMenu, UpdateSubCategory } from "./update";
 
 function Categories() {
   const locale = useLocale();
-  const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "editCat">("addCat");
+  const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
   const [category, setCategory] = useState<any>();
@@ -138,7 +138,7 @@ function Categories() {
   return (
     <>
       <div className="flex w-full h-full">
-        <div className="h-full items-center border-r-2 dark:border-gray-800 overflow-y-scroll">
+        <div className="h-full items-center border-r-2 dark:border-gray-800 overflow-y-scroll pb-16">
           <article className="flex flex-col">
             <Button onClick={() => setOpenDialog(true)} className="my-4 mx-auto">
               {!subCategoryId ? "Add category +" : "Add +"}
@@ -252,7 +252,13 @@ function Categories() {
         )}
         {subCategoryId && (
           <div className="w-3/4 h-full border-l-2 dark:border-gray-800 p-6 box-border overflow-y-scroll pb-16">
-            <MenuItem items={menuItems} />
+            <MenuItem
+              onClick={(dialogMode) => {
+                setDialogMode(dialogMode);
+                setOpenDialog(true);
+              }}
+              items={menuItems}
+            />
           </div>
         )}
       </div>
@@ -270,6 +276,10 @@ function Categories() {
               );
             case "addSubCat":
               return <CreateCategory categories={categories} parentCategoryId={categoryId} />;
+            case "addMenu":
+              return <CreateMenu />;
+            case "editMenu":
+              return <UpdateMenu />;
             case "addCat":
             default:
               return <CreateCategory categories={categories} />;

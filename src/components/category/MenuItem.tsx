@@ -1,9 +1,15 @@
+/* eslint-disable no-unused-vars */
 import { useLocale } from "next-intl";
 import React from "react";
 
 import { Button } from "../ui";
 
-function MenuItem({ items }: { items: any }) {
+interface menuProps {
+  items: any;
+  onClick: (dialogMode: "addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat") => void;
+}
+
+function MenuItem({ items, onClick }: menuProps) {
   const locale = useLocale();
 
   if (items)
@@ -12,8 +18,10 @@ function MenuItem({ items }: { items: any }) {
         <article className="w-full flex flex-wrap items-center justify-between">
           <h3 className="text-lg font-semibold">Menu ({items.length})</h3>
           <section className="space-x-4">
-            <Button variant={"outline"}>Edit menu</Button>
-            <Button>Add menu + </Button>
+            <Button onClick={() => onClick("editMenu")} variant={"outline"}>
+              Edit menu
+            </Button>
+            <Button onClick={() => onClick("addMenu")}>Add menu + </Button>
           </section>
         </article>
 

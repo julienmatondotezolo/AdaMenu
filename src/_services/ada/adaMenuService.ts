@@ -120,3 +120,68 @@ export async function fetchMenuItemByCategoryId({ categoryId }: { categoryId: st
     console.error("Impossible to fetch menu items:", error);
   }
 }
+
+export async function createMenuItem({ menuObject }: { menuObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/menu-item`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([menuObject]),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to create menu item:", error);
+  }
+}
+
+export async function updateMenuItem({ menuObject }: { menuObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/menu-item`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([menuObject]),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to create menu item:", error);
+  }
+}
+
+export async function deleteMenu({ menuId }: { menuId: string }): Promise<any> {
+  try {
+    const responseDeleteMenu: Response = await fetch(adaMenuUrl + `/menu-item/${menuId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseDeleteMenu.ok) {
+      return responseDeleteMenu;
+    } else {
+      return responseDeleteMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to delete menu item:", error);
+  }
+}
