@@ -6,10 +6,12 @@ import { Button } from "../ui";
 
 interface menuProps {
   items: any;
+  selectedMenuId: string | undefined;
   onClick: (dialogMode: "addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat") => void;
+  onPointerDown: (menuId: string) => void;
 }
 
-function MenuItem({ items, onClick }: menuProps) {
+function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) {
   const locale = useLocale();
 
   if (items)
@@ -18,9 +20,11 @@ function MenuItem({ items, onClick }: menuProps) {
         <article className="w-full flex flex-wrap items-center justify-between">
           <h3 className="text-lg font-semibold">Menu ({items.length})</h3>
           <section className="space-x-4">
-            <Button onClick={() => onClick("editMenu")} variant={"outline"}>
-              Edit menu
-            </Button>
+            {selectedMenuId && (
+              <Button onClick={() => onClick("editMenu")} variant={"outline"}>
+                Edit menu
+              </Button>
+            )}
             <Button onClick={() => onClick("addMenu")}>Add menu + </Button>
           </section>
         </article>
@@ -34,7 +38,8 @@ function MenuItem({ items, onClick }: menuProps) {
           <div className="w-full odd:bg-slate-600">
             {items?.map((menu: any, index: any) => (
               <section
-                className="grid grid-cols-[20px_5fr_2fr] py-2 mt-2 px-2 bg-neutral-100 dark:bg-slate-800"
+                onPointerDown={() => onPointerDown(menu.id)}
+                className={`cursor-pointer grid grid-cols-[20px_5fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"}`}
                 key={index}
               >
                 <p>{index + 1}.</p>

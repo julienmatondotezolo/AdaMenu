@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import {
   deleteCategory,
+  fetchAllergen,
   fetchCategories,
   fetchMenuItemByCategoryId,
   updateCategory,
@@ -41,9 +42,11 @@ function Categories() {
   const [subCategoryId, setSubCategoryId] = useState<string>();
   const [subCategory, setSubCategory] = useState<any>();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
+  const [selectedMenuId, setSelectedMenuId] = useState<string>();
 
   const queryClient = useQueryClient();
   const fetchAllCategories = () => fetchCategories();
+  const fetchAllAllergen = () => fetchAllergen();
 
   // Define the mutation for fetching menu items
   const { mutate: fetchMenuItems, data: menuItems } = useMutation(fetchMenuItemByCategoryId, {
@@ -62,6 +65,10 @@ function Categories() {
         // fetchMenuItems({ categoryId: firstCategory.id });
       }
     },
+  });
+
+  const { data: allergens } = useQuery("allergens", fetchAllAllergen, {
+    refetchOnWindowFocus: false,
   });
 
   const updateCategoryMutation = useMutation(updateCategory, {
@@ -93,11 +100,13 @@ function Categories() {
     setSelectedParentCategory("");
     // queryClient.setQueryData(["menuItems"], null);
     setSubCategoryId("");
+    setSelectedMenuId("");
   };
 
   const handleSelectCategory = (category: any) => {
     setSubCategoryId(category.id);
     setSubCategory(category);
+    setSelectedMenuId("");
     fetchMenuItems({ categoryId: category.id });
   };
 
@@ -126,6 +135,11 @@ function Categories() {
         console.error(`An error has occurred: ${error.message}`);
       }
     }
+  };
+
+  const handleSelectMenu = (menuId: string) => {
+    queryClient.invalidateQueries("menu-items-details");
+    setSelectedMenuId(menuId);
   };
 
   if (isLoading)
@@ -253,11 +267,13 @@ function Categories() {
         {subCategoryId && (
           <div className="w-3/4 h-full border-l-2 dark:border-gray-800 p-6 box-border overflow-y-scroll pb-16">
             <MenuItem
+              items={menuItems}
+              selectedMenuId={selectedMenuId}
               onClick={(dialogMode) => {
                 setDialogMode(dialogMode);
                 setOpenDialog(true);
               }}
-              items={menuItems}
+              onPointerDown={(menuId) => handleSelectMenu(menuId)}
             />
           </div>
         )}
@@ -277,9 +293,9 @@ function Categories() {
             case "addSubCat":
               return <CreateCategory categories={categories} parentCategoryId={categoryId} />;
             case "addMenu":
-              return <CreateMenu />;
+              return <CreateMenu allergens={allergens} subCategoryId={subCategoryId} />;
             case "editMenu":
-              return <UpdateMenu />;
+              return <UpdateMenu selectedMenuId={selectedMenuId} allergens={allergens} />;
             case "addCat":
             default:
               return <CreateCategory categories={categories} />;

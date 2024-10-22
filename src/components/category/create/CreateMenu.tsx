@@ -1,14 +1,20 @@
 import { Label } from "@radix-ui/react-label";
+import { useLocale } from "next-intl";
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { createCategory } from "@/_services";
+import { createMenuItem } from "@/_services";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
+import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
 
-function CreateMenu() {
+type CreateMenuProps = {
+  subCategoryId?: string;
+  allergens: any;
+};
+
+function CreateMenu({ subCategoryId, allergens }: CreateMenuProps) {
+  const locale = useLocale();
   const queryClient = useQueryClient();
-  const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
 
   // New state for input values
   const [nameEn, setNameEn] = useState<string>("");
@@ -16,33 +22,74 @@ function CreateMenu() {
   const [nameFr, setNameFr] = useState<string>("");
   const [nameNl, setNameNl] = useState<string>("");
 
-  const createCategoryMutation = useMutation(createCategory, {
+  // New state for description values
+  const [descriptionEn, setDescriptionEn] = useState<string>("");
+  const [descriptionIt, setDescriptionIt] = useState<string>("");
+  const [descriptionFr, setDescriptionFr] = useState<string>("");
+  const [descriptionNl, setDescriptionNl] = useState<string>("");
+
+  // New state for price values
+  const [price, setPrice] = useState<string>();
+
+  // New state for hidden values
+  const [hidden, setHidden] = useState<boolean>(true);
+
+  // New state for selected allergen IDs
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+
+  const handleVisibilityChange = (checked: boolean) => {
+    setHidden(checked);
+  };
+
+  const handleCheckboxChange = (id: string) => {
+    setSelectedAllergens((prev) =>
+      prev.includes(id) ? prev.filter((allergenId) => allergenId !== id) : [...prev, id],
+    );
+  };
+
+  const createMenuyMutation = useMutation(createMenuItem, {
     onSuccess: () => {
-      queryClient.invalidateQueries("categories");
+      queryClient.invalidateQueries("menuItems");
       setNameEn("");
       setNameIt("");
       setNameFr("");
       setNameNl("");
-      setSelectedParentCategory("");
+      setDescriptionEn("");
+      setDescriptionIt("");
+      setDescriptionFr("");
+      setDescriptionNl("");
+      setPrice("");
+      setHidden(true);
+      setSelectedAllergens([]);
     },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const newCategoryObject: any = {};
+    const newMenuObject: any = {};
 
-    newCategoryObject.names = {
+    newMenuObject.names = {
       en: nameEn,
       it: nameIt,
       fr: nameFr,
       nl: nameNl,
     };
 
-    newCategoryObject.parentCategoryId = selectedParentCategory;
+    newMenuObject.descriptions = {
+      en: descriptionEn,
+      it: descriptionIt,
+      fr: descriptionFr,
+      nl: descriptionNl,
+    };
+
+    newMenuObject.categoryId = subCategoryId;
+    newMenuObject.price = price;
+    newMenuObject.hidden = hidden;
+    newMenuObject.allergenIds = selectedAllergens;
 
     try {
-      createCategoryMutation.mutate({ categoryObject: newCategoryObject });
+      createMenuyMutation.mutate({ menuObject: newMenuObject });
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
@@ -51,7 +98,7 @@ function CreateMenu() {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-fit">
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>Add Menu item</CardTitle>
@@ -97,6 +144,78 @@ function CreateMenu() {
                 onChange={(e) => setNameNl(e.target.value)}
                 required
               />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">description en</Label>
+              <Input
+                id="description"
+                value={descriptionEn}
+                placeholder="description en"
+                onChange={(e) => setDescriptionEn(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">description it</Label>
+              <Input
+                id="description"
+                value={descriptionIt}
+                placeholder="description it"
+                onChange={(e) => setDescriptionIt(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">description fr</Label>
+              <Input
+                id="description"
+                value={descriptionFr}
+                placeholder="description fr"
+                onChange={(e) => setDescriptionFr(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="description">description nl</Label>
+              <Input
+                id="description"
+                value={descriptionNl}
+                placeholder="description nl"
+                onChange={(e) => setDescriptionNl(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 w-full items-center gap-4 mb-4">
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="name">price</Label>
+              <Input
+                id="price"
+                value={price}
+                placeholder="price"
+                onChange={(e) => setPrice(e.target.value)}
+                type="number"
+                required
+              />
+            </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label className="flex items-center" htmlFor="name">
+                Visibility: {!hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+              </Label>
+              <Switch checked={hidden} onCheckedChange={handleVisibilityChange} />
+            </div>
+          </div>
+          <div className="w-full">
+            <p>Allergens</p>
+            <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
+              {allergens.map((allergen: any, index: any) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={allergen.id}
+                    value={allergen.id}
+                    onCheckedChange={() => handleCheckboxChange(allergen.id)}
+                  />
+                  <Label htmlFor={allergen.names[locale]}>{allergen.names[locale]}</Label>
+                </div>
+              ))}
             </div>
           </div>
           {/* <div className="w-full space-y-1.5">

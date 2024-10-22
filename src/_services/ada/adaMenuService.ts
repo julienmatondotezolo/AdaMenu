@@ -121,6 +121,27 @@ export async function fetchMenuItemByCategoryId({ categoryId }: { categoryId: st
   }
 }
 
+export async function fetchMenuById({ menuId }: { menuId: string }): Promise<any> {
+  try {
+    const responseFetchMenuById: Response = await fetch(adaMenuUrl + `/menu-item/${menuId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseFetchMenuById.ok) {
+      return responseFetchMenuById.json();
+    } else {
+      return responseFetchMenuById;
+    }
+  } catch (error) {
+    console.error("Impossible to fetch menu item by id:", error);
+  }
+}
+
 export async function createMenuItem({ menuObject }: { menuObject: any }): Promise<any> {
   try {
     const responseCreateMenu: Response = await fetch(adaMenuUrl + `/menu-item`, {
@@ -183,5 +204,30 @@ export async function deleteMenu({ menuId }: { menuId: string }): Promise<any> {
     }
   } catch (error) {
     console.error("Impossible to delete menu item:", error);
+  }
+}
+
+/* ========================================================================== */
+/* =============================== ALLERGEN ================================= */
+/* ========================================================================== */
+
+export async function fetchAllergen(): Promise<any> {
+  try {
+    const responseAllergen: Response = await fetch(adaMenuUrl + `/allergen`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseAllergen.ok) {
+      return responseAllergen.json();
+    } else {
+      return responseAllergen;
+    }
+  } catch (error) {
+    console.error("Impossible to fetch allergen:", error);
   }
 }
