@@ -10,7 +10,6 @@ import {
   updateCategory,
 } from "@/_services/ada/adaMenuService";
 
-import { CreateCategory } from "../create";
 import {
   Button,
   Card,
@@ -28,15 +27,19 @@ import {
   SelectValue,
 } from "../ui";
 import { CategoryItem } from "./CategoryItem";
+import { CreateCategory } from "./create";
 import { MenuItem } from "./MenuItem";
 import { SubCategories } from "./SubCategories";
+import { UpdateSubCategory } from "./update";
 
 function Categories() {
   const locale = useLocale();
+  const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
   const [category, setCategory] = useState<any>();
   const [subCategoryId, setSubCategoryId] = useState<string>();
+  const [subCategory, setSubCategory] = useState<any>();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
 
   const queryClient = useQueryClient();
@@ -53,10 +56,9 @@ function Categories() {
     refetchOnWindowFocus: false,
     onSuccess(data) {
       if (data.length > 0) {
-        const firstCategory = data[0];
-
-        setCategory(firstCategory);
-        setCategoryId(firstCategory.id);
+        // const firstCategory = data[0];
+        // setCategory(firstCategory);
+        // setCategoryId(firstCategory.id);
         // fetchMenuItems({ categoryId: firstCategory.id });
       }
     },
@@ -95,6 +97,7 @@ function Categories() {
 
   const handleSelectCategory = (category: any) => {
     setSubCategoryId(category.id);
+    setSubCategory(category);
     fetchMenuItems({ categoryId: category.id });
   };
 
@@ -108,6 +111,11 @@ function Categories() {
       categoryObject: newCategory,
       categoryId: newCategory.id,
     });
+  };
+
+  const openUpdateSubCategory = () => {
+    setDialogMode("editCat");
+    setOpenDialog(true);
   };
 
   const handleDeleteCategory = () => {
@@ -133,7 +141,7 @@ function Categories() {
         <div className="h-full items-center border-r-2 dark:border-gray-800 overflow-y-scroll">
           <article className="flex flex-col">
             <Button onClick={() => setOpenDialog(true)} className="my-4 mx-auto">
-              Create category +{" "}
+              {!subCategoryId ? "Add category +" : "Add +"}
             </Button>
             {categories && (
               <CategoryItem
@@ -214,7 +222,18 @@ function Categories() {
             <section className="w-full p-5 border-x border-t-2 dark:border-gray-800">
               <article className="w-full flex flex-wrap items-center justify-between">
                 <h3 className="text-lg font-semibold">Sub categories ({category?.subCategories.length})</h3>
-                <Button variant={"outline"}>Edit sub categories</Button>
+                <section className="space-x-6">
+                  <Button
+                    onClick={() => {
+                      setDialogMode("addSubCat");
+                      setOpenDialog(true);
+                    }}
+                    variant={"outline"}
+                  >
+                    Add sub category
+                  </Button>
+                  {subCategoryId && <Button onClick={openUpdateSubCategory}>Edit sub category</Button>}
+                </section>
               </article>
               {category?.subCategories && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-8">
@@ -231,14 +250,31 @@ function Categories() {
             </section>
           </div>
         )}
-        {menuItems && menuItems.length > 0 && (
+        {subCategoryId && (
           <div className="w-3/4 h-full border-l-2 dark:border-gray-800 p-6 box-border overflow-y-scroll pb-16">
             <MenuItem items={menuItems} />
           </div>
         )}
       </div>
       <Dialog open={openDialog} setIsOpen={setOpenDialog}>
-        <CreateCategory categories={categories} />
+        {(() => {
+          switch (dialogMode) {
+            case "editCat":
+              return (
+                <UpdateSubCategory
+                  category={subCategory}
+                  setCategory={setSubCategory}
+                  categories={categories}
+                  parentCategoryId={categoryId}
+                />
+              );
+            case "addSubCat":
+              return <CreateCategory categories={categories} parentCategoryId={categoryId} />;
+            case "addCat":
+            default:
+              return <CreateCategory categories={categories} />;
+          }
+        })()}
       </Dialog>
     </>
   );

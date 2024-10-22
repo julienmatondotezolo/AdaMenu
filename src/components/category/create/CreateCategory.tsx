@@ -1,20 +1,25 @@
 import { Label } from "@radix-ui/react-label";
 import { useLocale } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createCategory } from "@/_services";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../ui";
+import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
 type CreateCategoryProps = {
   categories: any;
+  parentCategoryId?: string | undefined;
 };
 
-function CreateCategory({ categories }: CreateCategoryProps) {
+function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (parentCategoryId) setSelectedParentCategory(parentCategoryId);
+  }, [parentCategoryId, selectedParentCategory]);
 
   // New state for input values
   const [nameEn, setNameEn] = useState<string>("");
@@ -22,8 +27,7 @@ function CreateCategory({ categories }: CreateCategoryProps) {
   const [nameFr, setNameFr] = useState<string>("");
   const [nameNl, setNameNl] = useState<string>("");
 
-  const { mutate: fetchCreateCategory } = useMutation(createCategory, {
-    mutationKey: "CREATE_CATEGORY",
+  const createCategoryMutation = useMutation(createCategory, {
     onSuccess: () => {
       queryClient.invalidateQueries("categories");
       setNameEn("");
@@ -49,7 +53,7 @@ function CreateCategory({ categories }: CreateCategoryProps) {
     newCategoryObject.parentCategoryId = selectedParentCategory;
 
     try {
-      fetchCreateCategory({ categoryObject: newCategoryObject });
+      createCategoryMutation.mutate({ categoryObject: newCategoryObject });
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
@@ -61,7 +65,7 @@ function CreateCategory({ categories }: CreateCategoryProps) {
     <Card className="w-full">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Add Category</CardTitle>
+          <CardTitle>Add {parentCategoryId && "Sub "}Category</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
@@ -113,6 +117,7 @@ function CreateCategory({ categories }: CreateCategoryProps) {
               value={selectedParentCategory || ""}
               onChange={(e) => setSelectedParentCategory(e.target.value || undefined)}
               className="w-full p-2 border"
+              disabled={parentCategoryId ? true : false}
             >
               <option value="">Select a parent category</option>
               <option value={""}>NO CATEGORY</option>
@@ -125,7 +130,7 @@ function CreateCategory({ categories }: CreateCategoryProps) {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button type="submit">Create</Button>
+          <Button type="submit">{parentCategoryId ? "Add +" : "Create"}</Button>
         </CardFooter>
       </form>
     </Card>
