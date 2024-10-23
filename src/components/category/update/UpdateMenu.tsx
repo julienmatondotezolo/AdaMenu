@@ -3,16 +3,18 @@ import { useLocale } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { fetchMenuById, updateMenuItem } from "@/_services";
+import { deleteMenu, fetchMenuById, updateMenuItem } from "@/_services";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
 
 type UpdateMenuProps = {
   selectedMenuId: string | undefined;
   allergens: any;
+  sidedish: any;
+  supplement: any;
 };
 
-function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
+function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateMenuProps) {
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -29,6 +31,13 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
       await queryClient.invalidateQueries("menuItems");
       await queryClient.invalidateQueries("menu-items-details");
     },
+  });
+
+  const deleteMenuMutation = useMutation(deleteMenu, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries("menu-items-details");
+    }
   });
 
   // Refetch when selectedMenuId changes
@@ -54,6 +63,7 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
         categoryId: menuState.category.id,
         allergenIds: selectedAllergens,
         price: menuState.price,
+        order: menuState.order,
         hidden: menuState.hidden,
       },
     };
@@ -61,6 +71,16 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
     updateMenuMutation.mutate({
       menuObject,
     });
+  };
+
+  const handleDeleteMenu = () => {
+    try {
+      if (selectedMenuId) deleteMenuMutation.mutate({ menuId: selectedMenuId });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error(`An error has occurred: ${error.message}`);
+      }
+    }
   };
 
   if (isLoading)
@@ -172,6 +192,14 @@ function UpdateMenu({ selectedMenuId, allergens }: UpdateMenuProps) {
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
+            <Button
+              type="button"
+              onClick={handleDeleteMenu}
+              variant={"delete"}
+              disabled={deleteMenuMutation.isLoading}
+            >
+              {deleteMenuMutation.isLoading ? `Loading` : `Delete`}
+            </Button>
             <Button type="submit" disabled={updateMenuMutation.isLoading}>
               {updateMenuMutation.isLoading ? "Loading..." : "Update"}
             </Button>

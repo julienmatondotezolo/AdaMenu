@@ -10,9 +10,12 @@ import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox,
 type CreateMenuProps = {
   subCategoryId?: string;
   allergens: any;
+  sidedish: any;
+  supplement: any;
+  items: any;
 };
 
-function CreateMenu({ subCategoryId, allergens }: CreateMenuProps) {
+function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: CreateMenuProps) {
   const locale = useLocale();
   const queryClient = useQueryClient();
 
@@ -87,6 +90,7 @@ function CreateMenu({ subCategoryId, allergens }: CreateMenuProps) {
     newMenuObject.price = price;
     newMenuObject.hidden = hidden;
     newMenuObject.allergenIds = selectedAllergens;
+    newMenuObject.order = items.length + 1;
 
     try {
       createMenuyMutation.mutate({ menuObject: newMenuObject });
@@ -201,6 +205,36 @@ function CreateMenu({ subCategoryId, allergens }: CreateMenuProps) {
                 Visibility: {!hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
               </Label>
               <Switch checked={hidden} onCheckedChange={handleVisibilityChange} />
+            </div>
+          </div>
+          <div className="w-full">
+            <p>Supplement</p>
+            <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
+              {supplement.map((supplementItem: any, index: any) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={supplementItem.id}
+                    value={supplementItem.id}
+                    onCheckedChange={() => handleCheckboxChange(supplementItem.id)}
+                  />
+                  <Label htmlFor={supplementItem.names[locale]}>{supplementItem.names[locale]}</Label>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="w-full">
+            <p>Sidedish</p>
+            <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
+              {sidedish.map((sidedishItem: any, index: any) => (
+                <div key={index} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={sidedishItem.id}
+                    value={sidedishItem.id}
+                    onCheckedChange={() => handleCheckboxChange(sidedishItem.id)}
+                  />
+                  <Label htmlFor={sidedishItem.names[locale]}>{sidedishItem.names[locale]}</Label>
+                </div>
+              ))}
             </div>
           </div>
           <div className="w-full">

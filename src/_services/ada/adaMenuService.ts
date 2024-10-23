@@ -183,17 +183,18 @@ export async function updateMenuItem({ menuObject }: { menuObject: any }): Promi
 
 export async function deleteMenu({ menuId }: { menuId: string }): Promise<any> {
   try {
-    const responseDeleteMenu: Response = await fetch(adaMenuUrl + `/menu-item/${menuId}`, {
+    const responseDeleteMenu: Response = await fetch(adaMenuUrl + `/menu-item`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         // Authorization: `Bearer ${session.session.user.token}`,
         "ngrok-skip-browser-warning": "1",
       },
+      body: JSON.stringify([menuId]),
     });
 
     if (responseDeleteMenu.ok) {
-      return responseDeleteMenu;
+      return responseDeleteMenu.json();
     } else {
       return responseDeleteMenu;
     }

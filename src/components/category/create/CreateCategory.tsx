@@ -51,6 +51,7 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
     };
 
     newCategoryObject.parentCategoryId = selectedParentCategory;
+    newCategoryObject.order = categories.length + 1;
 
     try {
       createCategoryMutation.mutate({ categoryObject: newCategoryObject });
@@ -121,7 +122,7 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
             >
               <option value="">Select a parent category</option>
               <option value={""}>NO CATEGORY</option>
-              {categories.map((category: any, index: any) => (
+              {categories?.map((category: any, index: any) => (
                 <option key={index} value={category.id}>
                   {category.names[locale]}
                 </option>

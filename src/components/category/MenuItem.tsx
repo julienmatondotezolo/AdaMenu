@@ -36,7 +36,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
             <p>Price</p>
           </section>
           <div className="w-full odd:bg-slate-600">
-            {items?.map((menu: any, index: any) => (
+            {items?.sort((a: any, b: any) => a.order - b.order).map((menu: any, index: any) => (
               <section
                 onPointerDown={() => onPointerDown(menu.id)}
                 className={`cursor-pointer grid grid-cols-[20px_5fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"}`}

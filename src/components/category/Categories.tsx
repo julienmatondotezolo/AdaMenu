@@ -8,6 +8,8 @@ import {
   fetchAllergen,
   fetchCategories,
   fetchMenuItemByCategoryId,
+  fetchSidedish,
+  fetchSupplement,
   updateCategory,
 } from "@/_services/ada/adaMenuService";
 
@@ -57,9 +59,18 @@ function Categories() {
 
   const { isLoading, data: categories } = useQuery("categories", fetchAllCategories, {
     refetchOnWindowFocus: false,
+    select: (data) => data.sort((a: any, b: any) => a.order - b.order),
   });
 
   const { data: allergens } = useQuery("allergens", fetchAllAllergen, {
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: sidedish } = useQuery("sidedish", fetchSidedish, {
+    refetchOnWindowFocus: false,
+  });
+
+  const { data: supplement } = useQuery("supplement", fetchSupplement, {
     refetchOnWindowFocus: false,
   });
 
@@ -107,10 +118,13 @@ function Categories() {
   const handleUpdateCategory = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const selectedSubCatLength = categories.filter((category: any) => category.id === selectedParentCategory)[0];
+
     const newCategoryObject = {
       [category.id]: {
         names: category.names,
         parentCategoryId: selectedParentCategory,
+        order: selectedSubCatLength ? selectedSubCatLength.subCategories.length : category.order,
       },
     };
 
@@ -151,7 +165,13 @@ function Categories() {
       <div className="flex w-full h-full">
         <div className="h-full items-center border-r-2 dark:border-gray-800 overflow-y-scroll pb-16">
           <article className="flex flex-col">
-            <Button onClick={() => setOpenDialog(true)} className="my-4 mx-auto">
+            <Button
+              onClick={() => {
+                setDialogMode("addCat");
+                setOpenDialog(true);
+              }}
+              className="my-4 mx-auto"
+            >
               {!subCategoryId ? "Add category +" : "Add +"}
             </Button>
             {categories && (
@@ -255,14 +275,16 @@ function Categories() {
               </article>
               {category?.subCategories && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-8">
-                  {category?.subCategories.map((category: any, index: any) => (
-                    <SubCategories
-                      key={index}
-                      category={category}
-                      selectedSubCategoryId={subCategoryId}
-                      onClick={() => handleSelectCategory(category)}
-                    />
-                  ))}
+                  {category?.subCategories
+                    .sort((a: any, b: any) => a.order - b.order)
+                    .map((category: any, index: any) => (
+                      <SubCategories
+                        key={index}
+                        category={category}
+                        selectedSubCategoryId={subCategoryId}
+                        onClick={() => handleSelectCategory(category)}
+                      />
+                    ))}
                 </div>
               )}
             </section>
@@ -297,10 +319,26 @@ function Categories() {
             case "addSubCat":
               return <CreateCategory categories={categories} parentCategoryId={categoryId} />;
             case "addMenu":
-              return <CreateMenu allergens={allergens} subCategoryId={subCategoryId} />;
+              return (
+                <CreateMenu
+                  subCategoryId={subCategoryId}
+                  allergens={allergens}
+                  sidedish={sidedish}
+                  supplement={supplement}
+                  items={menuItems}
+                />
+              );
             case "editMenu":
-              return <UpdateMenu selectedMenuId={selectedMenuId} allergens={allergens} />;
+              return (
+                <UpdateMenu
+                  selectedMenuId={selectedMenuId}
+                  allergens={allergens}
+                  sidedish={sidedish}
+                  supplement={supplement}
+                />
+              );
             case "addCat":
+              return <CreateCategory categories={categories} />;
             default:
               return <CreateCategory categories={categories} />;
           }

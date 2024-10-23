@@ -27,16 +27,19 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
   const deleteCategoryMutation = useMutation(deleteCategory, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
-    },
+    }
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const selectedSubCatLength = categories.filter((category: any) => category.id === selectedParentCategory)[0];
+
     const newCategoryObject = {
       [category.id]: {
         names: category.names,
         parentCategoryId: selectedParentCategory,
+        order: selectedSubCatLength ? selectedSubCatLength.subCategories.length : category.order,
       },
     };
 
