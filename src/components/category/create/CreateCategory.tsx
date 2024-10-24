@@ -67,7 +67,9 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
     <Card className="w-full">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>{text("add")} {parentCategoryId && "Sub "}Category</CardTitle>
+          <CardTitle>
+            {text("add")} {parentCategoryId && "Sub "}Category
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">

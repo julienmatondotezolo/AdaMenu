@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Label } from "@radix-ui/react-label";
 import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
@@ -38,7 +39,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
     onSuccess: async () => {
       await queryClient.invalidateQueries("menuItems");
       await queryClient.invalidateQueries("menu-items-details");
-    }
+    },
   });
 
   // Refetch when selectedMenuId changes
@@ -193,12 +194,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
             </div>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button
-              type="button"
-              onClick={handleDeleteMenu}
-              variant={"delete"}
-              disabled={deleteMenuMutation.isLoading}
-            >
+            <Button type="button" onClick={handleDeleteMenu} variant={"delete"} disabled={deleteMenuMutation.isLoading}>
               {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
             </Button>
             <Button type="submit" disabled={updateMenuMutation.isLoading}>

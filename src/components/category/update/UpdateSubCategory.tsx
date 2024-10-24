@@ -28,7 +28,7 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
   const deleteCategoryMutation = useMutation(deleteCategory, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
-    }
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

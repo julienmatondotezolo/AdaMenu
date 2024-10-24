@@ -40,6 +40,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
 
   // New state for selected allergen IDs
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedSideDishes, setSelectedSideDishes] = useState<string[]>([]);
 
   const handleVisibilityChange = (checked: boolean) => {
     setHidden(checked);
@@ -48,6 +49,12 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
   const handleCheckboxChange = (id: string) => {
     setSelectedAllergens((prev) =>
       prev.includes(id) ? prev.filter((allergenId) => allergenId !== id) : [...prev, id],
+    );
+  };
+
+  const handleSideDishChange = (id: string) => {
+    setSelectedSideDishes((prev) =>
+      prev.includes(id) ? prev.filter((sidedishId) => sidedishId !== id) : [...prev, id],
     );
   };
 
@@ -91,6 +98,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
     newMenuObject.price = price;
     newMenuObject.hidden = hidden;
     newMenuObject.allergenIds = selectedAllergens;
+    newMenuObject.sideDishIds = selectedSideDishes;
     newMenuObject.order = items.length + 1;
 
     try {
@@ -231,7 +239,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
                   <Checkbox
                     id={sidedishItem.id}
                     value={sidedishItem.id}
-                    onCheckedChange={() => handleCheckboxChange(sidedishItem.id)}
+                    onCheckedChange={() => handleSideDishChange(sidedishItem.id)}
                   />
                   <Label htmlFor={sidedishItem.names[locale]}>{sidedishItem.names[locale]}</Label>
                 </div>
