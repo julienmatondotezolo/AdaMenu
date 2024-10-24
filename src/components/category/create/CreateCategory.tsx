@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
@@ -13,6 +13,7 @@ type CreateCategoryProps = {
 };
 
 function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
+  const text = useTranslations("Index");
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
@@ -66,7 +67,7 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
     <Card className="w-full">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Add {parentCategoryId && "Sub "}Category</CardTitle>
+          <CardTitle>{text("add")} {parentCategoryId && "Sub "}Category</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
@@ -131,7 +132,7 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button type="submit">{parentCategoryId ? "Add +" : "Create"}</Button>
+          <Button type="submit">{parentCategoryId ? `${text("add")} sub category +` : text("add")}</Button>
         </CardFooter>
       </form>
     </Card>

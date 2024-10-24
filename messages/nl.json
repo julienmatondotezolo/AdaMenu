@@ -1,6 +1,10 @@
 {
   "Index": {
     "welcome": "Welkom",
-    "all": "Alle"
+    "all": "Alle",
+    "add": "Toevoegen",
+    "update": "Updaten",
+    "edit": "Bewerken",
+    "delete": "Verwijderen"
   }
 }

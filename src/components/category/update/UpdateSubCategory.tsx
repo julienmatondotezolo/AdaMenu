@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
@@ -14,6 +14,7 @@ type UpdateSubCategoryProps = {
 };
 
 function UpdateSubCategory({ category, setCategory, categories, parentCategoryId }: UpdateSubCategoryProps) {
+  const text = useTranslations("Index");
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>(parentCategoryId);
@@ -115,9 +116,9 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
             variant={"delete"}
             disabled={deleteCategoryMutation.isLoading}
           >
-            {deleteCategoryMutation.isLoading ? `Loading` : `Delete`}
+            {deleteCategoryMutation.isLoading ? `Loading` : text("delete")}
           </Button>
-          <Button type="submit">Update</Button>
+          <Button type="submit">{text("update")}</Button>
         </CardFooter>
       </form>
     </Card>

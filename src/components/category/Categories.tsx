@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
@@ -37,6 +37,7 @@ import { UpdateMenu, UpdateSubCategory } from "./update";
 
 function Categories() {
   const locale = useLocale();
+  const text = useTranslations("Index");
   const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
@@ -172,7 +173,7 @@ function Categories() {
               }}
               className="my-4 mx-auto"
             >
-              {!subCategoryId ? "Add category +" : "Add +"}
+              {!subCategoryId ? `${text("add")} category +` : `${text("add")} +`}
             </Button>
             {categories && (
               <CategoryItem
@@ -245,10 +246,10 @@ function Categories() {
                       variant={"delete"}
                       disabled={deleteCategoryMutation.isLoading}
                     >
-                      {deleteCategoryMutation.isLoading ? `Loading` : `Delete`}
+                      {deleteCategoryMutation.isLoading ? `Loading` : `${text("delete")}`}
                     </Button>
                     <Button type="submit" disabled={updateCategoryMutation.isLoading}>
-                      {updateCategoryMutation.isLoading ? `Loading` : `Update`}
+                      {updateCategoryMutation.isLoading ? `Loading` : `${text("update")}`}
                     </Button>
                   </CardFooter>
                 </form>
@@ -260,7 +261,7 @@ function Categories() {
                 <section className="space-x-6">
                   {subCategoryId && (
                     <Button variant={"outline"} onClick={openUpdateSubCategory}>
-                      Edit sub category
+                      {text("edit")} sub category
                     </Button>
                   )}
                   <Button
@@ -269,7 +270,7 @@ function Categories() {
                       setOpenDialog(true);
                     }}
                   >
-                    Add sub category +
+                    {text("add")} sub category +
                   </Button>
                 </section>
               </article>

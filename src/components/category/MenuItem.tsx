@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React from "react";
 
 import { Button } from "../ui";
@@ -12,6 +12,7 @@ interface menuProps {
 }
 
 function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) {
+  const text = useTranslations("Index");
   const locale = useLocale();
 
   if (items)
@@ -22,10 +23,10 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
           <section className="space-x-4">
             {selectedMenuId && (
               <Button onClick={() => onClick("editMenu")} variant={"outline"}>
-                Edit menu
+                {text("edit")} menu
               </Button>
             )}
-            <Button onClick={() => onClick("addMenu")}>Add menu + </Button>
+            <Button onClick={() => onClick("addMenu")}>{text("add")} menu + </Button>
           </section>
         </article>
 

@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
@@ -16,6 +16,7 @@ type CreateMenuProps = {
 };
 
 function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: CreateMenuProps) {
+  const text = useTranslations("Index");
   const locale = useLocale();
   const queryClient = useQueryClient();
 
@@ -105,7 +106,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
     <Card className="w-full h-fit">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Add Menu item</CardTitle>
+          <CardTitle>{text("add")} Menu item</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
@@ -272,7 +273,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
           </div> */}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button type="submit">Add +</Button>
+          <Button type="submit">{text("add")} +</Button>
         </CardFooter>
       </form>
     </Card>

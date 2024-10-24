@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
@@ -15,6 +15,7 @@ type UpdateMenuProps = {
 };
 
 function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateMenuProps) {
+  const text = useTranslations("Index");
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -198,10 +199,10 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
               variant={"delete"}
               disabled={deleteMenuMutation.isLoading}
             >
-              {deleteMenuMutation.isLoading ? `Loading` : `Delete`}
+              {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
             </Button>
             <Button type="submit" disabled={updateMenuMutation.isLoading}>
-              {updateMenuMutation.isLoading ? "Loading..." : "Update"}
+              {updateMenuMutation.isLoading ? "Loading..." : text("update")}
             </Button>
           </CardFooter>
         </form>

@@ -1,6 +1,10 @@
 {
   "Index": {
     "welcome": "Welcome",
-    "all": "All"
+    "all": "All",
+    "add": "Add",
+    "update": "Update",
+    "edit": "Edit",
+    "delete": "Delete"
   }
 }
