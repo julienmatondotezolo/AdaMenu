@@ -17,7 +17,7 @@ const CategoryItem = ({ categories, categoryId, onClick }: CategoryItemProps) =>
   const queryClient = useQueryClient();
 
   const updateCategoryMutation = useMutation(updateCategory, {
-    onSuccess: async (responseUpdateCategory) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
     },
   });

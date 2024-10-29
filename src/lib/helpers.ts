@@ -1,4 +1,4 @@
-export function mapCategories(newCategories: any) {
+export function mapCategories(newCategories: any, parentCategoryId?: any) {
   const result: any = {};
 
   // Process main categories
@@ -7,7 +7,7 @@ export function mapCategories(newCategories: any) {
 
     result[categoryId] = {
       names: mainCategory.names,
-      parentCategoryId: "",
+      parentCategoryId: parentCategoryId ?? "",
       order: mainCategory.order,
     };
   });

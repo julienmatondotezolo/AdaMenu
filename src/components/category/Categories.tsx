@@ -109,11 +109,11 @@ function Categories() {
     setSelectedMenuId("");
   };
 
-  const handleSelectCategory = (category: any) => {
-    setSubCategoryId(category.id);
-    setSubCategory(category);
+  const handleSelectCategory = (subCategory: any) => {
+    setSubCategoryId(subCategory.id);
+    setSubCategory(subCategory);
     setSelectedMenuId("");
-    fetchMenuItems({ categoryId: category.id });
+    fetchMenuItems({ categoryId: subCategory.id });
   };
 
   const handleUpdateCategory = (e: React.FormEvent<HTMLFormElement>) => {
@@ -275,18 +275,12 @@ function Categories() {
                 </section>
               </article>
               {category?.subCategories && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-8">
-                  {category?.subCategories
-                    .sort((a: any, b: any) => a.order - b.order)
-                    .map((category: any, index: any) => (
-                      <SubCategories
-                        key={index}
-                        category={category}
-                        selectedSubCategoryId={subCategoryId}
-                        onClick={() => handleSelectCategory(category)}
-                      />
-                    ))}
-                </div>
+                <SubCategories
+                  subCategories={category.subCategories}
+                  parentCategoryId={categoryId}
+                  selectedSubCategoryId={subCategoryId}
+                  onClick={(subCategory) => handleSelectCategory(subCategory)}
+                />
               )}
             </section>
           </div>
