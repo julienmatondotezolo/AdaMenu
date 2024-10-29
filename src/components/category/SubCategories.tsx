@@ -4,7 +4,7 @@
 
 import { MoveLeft, MoveRight } from "lucide-react";
 import { useLocale } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { updateCategory } from "@/_services";
@@ -28,6 +28,10 @@ function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId,
 
   const locale = useLocale();
   const [orderedCategories, setOrderedCategories] = useState(subCategories);
+
+  useEffect(() => {
+    setOrderedCategories(subCategories);
+  }, [subCategories]);
 
   const moveCategory = (e: any, index: number, direction: "up" | "down") => {
     e.preventDefault();
