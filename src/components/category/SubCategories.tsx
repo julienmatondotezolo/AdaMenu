@@ -60,6 +60,7 @@ function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId,
         .map((subCategory: any, index: any) => (
           <button
             key={subCategory.id}
+            onClick={() => onClick(subCategory)}
             className={`relative cursor-pointer h-10 md:h-16  ${subCategory.id == selectedSubCategoryId ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"}`}
           >
             <div
@@ -68,9 +69,7 @@ function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId,
               <MoveLeft onClick={(e) => moveCategory(e, index, "up")} className="ml-2" size={20} />
               <MoveRight onClick={(e) => moveCategory(e, index, "down")} className="ml-2" size={20} />
             </div>
-            <h3 onClick={() => onClick(subCategory)} className="text-xs md:text-sm">
-              {subCategory.names[locale]}
-            </h3>
+            <h3 className="text-xs md:text-sm">{subCategory.names[locale]}</h3>
           </button>
         ))}
     </div>
