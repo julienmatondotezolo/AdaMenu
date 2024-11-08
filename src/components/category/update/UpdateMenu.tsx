@@ -20,6 +20,8 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
+  const [selectedSupplement, setSelectedSupplement] = useState<string[]>([]);
+  const [selectedSidedish, setSelectedSidedish] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
   const { mutate: fetchMenuItems, isLoading } = useMutation("menu-items-details", fetchMenuById, {
@@ -54,6 +56,18 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
     );
   };
 
+  const handleSupplementChange = (id: string) => {
+    // console.log("id:", id);
+    setSelectedSupplement((prev) =>
+      prev.includes(id) ? prev.filter((supplementId) => supplementId !== id) : [...prev, id],
+    );
+  };
+
+  const handleSidedishChange = (id: string) => {
+    // console.log("id:", id);
+    setSelectedSidedish((prev) => (prev.includes(id) ? prev.filter((sidedishId) => sidedishId !== id) : [...prev, id]));
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedMenuId) return;
@@ -64,6 +78,8 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
         descriptions: menuState.descriptions,
         categoryId: menuState.category.id,
         allergenIds: selectedAllergens,
+        sideDishIds: selectedSidedish,
+        supplementIds: selectedSupplement,
         price: menuState.price,
         order: menuState.order,
         hidden: menuState.hidden,
@@ -174,6 +190,38 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
                     }))
                   }
                 />
+              </div>
+            </div>
+            <div className="w-full">
+              <p>Supplement</p>
+              <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
+                {supplement.map((supplement: any, index: any) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={supplement.id}
+                      value={supplement.id}
+                      checked={menuState.supplements.some((menuSupplement: any) => menuSupplement.id === supplement.id)}
+                      onCheckedChange={() => handleSupplementChange(supplement.id)}
+                    />
+                    <Label htmlFor={supplement.names[locale]}>{supplement.names[locale]}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="w-full">
+              <p>Sidedish</p>
+              <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
+                {sidedish.map((sidedish: any, index: any) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={sidedish.id}
+                      value={sidedish.id}
+                      checked={menuState.sideDishes.some((menuSidedish: any) => menuSidedish.id === sidedish.id)}
+                      onCheckedChange={() => handleSidedishChange(sidedish.id)}
+                    />
+                    <Label htmlFor={sidedish.names[locale]}>{sidedish.names[locale]}</Label>
+                  </div>
+                ))}
               </div>
             </div>
             <div className="w-full">
