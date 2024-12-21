@@ -29,17 +29,8 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menu-items-details");
-
-      // Force a refetch of the menuItems query
-      await queryClient.refetchQueries("menuItems");
-
-      // Additional safety measure: invalidate the specific query
       await queryClient.invalidateQueries("menuItems");
-    },
-    // Add onSettled to ensure refetch happens even if there's an error
-    onSettled: async () => {
-      await queryClient.refetchQueries("menuItems");
+      await queryClient.invalidateQueries("menu-items-details");
     },
   });
 

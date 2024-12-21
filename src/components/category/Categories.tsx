@@ -52,11 +52,22 @@ function Categories() {
   const fetchAllAllergen = () => fetchAllergen();
 
   // Define the mutation for fetching menu items
-  const { mutate: fetchMenuItems, data: menuItems } = useMutation(fetchMenuItemByCategoryId, {
-    onSuccess: () => {
-      queryClient.invalidateQueries("menuItems");
+  // const { mutate: fetchMenuItems, data: menuItems } = useMutation("menuItems", fetchMenuItemByCategoryId, {
+  //   onSuccess: () => {
+  //     // Store the current subCategory for reference
+  //     queryClient.setQueryData("currentSubCategory", subCategoryId);
+  //   },
+  // });
+
+  // Define the query for fetching menu items based on the selected subCategoryId
+  const { data: menuItems } = useQuery(
+    ["menuItems", subCategoryId],
+    () => fetchMenuItemByCategoryId({ categoryId: subCategoryId }),
+    {
+      enabled: !!subCategoryId, // Only run the query if subCategoryId is defined
+      refetchOnWindowFocus: false,
     },
-  });
+  );
 
   const { isLoading, data: categories } = useQuery("categories", fetchAllCategories, {
     refetchOnWindowFocus: false,
@@ -113,7 +124,7 @@ function Categories() {
     setSubCategoryId(subCategory.id);
     setSubCategory(subCategory);
     setSelectedMenuId("");
-    fetchMenuItems({ categoryId: subCategory.id });
+    // fetchMenuItems({ categoryId: subCategory.id });
   };
 
   const handleUpdateCategory = (e: React.FormEvent<HTMLFormElement>) => {
