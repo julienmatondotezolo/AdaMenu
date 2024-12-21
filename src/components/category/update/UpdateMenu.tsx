@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { Label } from "@radix-ui/react-label";
 import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
@@ -19,9 +18,6 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
   const text = useTranslations("Index");
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
-  const [selectedSupplement, setSelectedSupplement] = useState<string[]>([]);
-  const [selectedSidedish, setSelectedSidedish] = useState<string[]>([]);
 
   const queryClient = useQueryClient();
   const { mutate: fetchMenuItems, isLoading } = useMutation("menu-items-details", fetchMenuById, {
@@ -32,8 +28,18 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
 
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries("menuItems");
+      // Invalidate and refetch both queries
       await queryClient.invalidateQueries("menu-items-details");
+
+      // Force a refetch of the menuItems query
+      await queryClient.refetchQueries("menuItems");
+
+      // Additional safety measure: invalidate the specific query
+      await queryClient.invalidateQueries("menuItems");
+    },
+    // Add onSettled to ensure refetch happens even if there's an error
+    onSettled: async () => {
+      await queryClient.refetchQueries("menuItems");
     },
   });
 
@@ -49,23 +55,19 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
     if (selectedMenuId) fetchMenuItems({ menuId: selectedMenuId });
   }, [fetchMenuItems, selectedMenuId]);
 
-  const handleCheckboxChange = (id: string) => {
-    // console.log("id:", id);
-    setSelectedAllergens((prev) =>
-      prev.includes(id) ? prev.filter((allergenId) => allergenId !== id) : [...prev, id],
-    );
-  };
+  const handleCheckboxChange = (type: "allergens" | "supplements" | "sideDishes", id: string) => {
+    setMenuState((prev: any) => {
+      const currentItems = prev[type] || [];
+      const itemExists = currentItems.some((item: any) => item.id === id);
 
-  const handleSupplementChange = (id: string) => {
-    // console.log("id:", id);
-    setSelectedSupplement((prev) =>
-      prev.includes(id) ? prev.filter((supplementId) => supplementId !== id) : [...prev, id],
-    );
-  };
+      // If item exists, remove it; if it doesn't exist, add it
+      const updatedItems = itemExists ? currentItems.filter((item: any) => item.id !== id) : [...currentItems, { id }];
 
-  const handleSidedishChange = (id: string) => {
-    // console.log("id:", id);
-    setSelectedSidedish((prev) => (prev.includes(id) ? prev.filter((sidedishId) => sidedishId !== id) : [...prev, id]));
+      return {
+        ...prev,
+        [type]: updatedItems,
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,9 +79,9 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
         names: menuState.names,
         descriptions: menuState.descriptions,
         categoryId: menuState.category.id,
-        allergenIds: selectedAllergens,
-        sideDishIds: selectedSidedish,
-        supplementIds: selectedSupplement,
+        allergenIds: menuState.allergens.map((a: any) => a.id),
+        sideDishIds: menuState.sideDishes.map((s: any) => s.id),
+        supplementIds: menuState.supplements.map((s: any) => s.id),
         price: menuState.price,
         order: menuState.order,
         hidden: menuState.hidden,
@@ -195,47 +197,46 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
             <div className="w-full">
               <p>Supplement</p>
               <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
-                {supplement.map((supplement: any, index: any) => (
+                {supplement.map((item: any, index: any) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Checkbox
-                      id={supplement.id}
-                      value={supplement.id}
-                      checked={menuState.supplements.some((menuSupplement: any) => menuSupplement.id === supplement.id)}
-                      onCheckedChange={() => handleSupplementChange(supplement.id)}
+                      id={`supplement-${item.id}`}
+                      checked={menuState.supplements.some((s: any) => s.id === item.id)}
+                      onCheckedChange={() => handleCheckboxChange("supplements", item.id)}
                     />
-                    <Label htmlFor={supplement.names[locale]}>{supplement.names[locale]}</Label>
+                    <Label htmlFor={`supplement-${item.id}`}>{item.names[locale]}</Label>
                   </div>
                 ))}
               </div>
             </div>
+
             <div className="w-full">
               <p>Sidedish</p>
               <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
-                {sidedish.map((sidedish: any, index: any) => (
+                {sidedish.map((item: any, index: any) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Checkbox
-                      id={sidedish.id}
-                      value={sidedish.id}
-                      checked={menuState.sideDishes.some((menuSidedish: any) => menuSidedish.id === sidedish.id)}
-                      onCheckedChange={() => handleSidedishChange(sidedish.id)}
+                      id={`sidedish-${item.id}`}
+                      checked={menuState.sideDishes.some((s: any) => s.id === item.id)}
+                      onCheckedChange={() => handleCheckboxChange("sideDishes", item.id)}
                     />
-                    <Label htmlFor={sidedish.names[locale]}>{sidedish.names[locale]}</Label>
+                    <Label htmlFor={`sidedish-${item.id}`}>{item.names[locale]}</Label>
                   </div>
                 ))}
               </div>
             </div>
+
             <div className="w-full">
               <p>Allergens</p>
               <div className="grid grid-cols-4 md:grid-cols-4 w-full items-center gap-4 mb-4 border dark:border-gray-800 p-4 mt-2 bg-gray-100 dark:bg-slate-800">
-                {allergens.map((allergen: any, index: any) => (
+                {allergens.map((item: any, index: any) => (
                   <div key={index} className="flex items-center space-x-2">
                     <Checkbox
-                      id={allergen.id}
-                      value={allergen.id}
-                      checked={menuState.allergens.some((menuAllergen: any) => menuAllergen.id === allergen.id)}
-                      onCheckedChange={() => handleCheckboxChange(allergen.id)}
+                      id={`allergen-${item.id}`}
+                      checked={menuState.allergens.some((a: any) => a.id === item.id)}
+                      onCheckedChange={() => handleCheckboxChange("allergens", item.id)}
                     />
-                    <Label htmlFor={allergen.names[locale]}>{allergen.names[locale]}</Label>
+                    <Label htmlFor={`allergen-${item.id}`}>{item.names[locale]}</Label>
                   </div>
                 ))}
               </div>
