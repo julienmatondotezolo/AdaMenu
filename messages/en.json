@@ -5,6 +5,7 @@
     "add": "Add",
     "update": "Update",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "hidden": "hidden"
   }
 }

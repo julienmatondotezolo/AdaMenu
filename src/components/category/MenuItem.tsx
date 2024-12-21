@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-vars */
+import { Eye, EyeOff, MoveDown, MoveUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import React from "react";
 
@@ -14,6 +15,10 @@ interface menuProps {
 function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) {
   const text = useTranslations("Index");
   const locale = useLocale();
+
+  const moveCategory = (index: number, direction: "up" | "down") => {
+    //
+  };
 
   if (!items) {
     return (
@@ -38,10 +43,11 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
       </article>
 
       <div className="text-sm mt-8">
-        <section className="grid grid-cols-[25px_5fr_2fr] font-semibold py-2 border-b mb-4 dark:border-gray-800">
+        <section className="grid grid-cols-[25px_3fr_1fr_2fr] font-semibold py-2 border-b mb-4 dark:border-gray-800">
           <p>Nr.</p>
           <p>Name</p>
           <p>Price</p>
+          <p>Visible</p>
         </section>
         <div className="w-full odd:bg-slate-600">
           {items
@@ -49,12 +55,19 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
             .map((menu: any, index: any) => (
               <section
                 onPointerDown={() => onPointerDown(menu.id)}
-                className={`cursor-pointer grid grid-cols-[20px_5fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"}`}
+                className={`relative cursor-pointer grid grid-cols-[20px_3fr_1fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"} ${menu.hidden == true && "opacity-40"}`}
                 key={index}
               >
                 <p>{index + 1}.</p>
                 <p>{menu.names[locale]}</p>
                 <p>{menu.price} EUR</p>
+                <div
+                  className={`${selectedMenuId === menu.id ? "flex" : "hidden"} absolute top-0 right-2 space-x-4 h-full items-center`}
+                >
+                  <MoveUp onClick={() => moveCategory(index, "up")} className="ml-2 left-0" size={20} />
+                  <MoveDown onClick={() => moveCategory(index, "down")} className="right-0" size={20} />
+                </div>
+                <div>{menu.hidden == true ? <EyeOff size={16} /> : <Eye size={16} />}</div>
               </section>
             ))}
         </div>

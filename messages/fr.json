@@ -5,6 +5,7 @@
     "add": "Ajouter",
     "update": "Mettre à jour",
     "edit": "Modifier",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "hidden": "caché"
   }
 }
