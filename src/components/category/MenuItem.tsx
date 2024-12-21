@@ -1,7 +1,11 @@
 /* eslint-disable no-unused-vars */
-import { Eye, EyeOff, MoveDown, MoveUp } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle, MoveDown, MoveUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useMutation, useQueryClient } from "react-query";
+
+import { updateMenuItem } from "@/_services";
+import { mapMenu } from "@/lib";
 
 import { Button } from "../ui";
 
@@ -15,9 +19,47 @@ interface menuProps {
 function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) {
   const text = useTranslations("Index");
   const locale = useLocale();
+  const [orderedMenuItems, setOrderedMenuItems] = useState<any[]>([]);
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (Array.isArray(items)) {
+      setOrderedMenuItems(items);
+    }
+  }, [items]);
+
+  const updateMenuMutation = useMutation(updateMenuItem, {
+    onSuccess: async () => {
+      // Invalidate and refetch both queries
+      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries("menu-items-details");
+    },
+  });
 
   const moveCategory = (index: number, direction: "up" | "down") => {
-    //
+    if (updateMenuMutation.isLoading) {
+      alert("Wait still loading...");
+      return;
+    }
+
+    const newMenuItems = [...orderedMenuItems];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+
+    if (targetIndex >= 0 && targetIndex < newMenuItems.length) {
+      // Swap the order of the categories
+      const tempOrder = newMenuItems[index].order;
+
+      newMenuItems[index].order = newMenuItems[targetIndex].order;
+      newMenuItems[targetIndex].order = tempOrder;
+
+      setOrderedMenuItems(newMenuItems);
+
+      const menuObject = mapMenu(newMenuItems);
+
+      updateMenuMutation.mutate({
+        menuObject,
+      });
+    }
   };
 
   if (!items) {
@@ -55,17 +97,23 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
             .map((menu: any, index: any) => (
               <section
                 onPointerDown={() => onPointerDown(menu.id)}
-                className={`relative cursor-pointer grid grid-cols-[20px_3fr_1fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"} ${menu.hidden == true && "opacity-40"}`}
-                key={index}
+                className={`relative cursor-pointer grid grid-cols-[20px_3fr_1fr_2fr] py-2 mt-2 px-2 ${selectedMenuId === menu.id ? "bg-primary-color text-white" : "bg-gray-200 dark:bg-gray-800"} ${menu.hidden === true && selectedMenuId !== menu.id && "opacity-40"} hover:bg-primary-color/50`}
+                key={menu.id}
               >
                 <p>{index + 1}.</p>
                 <p>{menu.names[locale]}</p>
                 <p>{menu.price} EUR</p>
                 <div
-                  className={`${selectedMenuId === menu.id ? "flex" : "hidden"} absolute top-0 right-2 space-x-4 h-full items-center`}
+                  className={`${selectedMenuId === menu.id && menu.hidden === false ? "flex" : "hidden"} absolute top-0 right-2 space-x-4 h-full items-center`}
                 >
-                  <MoveUp onClick={() => moveCategory(index, "up")} className="ml-2 left-0" size={20} />
-                  <MoveDown onClick={() => moveCategory(index, "down")} className="right-0" size={20} />
+                  {updateMenuMutation.isLoading ? (
+                    <LoaderCircle className="animate-spin" />
+                  ) : (
+                    <>
+                      <MoveUp onClick={() => moveCategory(index, "up")} className="ml-2 left-0" size={20} />
+                      <MoveDown onClick={() => moveCategory(index, "down")} className="right-0" size={20} />
+                    </>
+                  )}
                 </div>
                 <div>{menu.hidden == true ? <EyeOff size={16} /> : <Eye size={16} />}</div>
               </section>

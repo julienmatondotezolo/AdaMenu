@@ -116,9 +116,9 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
             variant={"delete"}
             disabled={deleteCategoryMutation.isLoading}
           >
-            {deleteCategoryMutation.isLoading ? `Loading` : text("delete")}
+            {deleteCategoryMutation.isLoading ? `Loading...` : text("delete")}
           </Button>
-          <Button type="submit">{text("update")}</Button>
+          <Button type="submit">{updateCategoryMutation.isLoading ? `Loading...` : text("update")}</Button>
         </CardFooter>
       </form>
     </Card>

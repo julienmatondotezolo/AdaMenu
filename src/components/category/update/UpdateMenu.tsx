@@ -172,7 +172,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
               <div className="flex flex-col space-y-1.5">
                 <Label className="flex items-center" htmlFor="name">
                   {text("hidden")}
-                  {!menuState.hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                  {menuState.hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
                 </Label>
                 <Switch
                   checked={menuState.hidden}
