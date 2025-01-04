@@ -11,13 +11,13 @@ import { updateCategory } from "@/_services";
 import { mapCategories } from "@/lib/helpers";
 
 interface SubCategoriesItemProps {
-  subCategories: any;
+  categories: any;
   parentCategoryId: string | undefined;
   selectedSubCategoryId: string | undefined;
   onClick: (categoryId: string) => void;
 }
 
-function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId, onClick }: SubCategoriesItemProps) {
+function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, onClick }: SubCategoriesItemProps) {
   const queryClient = useQueryClient();
 
   const updateCategoryMutation = useMutation(updateCategory, {
@@ -27,16 +27,20 @@ function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId,
   });
 
   const locale = useLocale();
-  const [orderedCategories, setOrderedCategories] = useState(subCategories);
+  const [orderedCategories, setOrderedCategories] = useState<any>();
 
   useEffect(() => {
-    setOrderedCategories(subCategories);
-  }, [subCategories]);
+    const fetchedSubCat = categories.filter((category: any) => category.id === parentCategoryId)[0];
+
+    if (fetchedSubCat) setOrderedCategories(fetchedSubCat.subCategories);
+  }, [categories, parentCategoryId]);
 
   const moveCategory = (e: any, index: number, direction: "up" | "down") => {
     e.preventDefault();
 
-    const newCategories = [...orderedCategories];
+    if (!orderedCategories) return;
+
+    const newCategories: any = [...orderedCategories];
 
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
@@ -60,7 +64,7 @@ function SubCategories({ subCategories, parentCategoryId, selectedSubCategoryId,
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full mt-8">
       {orderedCategories
-        .sort((a: any, b: any) => a.order - b.order)
+        ?.sort((a: any, b: any) => a.order - b.order)
         .map((subCategory: any, index: any) => (
           <button
             key={subCategory.id}

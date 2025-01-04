@@ -98,6 +98,14 @@ function Categories() {
 
   const deleteCategoryMutation = useMutation(deleteCategory, {
     onSuccess: async () => {
+      setCategory("");
+      setCategoryId("");
+      // Reset the selected parent category
+      setSelectedParentCategory("");
+      // queryClient.setQueryData(["menuItems"], null);
+      setSubCategoryId("");
+      setSelectedMenuId("");
+
       await queryClient.invalidateQueries("categories");
     },
   });
@@ -150,9 +158,9 @@ function Categories() {
     setOpenDialog(true);
   };
 
-  const handleDeleteCategory = () => {
+  const handleDeleteCategory = async () => {
     try {
-      if (categoryId) deleteCategoryMutation.mutate({ categoryId });
+      if (categoryId) await deleteCategoryMutation.mutateAsync({ categoryId });
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
@@ -257,10 +265,10 @@ function Categories() {
                       variant={"delete"}
                       disabled={deleteCategoryMutation.isLoading}
                     >
-                      {deleteCategoryMutation.isLoading ? `Loading` : `${text("delete")}`}
+                      {deleteCategoryMutation.isLoading ? `Loading...` : `${text("delete")}`}
                     </Button>
                     <Button type="submit" disabled={updateCategoryMutation.isLoading}>
-                      {updateCategoryMutation.isLoading ? `Loading` : `${text("update")}`}
+                      {updateCategoryMutation.isLoading ? `Loading...` : `${text("update")}`}
                     </Button>
                   </CardFooter>
                 </form>
@@ -285,9 +293,10 @@ function Categories() {
                   </Button>
                 </section>
               </article>
-              {category?.subCategories && (
+              {categoryId && (
                 <SubCategories
-                  subCategories={category.subCategories}
+                  categories={categories}
+                  // subCategories={category.subCategories}
                   parentCategoryId={categoryId}
                   selectedSubCategoryId={subCategoryId}
                   onClick={(subCategory) => handleSelectCategory(subCategory)}
@@ -297,7 +306,7 @@ function Categories() {
           </div>
         )}
         {subCategoryId && (
-          <div className="w-3/4 h-full border-l-2 dark:border-gray-800 p-6 box-border overflow-y-scroll pb-16">
+          <div className="w-3/4 h-full border-l-2 dark:border-gray-800 p-6">
             <MenuItem
               items={menuItems}
               selectedMenuId={selectedMenuId}
@@ -320,10 +329,13 @@ function Categories() {
                   setCategory={setSubCategory}
                   categories={categories}
                   parentCategoryId={categoryId}
+                  setOpenDialog={setOpenDialog}
                 />
               );
             case "addSubCat":
-              return <CreateCategory categories={categories} parentCategoryId={categoryId} />;
+              return (
+                <CreateCategory categories={categories} parentCategoryId={categoryId} setOpenDialog={setOpenDialog} />
+              );
             case "addMenu":
               return (
                 <CreateMenu
@@ -332,6 +344,7 @@ function Categories() {
                   sidedish={sidedish}
                   supplement={supplement}
                   items={menuItems}
+                  setOpenDialog={setOpenDialog}
                 />
               );
             case "editMenu":
@@ -341,12 +354,13 @@ function Categories() {
                   allergens={allergens}
                   sidedish={sidedish}
                   supplement={supplement}
+                  setOpenDialog={setOpenDialog}
                 />
               );
             case "addCat":
-              return <CreateCategory categories={categories} />;
+              return <CreateCategory categories={categories} setOpenDialog={setOpenDialog} />;
             default:
-              return <CreateCategory categories={categories} />;
+              return <></>;
           }
         })()}
       </Dialog>

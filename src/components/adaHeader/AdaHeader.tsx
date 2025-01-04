@@ -33,6 +33,7 @@ const AdaHeader = () => {
       <div>
         <small className="font-bold">ADA - Menu</small>
       </div>
+
       <div>
         <small className="font-medium">{time}</small>
       </div>

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { MoveDown, MoveUp } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { updateCategory } from "@/_services";
@@ -23,9 +23,15 @@ const CategoryItem = ({ categories, categoryId, onClick }: CategoryItemProps) =>
   });
 
   const locale = useLocale();
-  const [orderedCategories, setOrderedCategories] = useState(categories);
+  const [orderedCategories, setOrderedCategories] = useState<any>();
+
+  useEffect(() => {
+    setOrderedCategories(categories);
+  }, [categories]);
 
   const moveCategory = (index: number, direction: "up" | "down") => {
+    if (!orderedCategories) return;
+
     const newCategories = [...orderedCategories];
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
@@ -50,7 +56,7 @@ const CategoryItem = ({ categories, categoryId, onClick }: CategoryItemProps) =>
     <div className="w-full h-full border-t-2 dark:border-gray-800">
       <section className="flex flex-col w-fit text-neutral-800 dark:text-neutral-200">
         {orderedCategories
-          .sort((a: any, b: any) => a.order - b.order)
+          ?.sort((a: any, b: any) => a.order - b.order)
           .map((category: any, index: number) => (
             <button
               key={category.id}
