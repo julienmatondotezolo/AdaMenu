@@ -13,6 +13,7 @@
   "author": "Julien Matondo",
   "license": "MIT",
   "dependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@radix-ui/react-checkbox": "^1.1.2",
     "@radix-ui/react-label": "^2.1.0",
     "@radix-ui/react-select": "^2.1.2",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@types/node": "22.7.5",
-    "@types/react": "18.3.11"
+    "@types/react": "18.3.11",
+    "webpack": "^5.97.1"
   }
 }
