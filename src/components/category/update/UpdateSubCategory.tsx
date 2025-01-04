@@ -11,9 +11,16 @@ type UpdateSubCategoryProps = {
   setCategory: any;
   categories: any;
   parentCategoryId: string | undefined;
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function UpdateSubCategory({ category, setCategory, categories, parentCategoryId }: UpdateSubCategoryProps) {
+function UpdateSubCategory({
+  category,
+  setCategory,
+  categories,
+  parentCategoryId,
+  setOpenDialog,
+}: UpdateSubCategoryProps) {
   const text = useTranslations("Index");
   const queryClient = useQueryClient();
   const locale = useLocale();
@@ -34,19 +41,25 @@ function UpdateSubCategory({ category, setCategory, categories, parentCategoryId
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const selectedSubCatLength = categories.filter((category: any) => category.id === selectedParentCategory)[0];
+    try {
+      const selectedSubCatLength = categories.filter((category: any) => category.id === selectedParentCategory)[0];
 
-    const newCategoryObject = {
-      [category.id]: {
-        names: category.names,
-        parentCategoryId: selectedParentCategory,
-        order: selectedSubCatLength ? selectedSubCatLength.subCategories.length : category.order,
-      },
-    };
+      const newCategoryObject = {
+        [category.id]: {
+          names: category.names,
+          parentCategoryId: selectedParentCategory,
+          order: selectedSubCatLength ? selectedSubCatLength.subCategories.length : category.order,
+        },
+      };
 
-    updateCategoryMutation.mutate({
-      categoryObject: newCategoryObject,
-    });
+      await updateCategoryMutation.mutateAsync({
+        categoryObject: newCategoryObject,
+      });
+
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("error updating category:", error);
+    }
   };
 
   const handleDeleteCategory = () => {

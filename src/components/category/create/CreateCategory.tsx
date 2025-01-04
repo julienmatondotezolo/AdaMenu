@@ -10,13 +10,16 @@ import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } f
 type CreateCategoryProps = {
   categories: any;
   parentCategoryId?: string | undefined;
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
+function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateCategoryProps) {
   const text = useTranslations("Index");
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
+
+  const buttonText = parentCategoryId ? `${text("add")} sub category +` : text("add");
 
   useEffect(() => {
     if (parentCategoryId) setSelectedParentCategory(parentCategoryId);
@@ -55,7 +58,8 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
     newCategoryObject.order = categories.length + 1;
 
     try {
-      createCategoryMutation.mutate({ categoryObject: newCategoryObject });
+      await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });
+      setOpenDialog(false);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
@@ -134,7 +138,7 @@ function CreateCategory({ categories, parentCategoryId }: CreateCategoryProps) {
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button type="submit">{parentCategoryId ? `${text("add")} sub category +` : text("add")}</Button>
+          <Button type="submit">{createCategoryMutation.isLoading ? "Loading..." : buttonText}</Button>
         </CardFooter>
       </form>
     </Card>

@@ -12,9 +12,10 @@ type UpdateMenuProps = {
   allergens: any;
   sidedish: any;
   supplement: any;
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateMenuProps) {
+function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDialog }: UpdateMenuProps) {
   const text = useTranslations("Index");
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
@@ -65,23 +66,29 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement }: UpdateM
     e.preventDefault();
     if (!selectedMenuId) return;
 
-    const menuObject = {
-      [selectedMenuId]: {
-        names: menuState.names,
-        descriptions: menuState.descriptions,
-        categoryId: menuState.category.id,
-        allergenIds: menuState.allergens.map((a: any) => a.id),
-        sideDishIds: menuState.sideDishes.map((s: any) => s.id),
-        supplementIds: menuState.supplements.map((s: any) => s.id),
-        price: menuState.price,
-        order: menuState.order,
-        hidden: menuState.hidden,
-      },
-    };
+    try {
+      const menuObject = {
+        [selectedMenuId]: {
+          names: menuState.names,
+          descriptions: menuState.descriptions,
+          categoryId: menuState.category.id,
+          allergenIds: menuState.allergens.map((a: any) => a.id),
+          sideDishIds: menuState.sideDishes.map((s: any) => s.id),
+          supplementIds: menuState.supplements.map((s: any) => s.id),
+          price: menuState.price,
+          order: menuState.order,
+          hidden: menuState.hidden,
+        },
+      };
 
-    updateMenuMutation.mutate({
-      menuObject,
-    });
+      await updateMenuMutation.mutateAsync({
+        menuObject,
+      });
+
+      setOpenDialog(false);
+    } catch (error) {
+      console.error("error updating menu:", error);
+    }
   };
 
   const handleDeleteMenu = () => {

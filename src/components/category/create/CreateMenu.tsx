@@ -13,9 +13,10 @@ type CreateMenuProps = {
   sidedish: any;
   supplement: any;
   items: any;
+  setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: CreateMenuProps) {
+function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, setOpenDialog }: CreateMenuProps) {
   const text = useTranslations("Index");
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -58,7 +59,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
     );
   };
 
-  const createMenuyMutation = useMutation(createMenuItem, {
+  const createMenuMutation = useMutation(createMenuItem, {
     onSuccess: () => {
       queryClient.invalidateQueries("menuItems");
       setNameEn("");
@@ -102,7 +103,8 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
     newMenuObject.order = items.length + 1;
 
     try {
-      createMenuyMutation.mutate({ menuObject: newMenuObject });
+      await createMenuMutation.mutateAsync({ menuObject: newMenuObject });
+      setOpenDialog(false);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
@@ -211,7 +213,8 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label className="flex items-center" htmlFor="name">
-                Visibility: {!hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                {text("hidden")}
+                {hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
               </Label>
               <Switch checked={hidden} onCheckedChange={handleVisibilityChange} />
             </div>
@@ -281,7 +284,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items }: C
           </div> */}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button type="submit">{text("add")} +</Button>
+          <Button type="submit">{createMenuMutation.isLoading ? "Loading..." : text("add")} +</Button>
         </CardFooter>
       </form>
     </Card>
