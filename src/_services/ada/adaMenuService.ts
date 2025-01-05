@@ -343,3 +343,69 @@ export async function fetchSidedish(): Promise<any> {
     console.error("Impossible to fetch sidedish:", error);
   }
 }
+
+export async function createSidedishtem({ itemObject }: { itemObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/sidedish`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([itemObject]),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to create sauce item:", error);
+  }
+}
+
+export async function updateSidedishtem({ itemObject }: { itemObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/sidedish`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify(itemObject),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to update sauce item:", error);
+  }
+}
+
+export async function deleteSidedishtem({ itemId }: { itemId: string }): Promise<any> {
+  try {
+    const responseDeleteMenu: Response = await fetch(adaMenuUrl + `/sidedish`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([itemId]),
+    });
+
+    if (responseDeleteMenu.ok) {
+      return responseDeleteMenu.json();
+    } else {
+      return responseDeleteMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to delete sauce item:", error);
+  }
+}

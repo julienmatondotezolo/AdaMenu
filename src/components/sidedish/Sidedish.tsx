@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
 
-import { fetchSupplement } from "@/_services/ada/adaMenuService";
+import { fetchSidedish } from "@/_services/ada/adaMenuService";
 
 import { Dialog } from "../ui";
 import { CreateSauce } from "./create";
-import { SauceItem } from "./SauceItem";
+import { SidedishItem } from "./SidedishItem";
 import { UpdateSauce } from "./update";
 
-function Sauces() {
+function Sidedish() {
   const [dialogMode, setDialogMode] = useState<"addSauce" | "editSauce">("addSauce");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedItemId, setSelectedItemId] = useState<string>();
@@ -16,7 +16,7 @@ function Sauces() {
 
   const queryClient = useQueryClient();
 
-  const { isLoading, data: supplement } = useQuery("supplement", fetchSupplement, {
+  const { isLoading, data: supplement } = useQuery("sidedish", fetchSidedish, {
     refetchOnWindowFocus: false,
   });
 
@@ -34,14 +34,14 @@ function Sauces() {
   if (isLoading)
     return (
       <div className="flex h-full overflow-scroll pb-12">
-        <p className="m-auto">Loading sauces</p>
+        <p className="m-auto">Loading sidedish</p>
       </div>
     );
 
   return (
     <>
       <div className="flex w-full h-full p-6">
-        <SauceItem
+        <SidedishItem
           items={supplement}
           selectedItemId={selectedItemId}
           onClick={(dialogMode) => {
@@ -73,4 +73,4 @@ function Sauces() {
   );
 }
 
-export { Sauces };
+export { Sidedish };
