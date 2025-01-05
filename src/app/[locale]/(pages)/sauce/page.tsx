@@ -1,12 +1,12 @@
 "use client";
 
-import { AdaHeader, Categories } from "@/components";
+import { AdaHeader, Sauces } from "@/components";
 
 export default function Index() {
   return (
     <main className="relative h-screen overflow-hidden">
       <AdaHeader />
-      <Categories />
+      <Sauces />
     </main>
   );
 }

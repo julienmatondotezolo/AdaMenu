@@ -194,7 +194,7 @@ export async function deleteMenu({ menuId }: { menuId: string }): Promise<any> {
     });
 
     if (responseDeleteMenu.ok) {
-      return responseDeleteMenu.json();
+      return responseDeleteMenu.ok;
     } else {
       return responseDeleteMenu;
     }
@@ -250,6 +250,72 @@ export async function fetchSupplement(): Promise<any> {
     }
   } catch (error) {
     console.error("Impossible to fetch supplement:", error);
+  }
+}
+
+export async function createSauceItem({ itemObject }: { itemObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/supplement`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([itemObject]),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to create sauce item:", error);
+  }
+}
+
+export async function updateSauceItem({ itemObject }: { itemObject: any }): Promise<any> {
+  try {
+    const responseCreateMenu: Response = await fetch(adaMenuUrl + `/supplement`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify(itemObject),
+    });
+
+    if (responseCreateMenu.ok) {
+      return responseCreateMenu.json();
+    } else {
+      return responseCreateMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to update sauce item:", error);
+  }
+}
+
+export async function deleteSauceItem({ itemId }: { itemId: string }): Promise<any> {
+  try {
+    const responseDeleteMenu: Response = await fetch(adaMenuUrl + `/supplement`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify([itemId]),
+    });
+
+    if (responseDeleteMenu.ok) {
+      return responseDeleteMenu.json();
+    } else {
+      return responseDeleteMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to delete sauce item:", error);
   }
 }
 
