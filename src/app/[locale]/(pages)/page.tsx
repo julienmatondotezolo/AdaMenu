@@ -8,7 +8,10 @@ import PasswordPrompt from "@/components/PasswordPrompt";
 export default function Index() {
   const [authenticated, setAuthenticated] = useState(false);
 
-  if (!authenticated) {
+  // Check if the environment is local development
+  const isLocal = process.env.NODE_ENV === "development";
+
+  if (!isLocal && !authenticated) {
     return <PasswordPrompt onSuccess={() => setAuthenticated(true)} />;
   }
 

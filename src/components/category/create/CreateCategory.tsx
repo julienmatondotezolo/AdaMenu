@@ -18,12 +18,18 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [selectedParentCategory, setSelectedParentCategory] = useState<string | undefined>();
+  const [subCategoryLength, setSubCategoryLength] = useState<number | undefined>();
 
   const buttonText = parentCategoryId ? `${text("add")} sub category +` : text("add");
 
   useEffect(() => {
-    if (parentCategoryId) setSelectedParentCategory(parentCategoryId);
-  }, [parentCategoryId, selectedParentCategory]);
+    if (parentCategoryId) {
+      setSelectedParentCategory(parentCategoryId);
+      const subCat = categories.filter((category: any) => category.id === parentCategoryId)[0].subCategories;
+
+      setSubCategoryLength(subCat.length);
+    }
+  }, [categories, parentCategoryId, selectedParentCategory]);
 
   // New state for input values
   const [nameEn, setNameEn] = useState<string>("");
@@ -55,7 +61,7 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
     };
 
     newCategoryObject.parentCategoryId = selectedParentCategory;
-    newCategoryObject.order = categories.length + 1;
+    newCategoryObject.order = subCategoryLength ? subCategoryLength + 1 : categories.length + 1;
 
     try {
       await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });
