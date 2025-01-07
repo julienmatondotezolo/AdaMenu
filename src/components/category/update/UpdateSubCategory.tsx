@@ -62,9 +62,12 @@ function UpdateSubCategory({
     }
   };
 
-  const handleDeleteCategory = () => {
+  const handleDeleteCategory = async () => {
     try {
-      if (category.id) deleteCategoryMutation.mutate({ categoryId: category.id });
+      if (category.id) {
+        await deleteCategoryMutation.mutateAsync({ categoryId: category.id });
+        setOpenDialog(false);
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);

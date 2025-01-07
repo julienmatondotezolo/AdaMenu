@@ -82,7 +82,7 @@ export async function deleteCategory({ categoryId }: { categoryId: string }): Pr
     });
 
     if (responseDeleteCategory.ok) {
-      return responseDeleteCategory;
+      return responseDeleteCategory.ok;
     } else {
       return responseDeleteCategory;
     }

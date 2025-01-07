@@ -1,6 +1,6 @@
 import { Label } from "@radix-ui/react-label";
 import { useLocale, useTranslations } from "next-intl";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createCategory } from "@/_services";
@@ -48,30 +48,44 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
     },
   });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
 
-    const newCategoryObject: any = {};
+      const newCategoryObject: any = {};
 
-    newCategoryObject.names = {
-      en: nameEn,
-      it: nameIt,
-      fr: nameFr,
-      nl: nameNl,
-    };
+      newCategoryObject.names = {
+        en: nameEn,
+        it: nameIt,
+        fr: nameFr,
+        nl: nameNl,
+      };
 
-    newCategoryObject.parentCategoryId = selectedParentCategory;
-    newCategoryObject.order = subCategoryLength ? subCategoryLength + 1 : categories.length + 1;
+      newCategoryObject.parentCategoryId = selectedParentCategory;
+      newCategoryObject.order = subCategoryLength ?? categories.length + 1;
+      console.log("newCategoryObject.order:", newCategoryObject.order);
 
-    try {
-      await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });
-      setOpenDialog(false);
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error(`An error has occurred: ${error.message}`);
+      try {
+        await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });
+        setOpenDialog(false);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.error(`An error has occurred: ${error.message}`);
+        }
       }
-    }
-  };
+    },
+    [
+      categories.length,
+      createCategoryMutation,
+      nameEn,
+      nameFr,
+      nameIt,
+      nameNl,
+      selectedParentCategory,
+      setOpenDialog,
+      subCategoryLength,
+    ],
+  );
 
   return (
     <Card className="w-full">
