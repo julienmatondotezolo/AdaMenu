@@ -63,7 +63,6 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
 
       newCategoryObject.parentCategoryId = selectedParentCategory;
       newCategoryObject.order = subCategoryLength ?? categories.length + 1;
-      console.log("newCategoryObject.order:", newCategoryObject.order);
 
       try {
         await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });

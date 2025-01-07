@@ -3,7 +3,7 @@ import { useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { deleteMenu, updateSauceItem } from "@/_services";
+import { deleteSauceItem, updateSauceItem } from "@/_services";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -28,7 +28,7 @@ function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauc
     },
   });
 
-  const deleteItemMutation = useMutation(deleteMenu, {
+  const deleteItemMutation = useMutation(deleteSauceItem, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("supplement");
     },

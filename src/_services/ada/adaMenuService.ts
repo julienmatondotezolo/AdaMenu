@@ -71,7 +71,7 @@ export async function updateCategory({ categoryObject }: { categoryObject: any }
 
 export async function deleteCategory({ categoryId }: { categoryId: string }): Promise<any> {
   try {
-    const responseDeleteCategory: Response = await fetch(adaMenuUrl + `/category/${categoryId}`, {
+    const responseDeleteCategory: Response = await fetch(adaMenuUrl + `/category`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -310,7 +310,7 @@ export async function deleteSauceItem({ itemId }: { itemId: string }): Promise<a
     });
 
     if (responseDeleteMenu.ok) {
-      return responseDeleteMenu.json();
+      return responseDeleteMenu.ok;
     } else {
       return responseDeleteMenu;
     }
