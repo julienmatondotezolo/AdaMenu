@@ -8,6 +8,7 @@
     "delete": "Supprimer",
     "hidden": "caché",
     "no_description": "Aucune description",
-    "menu_item_not_visible": "L'élément ne sera pas visible!"
+    "menu_item_not_visible": "L'élément ne sera pas visible!",
+    "description_validation_error": "Si vous fournissez une description dans une langue, vous devez fournir des descriptions dans toutes les langues."
   }
 }

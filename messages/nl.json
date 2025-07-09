@@ -8,6 +8,7 @@
     "delete": "Verwijderen",
     "hidden": "Verbergen",
     "no_description": "Geen beschrijving",
-    "menu_item_not_visible": "Menu-item zal niet zichtbaar zijn!"
+    "menu_item_not_visible": "Menu-item zal niet zichtbaar zijn!",
+    "description_validation_error": "Als u een beschrijving in één taal opgeeft, moet u beschrijvingen in alle talen opgeven."
   }
 }

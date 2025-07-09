@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { deleteMenu, fetchMenuById, updateMenuItem } from "@/_services";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
+import { Button, Checkbox, Input, Switch } from "../../ui";
 
 type UpdateMenuProps = {
   selectedMenuId: string | undefined;
@@ -66,6 +66,16 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
     e.preventDefault();
     if (!selectedMenuId) return;
 
+    // Validate descriptions: if any description is filled, all must be filled
+    const descriptions = Object.values(menuState.descriptions || {}) as string[];
+    const hasAnyDescription = descriptions.some((desc) => desc && desc.trim() !== "");
+    const hasAllDescriptions = descriptions.every((desc) => desc && desc.trim() !== "");
+
+    if (hasAnyDescription && !hasAllDescriptions) {
+      alert(text("description_validation_error"));
+      return;
+    }
+
     try {
       const menuObject = {
         [selectedMenuId]: {
@@ -110,13 +120,16 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
 
   if (menuState)
     return (
-      <Card className="w-full">
-        <form onSubmit={handleSubmit}>
-          <CardHeader>
-            <CardTitle>Update Menu item</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+      <div className="h-full flex flex-col">
+        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b">
+            <h2 className="text-xl sm:text-2xl font-semibold">Update Menu item</h2>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
               {Object.entries(menuState.names).map(([key, value]) => (
                 <div key={key} className="flex flex-col space-y-1.5">
                   <Label htmlFor={`name${key}`}>{key}</Label>
@@ -138,7 +151,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
               {Object.entries(menuState.descriptions).map(([key, value]) => (
                 <div key={key} className="flex flex-col space-y-1.5">
                   <Label htmlFor={`description${key}`}>description {key}</Label>
@@ -159,7 +172,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 w-full items-center gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-4 mb-4">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="name">price</Label>
                 <Input
@@ -244,17 +257,27 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 ))}
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button type="button" onClick={handleDeleteMenu} variant={"delete"} disabled={deleteMenuMutation.isLoading}>
-              {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
-            </Button>
-            <Button type="submit" disabled={updateMenuMutation.isLoading}>
-              {updateMenuMutation.isLoading ? "Loading..." : text("update")}
-            </Button>
-          </CardFooter>
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="flex-shrink-0 border-t p-4 sm:p-6 bg-white dark:bg-background">
+            <div className="flex justify-between gap-4">
+              <Button
+                type="button"
+                onClick={handleDeleteMenu}
+                variant={"delete"}
+                disabled={deleteMenuMutation.isLoading}
+                className="min-w-[100px]"
+              >
+                {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
+              </Button>
+              <Button type="submit" disabled={updateMenuMutation.isLoading} className="min-w-[100px]">
+                {updateMenuMutation.isLoading ? "Loading..." : text("update")}
+              </Button>
+            </div>
+          </div>
         </form>
-      </Card>
+      </div>
     );
 }
 
