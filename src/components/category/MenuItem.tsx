@@ -111,7 +111,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
                     key={menu.id}
                   >
                     <p>{index + 1}.</p>
-                    <p>{menu.names[locale]}</p>
+                    <div className="flex flex-col">
+                      <p className="font-medium">{menu.names[locale]}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          menu.descriptions && menu.descriptions[locale]
+                            ? "text-gray-600 dark:text-gray-400"
+                            : "text-orange-500 dark:text-orange-400"
+                        }`}
+                      >
+                        {menu.descriptions && menu.descriptions[locale]
+                          ? menu.descriptions[locale]
+                          : text("no_description")}
+                      </p>
+                    </div>
                     <p>{menu.price} EUR</p>
                     <div
                       className={`${selectedMenuId === menu.id && menu.hidden === false ? "flex" : "hidden"} absolute top-0 right-2 space-x-4 h-full items-center`}

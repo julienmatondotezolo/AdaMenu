@@ -6,6 +6,7 @@
     "update": "Aggiorna",
     "edit": "Modifica",
     "delete": "Elimina",
-    "hidden": "nascosta"
+    "hidden": "nascosta",
+    "no_description": "Nessuna descrizione"
   }
 }

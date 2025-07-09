@@ -6,6 +6,7 @@
     "update": "Updaten",
     "edit": "Bewerken",
     "delete": "Verwijderen",
-    "hidden": "Verbergen"
+    "hidden": "Verbergen",
+    "no_description": "Geen beschrijving"
   }
 }

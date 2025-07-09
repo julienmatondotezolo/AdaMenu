@@ -6,6 +6,7 @@
     "update": "Update",
     "edit": "Edit",
     "delete": "Delete",
-    "hidden": "hidden"
+    "hidden": "hidden",
+    "no_description": "No description"
   }
 }

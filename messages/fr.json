@@ -6,6 +6,7 @@
     "update": "Mettre à jour",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "hidden": "caché"
+    "hidden": "caché",
+    "no_description": "Aucune description"
   }
 }
