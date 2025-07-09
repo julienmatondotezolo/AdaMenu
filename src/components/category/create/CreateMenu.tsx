@@ -61,7 +61,8 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
 
   const createMenuMutation = useMutation(createMenuItem, {
     onSuccess: () => {
-      queryClient.invalidateQueries("menuItems");
+      // Invalidate all menu item queries (including those with subCategoryId)
+      queryClient.invalidateQueries(["menuItems"]);
       setNameEn("");
       setNameIt("");
       setNameFr("");
@@ -227,7 +228,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
                   }
                 }}
                 type="number"
-                min="0"
+                min="1"
                 step="1"
                 required
               />

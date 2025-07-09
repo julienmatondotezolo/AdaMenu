@@ -19,6 +19,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   const text = useTranslations("Index");
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
   const { mutate: fetchMenuItems, isLoading } = useMutation("menu-items-details", fetchMenuById, {
@@ -30,15 +31,17 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
     },
   });
 
   const deleteMenuMutation = useMutation(deleteMenu, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+      setShowDeleteConfirm(false);
+      setOpenDialog(false);
     },
   });
 
@@ -102,13 +105,23 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   };
 
   const handleDeleteMenu = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
     try {
-      if (selectedMenuId) deleteMenuMutation.mutate({ menuId: selectedMenuId });
+      if (selectedMenuId) {
+        deleteMenuMutation.mutate({ menuId: selectedMenuId });
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
       }
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   if (isLoading)
@@ -190,7 +203,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                     }
                   }}
                   type="number"
-                  min="0"
+                  min="1"
                   required
                 />
               </div>
@@ -277,6 +290,32 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
             </div>
           </div>
         </form>
+
+        {/* Delete Confirmation Popup */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-background border-2 dark:border-gray-800 rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-4">{text("confirm_delete") || "Confirm Delete"}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                {text("delete_warning") ||
+                  "Are you sure you want to delete this menu item? This action cannot be undone."}
+              </p>
+              <div className="flex justify-end gap-4">
+                <Button type="button" onClick={handleCancelDelete}>
+                  {text("cancel") || "Cancel"}
+                </Button>
+                <Button
+                  type="button"
+                  variant={"delete"}
+                  onClick={handleConfirmDelete}
+                  disabled={deleteMenuMutation.isLoading}
+                >
+                  {deleteMenuMutation.isLoading ? "Deleting..." : text("confirm") || "Confirm Delete"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
 }

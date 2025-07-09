@@ -9,6 +9,10 @@
     "hidden": "hidden",
     "no_description": "No description",
     "menu_item_not_visible": "Menu item will not be visible!",
-    "description_validation_error": "If you provide a description in one language, you must provide descriptions in all languages."
+    "description_validation_error": "If you provide a description in one language, you must provide descriptions in all languages.",
+    "confirm_delete": "Confirm Delete",
+    "delete_warning": "Are you sure you want to delete this menu item? This action cannot be undone.",
+    "cancel": "Cancel",
+    "confirm": "Confirm"
   }
 }

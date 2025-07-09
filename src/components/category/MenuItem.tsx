@@ -32,7 +32,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
     },
   });
@@ -40,7 +40,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
   const toggleVisibilityMutation = useMutation(toggleMenuItemVisibility, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
     },
     onError: (error) => {
