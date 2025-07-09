@@ -1,6 +1,6 @@
 import { Label } from "@radix-ui/react-label";
 import { useLocale, useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import {
@@ -62,7 +62,7 @@ function Categories() {
   // Define the query for fetching menu items based on the selected subCategoryId
   const { data: menuItems } = useQuery(
     ["menuItems", subCategoryId],
-    () => fetchMenuItemByCategoryId({ categoryId: subCategoryId }),
+    () => fetchMenuItemByCategoryId({ categoryId: subCategoryId! }),
     {
       enabled: !!subCategoryId, // Only run the query if subCategoryId is defined
       refetchOnWindowFocus: false,
@@ -85,6 +85,13 @@ function Categories() {
   const { data: supplement } = useQuery("supplement", fetchSupplement, {
     refetchOnWindowFocus: false,
   });
+
+  // Auto-select the first category when categories are loaded
+  useEffect(() => {
+    if (categories && categories.length > 0 && !categoryId) {
+      openCategoryDetails(categories[0]);
+    }
+  }, [categories, categoryId]);
 
   const updateCategoryMutation = useMutation(updateCategory, {
     onSuccess: async (responseUpdateCategory) => {
@@ -219,8 +226,8 @@ function Categories() {
                           <Label htmlFor="name">{key}</Label>
                           <Input
                             id="name"
-                            value={value}
-                            placeholder={value}
+                            value={String(value)}
+                            placeholder={String(value)}
                             required
                             onChange={(e) =>
                               setCategory((prev: any) => ({
@@ -243,7 +250,7 @@ function Categories() {
                         </SelectTrigger>
                         <SelectContent className="w-full bg-white dark:bg-background">
                           <SelectGroup>
-                            <SelectItem value={null}>NO CATEGORY</SelectItem>
+                            <SelectItem value="NO_CATEGORY">NO CATEGORY</SelectItem>
                             {categories.map(
                               (category: any, index: any) =>
                                 // Check if category.id is not equal to categoryId before rendering

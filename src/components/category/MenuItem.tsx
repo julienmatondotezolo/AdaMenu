@@ -21,7 +21,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
   const locale = useLocale();
   const [orderedMenuItems, setOrderedMenuItems] = useState<any[]>([]);
   const queryClient = useQueryClient();
-  const visibleCount = items?.filter((items: any) => !items.hidden).length;
+  const visibleCount = Array.isArray(items) ? items.filter((item: any) => !item.hidden).length : 0;
 
   useEffect(() => {
     if (Array.isArray(items)) {
