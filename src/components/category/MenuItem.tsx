@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { updateMenuItem } from "@/_services";
+import { toggleMenuItemVisibility, updateMenuItem } from "@/_services";
 import { mapMenu } from "@/lib";
 
 import { Button } from "../ui";
@@ -37,6 +37,18 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
     },
   });
 
+  const toggleVisibilityMutation = useMutation(toggleMenuItemVisibility, {
+    onSuccess: async () => {
+      // Invalidate and refetch both queries
+      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries("menu-items-details");
+    },
+    onError: (error) => {
+      console.error("Failed to toggle visibility:", error);
+      alert("Failed to update menu item visibility. Please try again.");
+    },
+  });
+
   const moveCategory = (index: number, direction: "up" | "down") => {
     if (updateMenuMutation.isLoading) {
       alert("Wait still loading...");
@@ -61,6 +73,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
         menuObject,
       });
     }
+  };
+
+  const handleToggleVisibility = (menuItem: any, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering row selection
+
+    if (toggleVisibilityMutation.isLoading) {
+      return;
+    }
+
+    // Toggle visibility using the new API endpoint
+    toggleVisibilityMutation.mutate({
+      menuId: menuItem.id,
+      hidden: !menuItem.hidden,
+    });
   };
 
   if (!items) {
@@ -138,8 +164,22 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
                         </>
                       )}
                     </div>
-                    <div className="flex items-center">
-                      {menu.hidden == true ? <EyeOff size={24} /> : <Eye size={24} />}
+                    <div className="flex items-center justify-start">
+                      <button
+                        className="flex items-center justify-center cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 w-6 h-6 rounded transition-colors bg-transparent border-none"
+                        onClick={(e) => handleToggleVisibility(menu, e)}
+                        title={menu.hidden ? "Click to show" : "Click to hide"}
+                        aria-label={menu.hidden ? "Show menu item" : "Hide menu item"}
+                        disabled={toggleVisibilityMutation.isLoading}
+                      >
+                        {toggleVisibilityMutation.isLoading ? (
+                          <LoaderCircle className="animate-spin" size={16} />
+                        ) : menu.hidden ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
                     </div>
                   </section>
                 );

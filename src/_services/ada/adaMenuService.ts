@@ -203,6 +203,28 @@ export async function deleteMenu({ menuId }: { menuId: string }): Promise<any> {
   }
 }
 
+export async function toggleMenuItemVisibility({ menuId, hidden }: { menuId: string; hidden: boolean }): Promise<any> {
+  try {
+    const responseToggleVisibility: Response = await fetch(adaMenuUrl + `/menu-item/${menuId}/visibility`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+      body: JSON.stringify({ hidden }),
+    });
+
+    if (responseToggleVisibility.ok) {
+      return responseToggleVisibility.json();
+    } else {
+      return responseToggleVisibility;
+    }
+  } catch (error) {
+    console.error("Impossible to toggle menu item visibility:", error);
+  }
+}
+
 /* ========================================================================== */
 /* =============================== ALLERGEN ================================= */
 /* ========================================================================== */

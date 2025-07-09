@@ -7,6 +7,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "hidden": "hidden",
-    "no_description": "No description"
+    "no_description": "No description",
+    "menu_item_not_visible": "Menu item will not be visible!"
   }
 }

@@ -166,20 +166,25 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                   id="price"
                   value={menuState.price}
                   placeholder="price"
-                  onChange={(e) =>
-                    setMenuState((prev: any) => ({
-                      ...prev,
-                      price: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+
+                    if (value >= 0 || e.target.value === "") {
+                      setMenuState((prev: any) => ({
+                        ...prev,
+                        price: e.target.value,
+                      }));
+                    }
+                  }}
                   type="number"
+                  min="0"
                   required
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label className="flex items-center" htmlFor="name">
                   {text("hidden")}
-                  {menuState.hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                  {menuState.hidden && <p className="text-red-500 text-xs ml-4">{text("menu_item_not_visible")}</p>}
                 </Label>
                 <Switch
                   checked={menuState.hidden}

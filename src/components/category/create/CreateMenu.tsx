@@ -37,7 +37,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
   const [price, setPrice] = useState<string>();
 
   // New state for hidden values
-  const [hidden, setHidden] = useState<boolean>(true);
+  const [hidden, setHidden] = useState<boolean>(false);
 
   // New state for selected allergen IDs
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -71,7 +71,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
       setDescriptionFr("");
       setDescriptionNl("");
       setPrice("");
-      setHidden(true);
+      setHidden(false);
       setSelectedAllergens([]);
     },
   });
@@ -206,15 +206,23 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
                 id="price"
                 value={price}
                 placeholder="price"
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+
+                  if (value >= 0 || e.target.value === "") {
+                    setPrice(e.target.value);
+                  }
+                }}
                 type="number"
+                min="0"
+                step="0.01"
                 required
               />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label className="flex items-center" htmlFor="name">
                 {text("hidden")}
-                {hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                {hidden && <p className="text-red-500 text-xs ml-4">{text("menu_item_not_visible")}</p>}
               </Label>
               <Switch checked={hidden} onCheckedChange={handleVisibilityChange} />
             </div>
