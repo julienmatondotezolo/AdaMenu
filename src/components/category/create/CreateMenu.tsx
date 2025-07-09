@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { createMenuItem } from "@/_services";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
+import { Button, Checkbox, Input, Switch } from "../../ui";
 
 type CreateMenuProps = {
   subCategoryId?: string;
@@ -37,7 +37,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
   const [price, setPrice] = useState<string>();
 
   // New state for hidden values
-  const [hidden, setHidden] = useState<boolean>(true);
+  const [hidden, setHidden] = useState<boolean>(false);
 
   // New state for selected allergen IDs
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -61,7 +61,8 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
 
   const createMenuMutation = useMutation(createMenuItem, {
     onSuccess: () => {
-      queryClient.invalidateQueries("menuItems");
+      // Invalidate all menu item queries (including those with subCategoryId)
+      queryClient.invalidateQueries(["menuItems"]);
       setNameEn("");
       setNameIt("");
       setNameFr("");
@@ -71,13 +72,23 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
       setDescriptionFr("");
       setDescriptionNl("");
       setPrice("");
-      setHidden(true);
+      setHidden(false);
       setSelectedAllergens([]);
     },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Validate descriptions: if any description is filled, all must be filled
+    const descriptions = [descriptionEn, descriptionIt, descriptionFr, descriptionNl];
+    const hasAnyDescription = descriptions.some((desc) => desc.trim() !== "");
+    const hasAllDescriptions = descriptions.every((desc) => desc.trim() !== "");
+
+    if (hasAnyDescription && !hasAllDescriptions) {
+      alert(text("description_validation_error"));
+      return;
+    }
 
     const newMenuObject: any = {};
 
@@ -113,13 +124,16 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
   };
 
   return (
-    <Card className="w-full h-fit">
-      <form onSubmit={handleSubmit}>
-        <CardHeader>
-          <CardTitle>{text("add")} Menu item</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+    <div className="h-full flex flex-col">
+      <form onSubmit={handleSubmit} className="h-full flex flex-col">
+        {/* Fixed Header */}
+        <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b">
+          <h2 className="text-xl sm:text-2xl font-semibold">{text("add")} Menu item</h2>
+        </div>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">en</Label>
               <Input
@@ -161,7 +175,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">description en</Label>
               <Input
@@ -199,22 +213,30 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 w-full items-center gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-4 mb-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="name">price</Label>
               <Input
                 id="price"
                 value={price}
                 placeholder="price"
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+
+                  if (value >= 0 || e.target.value === "") {
+                    setPrice(e.target.value);
+                  }
+                }}
                 type="number"
+                min="1"
+                step="1"
                 required
               />
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label className="flex items-center" htmlFor="name">
                 {text("hidden")}
-                {hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                {hidden && <p className="text-red-500 text-xs ml-4">{text("menu_item_not_visible")}</p>}
               </Label>
               <Switch checked={hidden} onCheckedChange={handleVisibilityChange} />
             </div>
@@ -282,12 +304,18 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
               ))}
             </select>
           </div> */}
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <Button type="submit">{createMenuMutation.isLoading ? "Loading..." : text("add")} +</Button>
-        </CardFooter>
+        </div>
+
+        {/* Fixed Footer */}
+        <div className="flex-shrink-0 border-t p-4 sm:p-6 bg-white dark:bg-background">
+          <div className="flex justify-end">
+            <Button type="submit" className="min-w-[100px]" disabled={createMenuMutation.isLoading}>
+              {createMenuMutation.isLoading ? "Loading..." : text("add")} +
+            </Button>
+          </div>
+        </div>
       </form>
-    </Card>
+    </div>
   );
 }
 

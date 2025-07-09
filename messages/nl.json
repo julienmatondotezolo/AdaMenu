@@ -6,6 +6,13 @@
     "update": "Updaten",
     "edit": "Bewerken",
     "delete": "Verwijderen",
-    "hidden": "Verbergen"
+    "hidden": "Verbergen",
+    "no_description": "Geen beschrijving",
+    "menu_item_not_visible": "Menu-item zal niet zichtbaar zijn!",
+    "description_validation_error": "Als u een beschrijving in één taal opgeeft, moet u beschrijvingen in alle talen opgeven.",
+    "confirm_delete": "Verwijdering bevestigen",
+    "delete_warning": "Weet u zeker dat u dit menu-item wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "cancel": "Annuleren",
+    "confirm": "Bevestigen"
   }
 }

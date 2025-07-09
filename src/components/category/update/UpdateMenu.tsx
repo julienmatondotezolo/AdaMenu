@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { deleteMenu, fetchMenuById, updateMenuItem } from "@/_services";
 
-import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Checkbox, Input, Switch } from "../../ui";
+import { Button, Checkbox, Input, Switch } from "../../ui";
 
 type UpdateMenuProps = {
   selectedMenuId: string | undefined;
@@ -19,6 +19,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   const text = useTranslations("Index");
   const locale = useLocale();
   const [menuState, setMenuState] = useState<any>();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
 
   const queryClient = useQueryClient();
   const { mutate: fetchMenuItems, isLoading } = useMutation("menu-items-details", fetchMenuById, {
@@ -30,15 +31,17 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
     },
   });
 
   const deleteMenuMutation = useMutation(deleteMenu, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+      setShowDeleteConfirm(false);
+      setOpenDialog(false);
     },
   });
 
@@ -66,6 +69,16 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
     e.preventDefault();
     if (!selectedMenuId) return;
 
+    // Validate descriptions: if any description is filled, all must be filled
+    const descriptions = Object.values(menuState.descriptions || {}) as string[];
+    const hasAnyDescription = descriptions.some((desc) => desc && desc.trim() !== "");
+    const hasAllDescriptions = descriptions.every((desc) => desc && desc.trim() !== "");
+
+    if (hasAnyDescription && !hasAllDescriptions) {
+      alert(text("description_validation_error"));
+      return;
+    }
+
     try {
       const menuObject = {
         [selectedMenuId]: {
@@ -92,13 +105,23 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
   };
 
   const handleDeleteMenu = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
     try {
-      if (selectedMenuId) deleteMenuMutation.mutate({ menuId: selectedMenuId });
+      if (selectedMenuId) {
+        deleteMenuMutation.mutate({ menuId: selectedMenuId });
+      }
     } catch (error) {
       if (error instanceof Error) {
         console.error(`An error has occurred: ${error.message}`);
       }
     }
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   if (isLoading)
@@ -110,13 +133,16 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
 
   if (menuState)
     return (
-      <Card className="w-full">
-        <form onSubmit={handleSubmit}>
-          <CardHeader>
-            <CardTitle>Update Menu item</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+      <div className="h-full flex flex-col">
+        <form onSubmit={handleSubmit} className="h-full flex flex-col">
+          {/* Fixed Header */}
+          <div className="flex-shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b">
+            <h2 className="text-xl sm:text-2xl font-semibold">Update Menu item</h2>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
               {Object.entries(menuState.names).map(([key, value]) => (
                 <div key={key} className="flex flex-col space-y-1.5">
                   <Label htmlFor={`name${key}`}>{key}</Label>
@@ -138,7 +164,7 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 w-full items-center gap-4 mb-4">
               {Object.entries(menuState.descriptions).map(([key, value]) => (
                 <div key={key} className="flex flex-col space-y-1.5">
                   <Label htmlFor={`description${key}`}>description {key}</Label>
@@ -159,27 +185,32 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 w-full items-center gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 w-full items-center gap-4 mb-4">
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="name">price</Label>
                 <Input
                   id="price"
                   value={menuState.price}
                   placeholder="price"
-                  onChange={(e) =>
-                    setMenuState((prev: any) => ({
-                      ...prev,
-                      price: e.target.value,
-                    }))
-                  }
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+
+                    if (value >= 0 || e.target.value === "") {
+                      setMenuState((prev: any) => ({
+                        ...prev,
+                        price: e.target.value,
+                      }));
+                    }
+                  }}
                   type="number"
+                  min="1"
                   required
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label className="flex items-center" htmlFor="name">
                   {text("hidden")}
-                  {menuState.hidden && <p className="text-red-500 text-xs ml-4">Menu item will not be visible !</p>}
+                  {menuState.hidden && <p className="text-red-500 text-xs ml-4">{text("menu_item_not_visible")}</p>}
                 </Label>
                 <Switch
                   checked={menuState.hidden}
@@ -239,17 +270,53 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                 ))}
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <Button type="button" onClick={handleDeleteMenu} variant={"delete"} disabled={deleteMenuMutation.isLoading}>
-              {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
-            </Button>
-            <Button type="submit" disabled={updateMenuMutation.isLoading}>
-              {updateMenuMutation.isLoading ? "Loading..." : text("update")}
-            </Button>
-          </CardFooter>
+          </div>
+
+          {/* Fixed Footer */}
+          <div className="flex-shrink-0 border-t p-4 sm:p-6 bg-white dark:bg-background">
+            <div className="flex justify-between gap-4">
+              <Button
+                type="button"
+                onClick={handleDeleteMenu}
+                variant={"delete"}
+                disabled={deleteMenuMutation.isLoading}
+                className="min-w-[100px]"
+              >
+                {deleteMenuMutation.isLoading ? `Loading` : text("delete")}
+              </Button>
+              <Button type="submit" disabled={updateMenuMutation.isLoading} className="min-w-[100px]">
+                {updateMenuMutation.isLoading ? "Loading..." : text("update")}
+              </Button>
+            </div>
+          </div>
         </form>
-      </Card>
+
+        {/* Delete Confirmation Popup */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-background border-2 dark:border-gray-800 rounded-lg p-6 max-w-md w-full">
+              <h3 className="text-lg font-semibold mb-4">{text("confirm_delete") || "Confirm Delete"}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                {text("delete_warning") ||
+                  "Are you sure you want to delete this menu item? This action cannot be undone."}
+              </p>
+              <div className="flex justify-end gap-4">
+                <Button type="button" onClick={handleCancelDelete}>
+                  {text("cancel") || "Cancel"}
+                </Button>
+                <Button
+                  type="button"
+                  variant={"delete"}
+                  onClick={handleConfirmDelete}
+                  disabled={deleteMenuMutation.isLoading}
+                >
+                  {deleteMenuMutation.isLoading ? "Deleting..." : text("confirm") || "Confirm Delete"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     );
 }
 

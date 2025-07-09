@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
-import { updateMenuItem } from "@/_services";
+import { toggleMenuItemVisibility, updateMenuItem } from "@/_services";
 import { mapMenu } from "@/lib";
 
 import { Button } from "../ui";
@@ -32,8 +32,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
       // Invalidate and refetch both queries
-      await queryClient.invalidateQueries("menuItems");
+      await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+    },
+  });
+
+  const toggleVisibilityMutation = useMutation(toggleMenuItemVisibility, {
+    onSuccess: async () => {
+      // Invalidate and refetch both queries
+      await queryClient.invalidateQueries(["menuItems"]);
+      await queryClient.invalidateQueries("menu-items-details");
+    },
+    onError: (error) => {
+      console.error("Failed to toggle visibility:", error);
+      alert("Failed to update menu item visibility. Please try again.");
     },
   });
 
@@ -61,6 +73,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
         menuObject,
       });
     }
+  };
+
+  const handleToggleVisibility = (menuItem: any, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent triggering row selection
+
+    if (toggleVisibilityMutation.isLoading) {
+      return;
+    }
+
+    // Toggle visibility using the new API endpoint
+    toggleVisibilityMutation.mutate({
+      menuId: menuItem.id,
+      hidden: !menuItem.hidden,
+    });
   };
 
   if (!items) {
@@ -111,7 +137,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
                     key={menu.id}
                   >
                     <p>{index + 1}.</p>
-                    <p>{menu.names[locale]}</p>
+                    <div className="flex flex-col">
+                      <p className="font-medium">{menu.names[locale]}</p>
+                      <p
+                        className={`text-xs mt-1 ${
+                          menu.descriptions && menu.descriptions[locale]
+                            ? "text-gray-600 dark:text-gray-400"
+                            : "text-orange-500 dark:text-orange-400"
+                        }`}
+                      >
+                        {menu.descriptions && menu.descriptions[locale]
+                          ? menu.descriptions[locale]
+                          : text("no_description")}
+                      </p>
+                    </div>
                     <p>{menu.price} EUR</p>
                     <div
                       className={`${selectedMenuId === menu.id && menu.hidden === false ? "flex" : "hidden"} absolute top-0 right-2 space-x-4 h-full items-center`}
@@ -125,7 +164,23 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
                         </>
                       )}
                     </div>
-                    <div>{menu.hidden == true ? <EyeOff size={16} /> : <Eye size={16} />}</div>
+                    <div className="flex items-center justify-start">
+                      <button
+                        className="flex items-center justify-center cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 w-6 h-6 rounded transition-colors bg-transparent border-none"
+                        onClick={(e) => handleToggleVisibility(menu, e)}
+                        title={menu.hidden ? "Click to show" : "Click to hide"}
+                        aria-label={menu.hidden ? "Show menu item" : "Hide menu item"}
+                        disabled={toggleVisibilityMutation.isLoading}
+                      >
+                        {toggleVisibilityMutation.isLoading ? (
+                          <LoaderCircle className="animate-spin" size={16} />
+                        ) : menu.hidden ? (
+                          <EyeOff size={16} />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                      </button>
+                    </div>
                   </section>
                 );
               })}

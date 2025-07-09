@@ -6,6 +6,13 @@
     "update": "Mettre à jour",
     "edit": "Modifier",
     "delete": "Supprimer",
-    "hidden": "caché"
+    "hidden": "caché",
+    "no_description": "Aucune description",
+    "menu_item_not_visible": "L'élément ne sera pas visible!",
+    "description_validation_error": "Si vous fournissez une description dans une langue, vous devez fournir des descriptions dans toutes les langues.",
+    "confirm_delete": "Confirmer la suppression",
+    "delete_warning": "Êtes-vous sûr de vouloir supprimer cet élément de menu ? Cette action ne peut pas être annulée.",
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
   }
 }

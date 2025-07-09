@@ -23,11 +23,13 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
   const buttonText = parentCategoryId ? `${text("add")} sub category +` : text("add");
 
   useEffect(() => {
-    if (parentCategoryId) {
+    if (parentCategoryId && categories) {
       setSelectedParentCategory(parentCategoryId);
-      const subCat = categories.filter((category: any) => category.id === parentCategoryId)[0].subCategories;
+      const parentCategory = categories.find((category: any) => category.id === parentCategoryId);
 
-      setSubCategoryLength(subCat.length);
+      if (parentCategory?.subCategories) {
+        setSubCategoryLength(parentCategory.subCategories.length);
+      }
     }
   }, [categories, parentCategoryId, selectedParentCategory]);
 
@@ -62,7 +64,7 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
       };
 
       newCategoryObject.parentCategoryId = selectedParentCategory;
-      newCategoryObject.order = subCategoryLength ?? categories.length + 1;
+      newCategoryObject.order = subCategoryLength ?? (categories?.length || 0) + 1;
 
       try {
         await createCategoryMutation.mutateAsync({ categoryObject: newCategoryObject });
@@ -74,7 +76,7 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
       }
     },
     [
-      categories.length,
+      categories?.length,
       createCategoryMutation,
       nameEn,
       nameFr,
