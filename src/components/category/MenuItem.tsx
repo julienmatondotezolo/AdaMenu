@@ -138,7 +138,9 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown }: menuProps) 
                         </>
                       )}
                     </div>
-                    <div>{menu.hidden == true ? <EyeOff size={16} /> : <Eye size={16} />}</div>
+                    <div className="flex items-center">
+                      {menu.hidden == true ? <EyeOff size={24} /> : <Eye size={24} />}
+                    </div>
                   </section>
                 );
               })}
