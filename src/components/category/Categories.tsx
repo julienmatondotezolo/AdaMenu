@@ -413,7 +413,7 @@ function Categories() {
 
               {/* Scrollable content */}
               <div className="flex-1 overflow-y-auto">
-                <section className="sticky top-0 bg-white dark:bg-background dark:bg-[#121212] border-b dark:border-gray-800 z-10">
+                <section className="sticky top-0 bg-white dark:bg-[#121212] border-b dark:border-gray-800 z-10">
                   <button
                     className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                     onClick={() => setIsSubcategoriesExpanded(!isSubcategoriesExpanded)}
