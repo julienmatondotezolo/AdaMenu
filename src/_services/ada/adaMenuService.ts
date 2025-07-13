@@ -93,7 +93,7 @@ export async function deleteCategory({ categoryId }: { categoryId: string }): Pr
 
 export const toggleCategoryVisibility = async ({ categoryId, hidden }: { categoryId: string; hidden: boolean }) => {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories/${categoryId}/visibility`, {
+    const response = await fetch(`${adaMenuUrl}/category/${categoryId}/visibility`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
