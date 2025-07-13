@@ -91,6 +91,27 @@ export async function deleteCategory({ categoryId }: { categoryId: string }): Pr
   }
 }
 
+export const toggleCategoryVisibility = async ({ categoryId, hidden }: { categoryId: string; hidden: boolean }) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/categories/${categoryId}/visibility`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ hidden }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to toggle category visibility");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error toggling category visibility:", error);
+    throw error;
+  }
+};
+
 /* ========================================================================== */
 /* ================================= MENU =================================== */
 /* ========================================================================== */

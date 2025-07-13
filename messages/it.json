@@ -12,6 +12,8 @@
     "description_validation_error": "Se fornisci una descrizione in una lingua, devi fornire descrizioni in tutte le lingue.",
     "confirm_delete": "Conferma eliminazione",
     "delete_warning": "Sei sicuro di voler eliminare questo elemento del menu? Questa azione non può essere annullata.",
+    "delete_category_warning": "Sei sicuro di voler eliminare questa categoria? Questo rimuoverà permanentemente la categoria e tutte le sue sottocategorie dal tuo menu.",
+    "action_cannot_be_undone": "Questa azione non può essere annullata",
     "cancel": "Annulla",
     "confirm": "Conferma"
   }

@@ -1,3 +1,3 @@
-export * from "./Categories";
-export * from "./CategoryItem";
+export { default as Categories } from "./Categories";
+export { default as CategoryItem } from "./CategoryItem";
 export * from "./SubCategories";
