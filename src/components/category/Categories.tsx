@@ -29,7 +29,7 @@ import {
   SelectValue,
   Switch,
 } from "../ui";
-import { CategoryItem } from "./CategoryItem";
+import CategoryItem from "./CategoryItem";
 import { CreateCategory, CreateMenu } from "./create";
 import { MenuItem } from "./MenuItem";
 import { SubCategories } from "./SubCategories";
@@ -582,4 +582,4 @@ function Categories() {
   );
 }
 
-export { Categories };
+export default Categories;
