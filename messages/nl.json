@@ -12,6 +12,8 @@
     "description_validation_error": "Als u een beschrijving in één taal opgeeft, moet u beschrijvingen in alle talen opgeven.",
     "confirm_delete": "Verwijdering bevestigen",
     "delete_warning": "Weet u zeker dat u dit menu-item wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
+    "delete_category_warning": "Weet u zeker dat u deze categorie wilt verwijderen? Dit zal de categorie en alle subcategorieën permanent uit uw menu verwijderen.",
+    "action_cannot_be_undone": "Deze actie kan niet ongedaan worden gemaakt",
     "cancel": "Annuleren",
     "confirm": "Bevestigen"
   }

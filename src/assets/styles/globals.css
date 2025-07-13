@@ -26,4 +26,9 @@
         height: 100%;
         overflow: hidden; /* Prevents scrolling */
       }
+
+    .bg-card  {
+        border-color: #1a202c;
+        background-color: #1a202c;
+    }
 }

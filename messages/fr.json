@@ -12,6 +12,8 @@
     "description_validation_error": "Si vous fournissez une description dans une langue, vous devez fournir des descriptions dans toutes les langues.",
     "confirm_delete": "Confirmer la suppression",
     "delete_warning": "Êtes-vous sûr de vouloir supprimer cet élément de menu ? Cette action ne peut pas être annulée.",
+    "delete_category_warning": "Êtes-vous sûr de vouloir supprimer cette catégorie ? Cela supprimera définitivement la catégorie et toutes ses sous-catégories de votre menu.",
+    "action_cannot_be_undone": "Cette action ne peut pas être annulée",
     "cancel": "Annuler",
     "confirm": "Confirmer"
   }
