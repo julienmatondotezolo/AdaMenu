@@ -37,3 +37,4 @@ yarn-error.log*
 next-env.d.ts
 src/components/ExampleComponent.tsx
 public/sw.js.map
+public/sw.js.map
