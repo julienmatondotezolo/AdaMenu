@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteMenu, fetchMenuById, updateMenuItem } from "@/_services";
-import { showActionToast } from "@/lib/utils";
+import { formatPrice, showActionToast } from "@/lib/utils";
 
 import { Button, Checkbox, Input, Switch } from "../../ui";
 
@@ -275,12 +275,13 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
                     value={menuState.price}
                     placeholder="0.00"
                     onChange={(e) => {
-                      const value = parseFloat(e.target.value);
+                      const formattedValue = formatPrice(e.target.value);
+                      const value = parseFloat(formattedValue);
 
                       if (value >= 0 || e.target.value === "") {
                         setMenuState((prev: any) => ({
                           ...prev,
-                          price: e.target.value,
+                          price: formattedValue,
                         }));
                       }
                     }}

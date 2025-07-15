@@ -17,6 +17,10 @@ interface ShowToastOptions {
   error?: Error;
 }
 
+export const formatPrice = (value: string): string =>
+  // Replace comma with dot for decimal numbers
+  value.replace(",", ".");
+
 export const showActionToast = ({ type, action, itemName, locale = "en", error }: ShowToastOptions) => {
   const actionText = {
     create: {

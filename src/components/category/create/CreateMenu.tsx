@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createMenuItem } from "@/_services";
-import { showActionToast } from "@/lib/utils";
+import { formatPrice, showActionToast } from "@/lib/utils";
 
 import { Button, Checkbox, Input, Switch } from "../../ui";
 
@@ -323,10 +323,11 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
                   value={price}
                   placeholder="0.00"
                   onChange={(e) => {
-                    const value = parseFloat(e.target.value);
+                    const formattedValue = formatPrice(e.target.value);
+                    const value = parseFloat(formattedValue);
 
                     if (value >= 0 || e.target.value === "") {
-                      setPrice(e.target.value);
+                      setPrice(formattedValue);
                     }
                   }}
                   type="number"

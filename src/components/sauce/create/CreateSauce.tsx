@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createSauceItem } from "@/_services";
-import { showActionToast } from "@/lib/utils";
+import { formatPrice, showActionToast } from "@/lib/utils";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -140,7 +140,11 @@ function CreateSauce({ setOpenDialog }: CreateSauceProps) {
                 id="price"
                 value={additionalPrice}
                 placeholder="price"
-                onChange={(e) => setAdditionalPrice(e.target.value)}
+                onChange={(e) => {
+                  const formattedValue = formatPrice(e.target.value);
+
+                  setAdditionalPrice(formattedValue);
+                }}
                 type="number"
                 required
               />

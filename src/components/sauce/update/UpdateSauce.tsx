@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteSauceItem, updateSauceItem } from "@/_services";
-import { showActionToast } from "@/lib/utils";
+import { formatPrice, showActionToast } from "@/lib/utils";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -151,12 +151,14 @@ function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauc
                   id="price"
                   value={itemState.additionalPrice}
                   placeholder="price"
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const formattedValue = formatPrice(e.target.value);
+
                     setItemState((prev: ItemState) => ({
                       ...prev,
-                      additionalPrice: e.target.value,
-                    }))
-                  }
+                      additionalPrice: formattedValue,
+                    }));
+                  }}
                   type="number"
                   required
                 />
