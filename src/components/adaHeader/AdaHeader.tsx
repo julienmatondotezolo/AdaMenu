@@ -1,8 +1,6 @@
-import { Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
 import React, { useEffect, useState } from "react";
 
-import { LanguageSwitcher } from "./LanguageSwitcher";
+import { HamburgerMenu } from "./HamburgerMenu";
 
 const AdaHeader = () => {
   const [time, setTime] = useState<string | null>(null);
@@ -20,28 +18,17 @@ const AdaHeader = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const { setTheme, theme } = useTheme();
-
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
-
   if (!mounted) return null;
 
   return (
     <div className="flex items-center justify-between p-2 bg-primary text-white">
-      <div>
+      <div className="flex items-center space-x-4">
+        <HamburgerMenu />
         <small className="font-bold">ADA - Menu</small>
       </div>
 
       <div>
         <small className="font-medium">{time}</small>
-      </div>
-      <div className="flex ">
-        <LanguageSwitcher />
-        <button onClick={toggleTheme} className="ml-4 p-2 ">
-          {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
       </div>
     </div>
   );
