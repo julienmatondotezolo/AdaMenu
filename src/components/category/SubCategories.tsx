@@ -20,15 +20,15 @@ interface SubCategoriesItemProps {
 
 function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, onClick }: SubCategoriesItemProps) {
   const queryClient = useQueryClient();
+  const locale = useLocale();
+  const [orderedCategories, setOrderedCategories] = useState<any>();
+  const [expandedSubCategoryId, setExpandedSubCategoryId] = useState<string | null>(null);
 
   const updateCategoryMutation = useMutation(updateCategory, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
     },
   });
-
-  const locale = useLocale();
-  const [orderedCategories, setOrderedCategories] = useState<any>();
 
   useEffect(() => {
     const fetchedSubCat = categories.filter((category: any) => category.id === parentCategoryId)[0];
@@ -38,15 +38,14 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
 
   const moveCategory = (e: any, index: number, direction: "up" | "down") => {
     e.preventDefault();
+    e.stopPropagation(); // Prevent the click from triggering the parent button's onClick
 
     if (!orderedCategories) return;
 
     const newCategories: any = [...orderedCategories];
-
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
     if (targetIndex >= 0 && targetIndex < newCategories.length) {
-      // Swap the order of the categories
       const tempOrder = newCategories[index].order;
 
       newCategories[index].order = newCategories[targetIndex].order;
@@ -59,6 +58,23 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
       updateCategoryMutation.mutate({
         categoryObject: newCategoryObject,
       });
+    }
+  };
+
+  const handleSubCategoryClick = (subCategory: any) => {
+    if (selectedSubCategoryId === subCategory.id) {
+      // If clicking the same subcategory that's already selected
+      if (expandedSubCategoryId === subCategory.id) {
+        // If it's expanded, collapse it
+        setExpandedSubCategoryId(null);
+      } else {
+        // If it's collapsed, expand it
+        setExpandedSubCategoryId(subCategory.id);
+      }
+    } else {
+      // If clicking a different subcategory
+      onClick(subCategory);
+      setExpandedSubCategoryId(subCategory.id);
     }
   };
 
@@ -77,8 +93,9 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
                   ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25 scale-105"
                   : "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm hover:shadow-md border border-gray-200 dark:border-gray-700"
               }
+              ${expandedSubCategoryId === subCategory.id ? "h-auto" : "h-24"}
             `}
-            onClick={() => onClick(subCategory)}
+            onClick={() => handleSubCategoryClick(subCategory)}
           >
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-5">
@@ -88,7 +105,7 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
             </div>
 
             {/* Content */}
-            <div className="relative p-4 h-24 flex items-center justify-between">
+            <div className="relative p-4 flex items-center justify-between">
               <div className="flex items-center space-x-3 flex-1 min-w-0">
                 <div
                   className={`
@@ -100,7 +117,7 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
                   }
                 `}
                 >
-                  {subCategory.id === selectedSubCategoryId ? (
+                  {expandedSubCategoryId === subCategory.id ? (
                     <FolderOpen className="w-4 h-4 text-white" />
                   ) : (
                     <Folder className="w-4 h-4 text-blue-600 dark:text-blue-400" />
@@ -157,6 +174,23 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
                 </div>
               )}
             </div>
+
+            {/* Expanded Content */}
+            {expandedSubCategoryId === subCategory.id && (
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="space-y-2">
+                  {subCategory.menuItems?.map((menuItem: any) => (
+                    <div
+                      key={menuItem.id}
+                      className="flex justify-between items-center p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50"
+                    >
+                      <span className="text-sm font-medium">{menuItem.names[locale]}</span>
+                      <span className="text-sm text-gray-500">€{menuItem.price}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Selection Indicator */}
             {subCategory.id === selectedSubCategoryId && (

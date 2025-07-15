@@ -69,8 +69,11 @@ function Categories() {
     ["menuItems", subCategoryId],
     () => fetchMenuItemByCategoryId({ categoryId: subCategoryId! }),
     {
-      enabled: !!subCategoryId, // Only run the query if subCategoryId is defined
+      enabled: !!subCategoryId,
       refetchOnWindowFocus: false,
+      onSuccess: () => {
+        setIsSubcategoriesExpanded(false);
+      },
     },
   );
 
@@ -469,7 +472,7 @@ function Categories() {
                           categories={categories}
                           parentCategoryId={categoryId}
                           selectedSubCategoryId={subCategoryId}
-                          onClick={(subCategory) => handleSelectCategory(subCategory)}
+                          onClick={handleSelectCategory}
                         />
                       </div>
                     )}
