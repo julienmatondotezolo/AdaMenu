@@ -448,15 +448,17 @@ function Categories() {
                               {category?.subCategories.find((sc: any) => sc.id === subCategoryId)?.names[locale]}
                             </Button>
                           )}
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDialogMode("addSubCat");
-                              setOpenDialog(true);
-                            }}
-                          >
-                            + {text("add")} sub category
-                          </Button>
+                          {isSubcategoriesExpanded && (
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDialogMode("addSubCat");
+                                setOpenDialog(true);
+                              }}
+                            >
+                              + {text("add")} sub category
+                            </Button>
+                          )}
                         </section>
                         {isSubcategoriesExpanded ? (
                           <ChevronUp className="w-5 h-5 text-gray-500" />
