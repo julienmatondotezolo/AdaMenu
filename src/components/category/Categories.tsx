@@ -65,14 +65,25 @@ function Categories() {
   // });
 
   // Define the query for fetching menu items based on the selected subCategoryId
-  const { data: menuItems } = useQuery(
+  const { data: menuItems, isLoading: isMenuLoading } = useQuery(
     ["menuItems", subCategoryId],
     () => fetchMenuItemByCategoryId({ categoryId: subCategoryId! }),
     {
-      enabled: !!subCategoryId, // Only run the query if subCategoryId is defined
+      enabled: !!subCategoryId,
       refetchOnWindowFocus: false,
+      onSuccess: () => {
+        setIsSubcategoriesExpanded(false);
+      },
     },
   );
+
+  // Add loading dialog state
+  const [isLoadingDialogOpen, setIsLoadingDialogOpen] = useState(false);
+
+  // Update loading dialog state when menu items are loading
+  useEffect(() => {
+    setIsLoadingDialogOpen(isMenuLoading);
+  }, [isMenuLoading]);
 
   const { isLoading, data: categories } = useQuery("categories", fetchAllCategories, {
     refetchOnWindowFocus: false,
@@ -469,7 +480,7 @@ function Categories() {
                           categories={categories}
                           parentCategoryId={categoryId}
                           selectedSubCategoryId={subCategoryId}
-                          onClick={(subCategory) => handleSelectCategory(subCategory)}
+                          onClick={handleSelectCategory}
                         />
                       </div>
                     )}
@@ -534,6 +545,14 @@ function Categories() {
           </div>
         </div>
       )}
+
+      {/* Loading Dialog */}
+      <Dialog open={isLoadingDialogOpen} setIsOpen={setIsLoadingDialogOpen}>
+        <div className="flex flex-col items-center justify-center p-8 space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
+          <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Loading menu items...</p>
+        </div>
+      </Dialog>
 
       <Dialog open={openDialog} setIsOpen={setOpenDialog}>
         {(() => {
