@@ -199,7 +199,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
 
       {/* Content */}
       <div className="flex-1 overflow-hidden px-6 py-4">
-        <div className="h-full overflow-y-auto space-y-3">
+        <div className="h-full overflow-y-auto space-y-3 pb-12">
           <div className={viewMode === 'grid' ? 
             "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" : 
             "flex flex-col space-y-3"

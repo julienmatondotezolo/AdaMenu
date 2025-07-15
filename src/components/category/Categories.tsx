@@ -423,28 +423,30 @@ function Categories() {
                     <div className="flex items-center justify-between w-full">
                       <h3 className="text-lg font-semibold">Sub categories ({category?.subCategories.length})</h3>
                       <div className="flex items-center space-x-6">
-                        <section className="space-x-6">
-                          {subCategoryId && (
+                        {isSubcategoriesExpanded && (
+                          <section className="space-x-6">
+                            {subCategoryId && (
+                              <Button
+                                variant={"outline"}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openUpdateSubCategory();
+                                }}
+                              >
+                                {text("edit")} sub category
+                              </Button>
+                            )}
                             <Button
-                              variant={"outline"}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openUpdateSubCategory();
+                                setDialogMode("addSubCat");
+                                setOpenDialog(true);
                               }}
                             >
-                              {text("edit")} sub category
+                              + {text("add")} sub category
                             </Button>
-                          )}
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDialogMode("addSubCat");
-                              setOpenDialog(true);
-                            }}
-                          >
-                            + {text("add")} sub category
-                          </Button>
-                        </section>
+                          </section>
+                        )}
                         {isSubcategoriesExpanded ? (
                           <ChevronUp className="w-5 h-5 text-gray-500" />
                         ) : (
