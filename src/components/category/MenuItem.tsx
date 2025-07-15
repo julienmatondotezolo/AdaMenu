@@ -124,17 +124,6 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            {selectedMenuId && (
-              <Button
-                onClick={() => onClick("editMenu")}
-                variant="outline"
-                size="sm"
-                className="flex items-center space-x-2"
-              >
-                <Edit className="w-4 h-4" />
-                <span>{text("edit")}</span>
-              </Button>
-            )}
             <FloatingActionButton
               onClick={() => onClick("addMenu")}
               label={text("add")}
@@ -240,6 +229,20 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
 
                     {/* Actions */}
                     <div className="flex items-center space-x-1">
+                      {selectedMenuId === menu.id && (
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClick("editMenu");
+                          }}
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center space-x-2"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>{text("edit")}</span>
+                        </Button>
+                      )}
                       <button
                         onClick={(e) => handleToggleVisibility(menu, e)}
                         className={`p-1.5 rounded-lg transition-colors duration-200 ${
