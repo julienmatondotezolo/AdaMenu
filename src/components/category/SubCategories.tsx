@@ -15,10 +15,17 @@ interface SubCategoriesItemProps {
   categories: any;
   parentCategoryId: string | undefined;
   selectedSubCategoryId: string | undefined;
+  setIsSubcategoriesExpanded: (isExpanded: boolean) => void;
   onClick: (categoryId: string) => void;
 }
 
-function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, onClick }: SubCategoriesItemProps) {
+function SubCategories({
+  categories,
+  parentCategoryId,
+  selectedSubCategoryId,
+  setIsSubcategoriesExpanded,
+  onClick,
+}: SubCategoriesItemProps) {
   const queryClient = useQueryClient();
   const locale = useLocale();
   const [orderedCategories, setOrderedCategories] = useState<any>();
@@ -71,10 +78,12 @@ function SubCategories({ categories, parentCategoryId, selectedSubCategoryId, on
         // If it's collapsed, expand it
         setExpandedSubCategoryId(subCategory.id);
       }
+      setIsSubcategoriesExpanded(false);
     } else {
       // If clicking a different subcategory
       onClick(subCategory);
       setExpandedSubCategoryId(subCategory.id);
+      setIsSubcategoriesExpanded(false);
     }
   };
 

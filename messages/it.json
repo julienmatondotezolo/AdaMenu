@@ -15,6 +15,7 @@
     "delete_category_warning": "Sei sicuro di voler eliminare questa categoria? Questo rimuoverà permanentemente la categoria e tutte le sue sottocategorie dal tuo menu.",
     "action_cannot_be_undone": "Questa azione non può essere annullata",
     "cancel": "Annulla",
-    "confirm": "Conferma"
+    "confirm": "Conferma",
+    "loading_menu_items": "Caricamento degli elementi del menu..."
   }
 }

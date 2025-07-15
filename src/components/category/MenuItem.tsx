@@ -102,7 +102,7 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
   if (!items) {
     return (
       <div className="flex h-full overflow-scroll pb-12">
-        <p className="m-auto">Loading menus...</p>
+        <p className="m-auto">{text("loading_menu_items")}</p>
       </div>
     );
   }

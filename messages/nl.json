@@ -15,6 +15,7 @@
     "delete_category_warning": "Weet u zeker dat u deze categorie wilt verwijderen? Dit zal de categorie en alle subcategorieën permanent uit uw menu verwijderen.",
     "action_cannot_be_undone": "Deze actie kan niet ongedaan worden gemaakt",
     "cancel": "Annuleren",
-    "confirm": "Bevestigen"
+    "confirm": "Bevestigen",
+    "loading_menu_items": "Menu-items laden..."
   }
 }
