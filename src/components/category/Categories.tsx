@@ -271,7 +271,7 @@ function Categories() {
                     aria-expanded={isCategoryDetailsExpanded}
                     aria-controls="category-details-content"
                   >
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center justify-between w-full pr-6">
                       <h2 className="text-xl font-semibold">{category.names[locale]}</h2>
                       {!isEditMode && (
                         <Button
@@ -423,32 +423,41 @@ function Categories() {
                     aria-controls="subcategories-content"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <h3 className="text-lg font-semibold">Sub categories ({category?.subCategories.length})</h3>
+                      <div className="flex items-center space-x-4">
+                        <h3 className="text-lg font-semibold">Sub categories ({category?.subCategories.length})</h3>
+                        {subCategoryId && (
+                          <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                              {category?.subCategories.find((sc: any) => sc.id === subCategoryId)?.names[locale]}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       <div className="flex items-center space-x-6">
-                        {isSubcategoriesExpanded && (
-                          <section className="space-x-6">
-                            {subCategoryId && (
-                              <Button
-                                variant={"outline"}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  openUpdateSubCategory();
-                                }}
-                              >
-                                {text("edit")} sub category
-                              </Button>
-                            )}
+                        <section className="space-x-6">
+                          {subCategoryId && (
                             <Button
+                              variant={"outline"}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setDialogMode("addSubCat");
-                                setOpenDialog(true);
+                                openUpdateSubCategory();
                               }}
                             >
-                              + {text("add")} sub category
+                              <Edit className="w-4 h-4" />
+                              {text("edit")} sub category{" "}
+                              {category?.subCategories.find((sc: any) => sc.id === subCategoryId)?.names[locale]}
                             </Button>
-                          </section>
-                        )}
+                          )}
+                          <Button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDialogMode("addSubCat");
+                              setOpenDialog(true);
+                            }}
+                          >
+                            + {text("add")} sub category
+                          </Button>
+                        </section>
                         {isSubcategoriesExpanded ? (
                           <ChevronUp className="w-5 h-5 text-gray-500" />
                         ) : (
