@@ -62,7 +62,7 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
   };
 
   const createMenuMutation = useMutation(createMenuItem, {
-    onSuccess: (response) => {
+    onSuccess: () => {
       // Invalidate all menu item queries (including those with subCategoryId)
       queryClient.invalidateQueries(["menuItems"]);
       showActionToast({
