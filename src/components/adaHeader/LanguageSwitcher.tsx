@@ -1,31 +1,61 @@
 import { useLocale } from "next-intl";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { usePathname, useRouter } from "@/navigation";
+
+type Locale = "en" | "fr" | "nl";
+
+const STORAGE_KEY = "ada-menu-language";
 
 function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const menuStyle = `flex text-xs py-2 px-4 hover:bg-white/20 dark:text-white cursor-pointer group rounded-xl`;
+  const menuStyle =
+    "flex items-center w-full text-sm py-2 px-4 hover:bg-white/10 rounded-lg cursor-pointer transition-colors";
 
-  const changeLanguage = (language: any) => {
+  const changeLanguage = (language: Locale) => {
+    // Save to localStorage
+    localStorage.setItem(STORAGE_KEY, language);
     router.push(pathname, { locale: language });
   };
 
+  // Set language based on localStorage or default to French
+  useEffect(() => {
+    // Only run on client side
+    if (typeof window !== "undefined") {
+      const savedLanguage = localStorage.getItem(STORAGE_KEY) as Locale | null;
+
+      // If there's a saved language and it's different from current
+      if (savedLanguage && savedLanguage !== locale) {
+        changeLanguage(savedLanguage);
+      }
+      // If no saved language and current is not French
+      else if (!savedLanguage && locale !== "fr") {
+        changeLanguage("fr");
+      }
+    }
+  }, []);
+
   return (
-    <div className="flex flex-row w-full">
-      <button className={`${menuStyle} ${locale == "en" ? "bg-black/20" : ""}`} onClick={() => changeLanguage("en")}>
-        <p className={`group-hover:underline ${locale == "en" ? "font-bold" : "font-light"}`}>ENG</p>
+    <div className="flex flex-col w-full space-y-1">
+      <button
+        className={`${menuStyle} ${locale === "fr" ? "bg-white/20 font-semibold" : ""}`}
+        onClick={() => changeLanguage("fr")}
+      >
+        Français
       </button>
-      <button className={`${menuStyle} ${locale == "fr" ? "bg-black/20" : ""}`} onClick={() => changeLanguage("fr")}>
-        <p className={`group-hover:underline ${locale == "fr" ? "font-bold" : "font-light"}`}>FR</p>
+      <button
+        className={`${menuStyle} ${locale === "en" ? "bg-white/20 font-semibold" : ""}`}
+        onClick={() => changeLanguage("en")}
+      >
+        English
       </button>
-      <button className={`${menuStyle} ${locale == "nl" ? "bg-black/20" : ""}`} onClick={() => changeLanguage("nl")}>
-        <p className={`group-hover:underline ${locale == "nl" ? "font-bold" : "font-light"}`}>NL</p>
-      </button>
-      <button className={`${menuStyle} ${locale == "it" ? "bg-black/20" : ""}`} onClick={() => changeLanguage("it")}>
-        <p className={`group-hover:underline ${locale == "it" ? "font-bold" : "font-light"}`}>IT</p>
+      <button
+        className={`${menuStyle} ${locale === "nl" ? "bg-white/20 font-semibold" : ""}`}
+        onClick={() => changeLanguage("nl")}
+      >
+        Nederlands
       </button>
     </div>
   );
