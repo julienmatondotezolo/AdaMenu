@@ -7,6 +7,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { toggleCategoryVisibility, updateCategory } from "@/_services/ada/adaMenuService";
 import { mapCategories } from "@/lib";
+import { showActionToast } from "@/lib/utils";
 
 interface CategoryItemProps {
   categories: any;
@@ -33,16 +34,30 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
     },
+    onError: (error: unknown) => {
+      console.error("Failed to update category:", error);
+    },
   });
 
   const toggleVisibilityMutation = useMutation(toggleCategoryVisibility, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
+      showActionToast({
+        type: "success",
+        action: "update",
+        itemName: orderedCategories.find((cat: any) => cat.id === toggleLoadingId)?.names[locale],
+        locale,
+      });
       setToggleLoadingId(null);
     },
-    onError: (error) => {
-      console.error("Failed to toggle visibility:", error);
-      alert("Failed to update category visibility. Please try again.");
+    onError: (error: unknown) => {
+      showActionToast({
+        type: "error",
+        action: "update",
+        itemName: orderedCategories.find((cat: any) => cat.id === toggleLoadingId)?.names[locale],
+        locale,
+        error: error instanceof Error ? error : new Error("Unknown error"),
+      });
       setToggleLoadingId(null);
     },
   });
@@ -92,9 +107,30 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
 
     const newCategoryObject = mapCategories(updatedItems);
 
-    updateCategoryMutation.mutate({
-      categoryObject: newCategoryObject,
-    });
+    updateCategoryMutation.mutate(
+      {
+        categoryObject: newCategoryObject,
+      },
+      {
+        onSuccess: () => {
+          showActionToast({
+            type: "success",
+            action: "update",
+            itemName: draggedItem.names[locale],
+            locale,
+          });
+        },
+        onError: (error: unknown) => {
+          showActionToast({
+            type: "error",
+            action: "update",
+            itemName: draggedItem.names[locale],
+            locale,
+            error: error instanceof Error ? error : new Error("Unknown error"),
+          });
+        },
+      },
+    );
   };
 
   const handleToggleVisibility = (category: any, event: React.MouseEvent) => {

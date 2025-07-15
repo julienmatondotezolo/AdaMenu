@@ -1,9 +1,10 @@
 import { Label } from "@radix-ui/react-label";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createSauceItem } from "@/_services";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -12,7 +13,7 @@ type CreateSauceProps = {
 };
 
 function CreateSauce({ setOpenDialog }: CreateSauceProps) {
-  // const locale = useLocale();
+  const locale = useLocale();
   const text = useTranslations("Index");
   const queryClient = useQueryClient();
 
@@ -37,11 +38,26 @@ function CreateSauce({ setOpenDialog }: CreateSauceProps) {
   const createItemMutation = useMutation(createSauceItem, {
     onSuccess: () => {
       queryClient.invalidateQueries("supplement");
+      showActionToast({
+        type: "success",
+        action: "create",
+        itemName: nameEn,
+        locale,
+      });
       setNameEn("");
       setNameIt("");
       setNameFr("");
       setNameNl("");
       setAdditionalPrice("");
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "create",
+        itemName: nameEn,
+        locale,
+        error,
+      });
     },
   });
 

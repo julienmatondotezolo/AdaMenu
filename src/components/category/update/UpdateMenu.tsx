@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteMenu, fetchMenuById, updateMenuItem } from "@/_services";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, Checkbox, Input, Switch } from "../../ui";
 
@@ -34,6 +35,21 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
       // Invalidate and refetch both queries
       await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+      showActionToast({
+        type: "success",
+        action: "update",
+        itemName: menuState?.names[locale],
+        locale,
+      });
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "update",
+        itemName: menuState?.names[locale],
+        locale,
+        error,
+      });
     },
   });
 
@@ -41,8 +57,23 @@ function UpdateMenu({ selectedMenuId, allergens, sidedish, supplement, setOpenDi
     onSuccess: async () => {
       await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+      showActionToast({
+        type: "success",
+        action: "delete",
+        itemName: menuState?.names[locale],
+        locale,
+      });
       setShowDeleteConfirm(false);
       setOpenDialog(false);
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "delete",
+        itemName: menuState?.names[locale],
+        locale,
+        error,
+      });
     },
   });
 

@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { toggleMenuItemVisibility, updateMenuItem } from "@/_services";
 import { mapMenu } from "@/lib";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, FloatingActionButton } from "../ui";
 
@@ -37,7 +38,6 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
 
   const updateMenuMutation = useMutation(updateMenuItem, {
     onSuccess: async () => {
-      // Invalidate and refetch both queries
       await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
     },
@@ -45,14 +45,24 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
 
   const toggleVisibilityMutation = useMutation(toggleMenuItemVisibility, {
     onSuccess: async () => {
-      // Invalidate and refetch both queries
       await queryClient.invalidateQueries(["menuItems"]);
       await queryClient.invalidateQueries("menu-items-details");
+      showActionToast({
+        type: 'success',
+        action: 'update',
+        itemName: orderedMenuItems.find((item: any) => item.id === toggleLoadingId)?.names[locale],
+        locale,
+      });
       setToggleLoadingId(null);
     },
-    onError: (error) => {
-      console.error("Failed to toggle visibility:", error);
-      alert("Failed to update menu item visibility. Please try again.");
+    onError: (error: Error) => {
+      showActionToast({
+        type: 'error',
+        action: 'update',
+        itemName: orderedMenuItems.find((item: any) => item.id === toggleLoadingId)?.names[locale],
+        locale,
+        error,
+      });
       setToggleLoadingId(null);
     },
   });
@@ -67,7 +77,6 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
     const targetIndex = direction === "up" ? index - 1 : index + 1;
 
     if (targetIndex >= 0 && targetIndex < newMenuItems.length) {
-      // Swap the order of the categories
       const tempOrder = newMenuItems[index].order;
 
       newMenuItems[index].order = newMenuItems[targetIndex].order;
@@ -79,6 +88,24 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
 
       updateMenuMutation.mutate({
         menuObject,
+      }, {
+        onSuccess: () => {
+          showActionToast({
+            type: 'success',
+            action: 'update',
+            itemName: newMenuItems[index].names[locale],
+            locale,
+          });
+        },
+        onError: (error: unknown) => {
+          showActionToast({
+            type: 'error',
+            action: 'update',
+            itemName: newMenuItems[index].names[locale],
+            locale,
+            error: error instanceof Error ? error : new Error('Unknown error'),
+          });
+        },
       });
     }
   };

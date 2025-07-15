@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createCategory } from "@/_services";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -42,11 +43,26 @@ function CreateCategory({ categories, parentCategoryId, setOpenDialog }: CreateC
   const createCategoryMutation = useMutation(createCategory, {
     onSuccess: () => {
       queryClient.invalidateQueries("categories");
+      showActionToast({
+        type: "success",
+        action: "create",
+        itemName: nameEn,
+        locale,
+      });
       setNameEn("");
       setNameIt("");
       setNameFr("");
       setNameNl("");
       setSelectedParentCategory("");
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "create",
+        itemName: nameEn,
+        locale,
+        error,
+      });
     },
   });
 

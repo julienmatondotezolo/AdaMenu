@@ -10,6 +10,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { updateCategory } from "@/_services";
 import { mapCategories } from "@/lib/helpers";
+import { showActionToast } from "@/lib/utils";
 
 interface SubCategoriesItemProps {
   categories: any;
@@ -62,9 +63,30 @@ function SubCategories({
 
       const newCategoryObject = mapCategories(newCategories, parentCategoryId);
 
-      updateCategoryMutation.mutate({
-        categoryObject: newCategoryObject,
-      });
+      updateCategoryMutation.mutate(
+        {
+          categoryObject: newCategoryObject,
+        },
+        {
+          onSuccess: () => {
+            showActionToast({
+              type: "success",
+              action: "update",
+              itemName: newCategories[index].names[locale],
+              locale,
+            });
+          },
+          onError: (error: unknown) => {
+            showActionToast({
+              type: "error",
+              action: "update",
+              itemName: newCategories[index].names[locale],
+              locale,
+              error: error instanceof Error ? error : new Error("Unknown error"),
+            });
+          },
+        },
+      );
     }
   };
 

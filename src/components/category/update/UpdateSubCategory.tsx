@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "react-query";
 
 import { deleteCategory, updateCategory } from "@/_services";
 import { Button, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui";
+import { showActionToast } from "@/lib/utils";
 
 type UpdateSubCategoryProps = {
   category: any;
@@ -31,13 +32,43 @@ function UpdateSubCategory({
   const updateCategoryMutation = useMutation(updateCategory, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
+      showActionToast({
+        type: "success",
+        action: "update",
+        itemName: category.names[locale],
+        locale,
+      });
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "update",
+        itemName: category.names[locale],
+        locale,
+        error,
+      });
     },
   });
 
   const deleteCategoryMutation = useMutation(deleteCategory, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("categories");
+      showActionToast({
+        type: "success",
+        action: "delete",
+        itemName: category.names[locale],
+        locale,
+      });
       setOpenDialog(false);
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "delete",
+        itemName: category.names[locale],
+        locale,
+        error,
+      });
     },
   });
 

@@ -13,6 +13,7 @@ import {
   fetchSupplement,
   updateCategory,
 } from "@/_services/ada/adaMenuService";
+import { showActionToast } from "@/lib/utils";
 
 import {
   Button,
@@ -104,21 +105,48 @@ function Categories() {
       if (responseUpdateCategory) {
         setCategory(responseUpdateCategory);
         setCategoryId(responseUpdateCategory.id);
+        showActionToast({
+          type: "success",
+          action: "update",
+          itemName: responseUpdateCategory.names[locale],
+          locale,
+        });
       }
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "update",
+        itemName: category?.names[locale],
+        locale,
+        error,
+      });
     },
   });
 
   const deleteCategoryMutation = useMutation(deleteCategory, {
     onSuccess: async () => {
+      showActionToast({
+        type: "success",
+        action: "delete",
+        itemName: category?.names[locale],
+        locale,
+      });
       setCategory("");
       setCategoryId("");
-      // Reset the selected parent category
       setSelectedParentCategory("");
-      // queryClient.setQueryData(["menuItems"], null);
       setSubCategoryId("");
       setSelectedMenuId("");
-
       await queryClient.invalidateQueries("categories");
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "delete",
+        itemName: category?.names[locale],
+        locale,
+        error,
+      });
     },
   });
 

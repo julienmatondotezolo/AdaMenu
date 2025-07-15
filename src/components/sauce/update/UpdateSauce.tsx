@@ -1,9 +1,10 @@
 import { Label } from "@radix-ui/react-label";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { deleteSauceItem, updateSauceItem } from "@/_services";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, Card, CardContent, CardFooter, CardHeader, CardTitle, Input } from "../../ui";
 
@@ -13,24 +14,61 @@ type UpdateSauceProps = {
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
+interface ItemState {
+  names: {
+    [key: string]: string;
+  };
+  additionalPrice?: string;
+}
+
 function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauceProps) {
-  // const locale = useLocale();
+  const locale = useLocale();
   const text = useTranslations("Index");
-  const [itemState, setItemState] = useState<any>(selectedItem);
+  const [itemState, setItemState] = useState<ItemState>(selectedItem);
 
   const queryClient = useQueryClient();
   const textItem = "Sauce";
 
   const updateItemMutation = useMutation(updateSauceItem, {
     onSuccess: async () => {
-      // Invalidate and refetch both queries
       await queryClient.invalidateQueries("supplement");
+      showActionToast({
+        type: "success",
+        action: "update",
+        itemName: itemState.names[locale],
+        locale,
+      });
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "update",
+        itemName: itemState.names[locale],
+        locale,
+        error,
+      });
     },
   });
 
   const deleteItemMutation = useMutation(deleteSauceItem, {
     onSuccess: async () => {
       await queryClient.invalidateQueries("supplement");
+      showActionToast({
+        type: "success",
+        action: "delete",
+        itemName: itemState.names[locale],
+        locale,
+      });
+      setOpenDialog(false);
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "delete",
+        itemName: itemState.names[locale],
+        locale,
+        error,
+      });
     },
   });
 
@@ -66,7 +104,7 @@ function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauc
   const handleDeleteMenu = async () => {
     try {
       if (selectedItemId) {
-        await deleteItemMutation.mutateAsync({ menuId: selectedItemId });
+        await deleteItemMutation.mutateAsync({ itemId: selectedItemId });
         setOpenDialog(false);
       }
     } catch (error) {
@@ -94,7 +132,7 @@ function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauc
                     placeholder={value}
                     required
                     onChange={(e) =>
-                      setItemState((prev: any) => ({
+                      setItemState((prev: ItemState) => ({
                         ...prev,
                         names: {
                           ...prev.names,
@@ -114,7 +152,7 @@ function UpdateSauce({ selectedItemId, selectedItem, setOpenDialog }: UpdateSauc
                   value={itemState.additionalPrice}
                   placeholder="price"
                   onChange={(e) =>
-                    setItemState((prev: any) => ({
+                    setItemState((prev: ItemState) => ({
                       ...prev,
                       additionalPrice: e.target.value,
                     }))

@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Toaster } from "sonner";
 
 import Providers from "../providers";
 
@@ -11,5 +12,10 @@ export default function PagesLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  return <Providers locale={locale}>{children}</Providers>;
+  return (
+    <Providers locale={locale}>
+      {children}
+      <Toaster richColors position="bottom-right" />
+    </Providers>
+  );
 }

@@ -5,6 +5,7 @@ import React, { useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
 
 import { createMenuItem } from "@/_services";
+import { showActionToast } from "@/lib/utils";
 
 import { Button, Checkbox, Input, Switch } from "../../ui";
 
@@ -61,9 +62,15 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
   };
 
   const createMenuMutation = useMutation(createMenuItem, {
-    onSuccess: () => {
+    onSuccess: (response) => {
       // Invalidate all menu item queries (including those with subCategoryId)
       queryClient.invalidateQueries(["menuItems"]);
+      showActionToast({
+        type: "success",
+        action: "create",
+        itemName: nameEn,
+        locale,
+      });
       setNameEn("");
       setNameIt("");
       setNameFr("");
@@ -75,6 +82,15 @@ function CreateMenu({ subCategoryId, allergens, sidedish, supplement, items, set
       setPrice("");
       setHidden(false);
       setSelectedAllergens([]);
+    },
+    onError: (error: Error) => {
+      showActionToast({
+        type: "error",
+        action: "create",
+        itemName: nameEn,
+        locale,
+        error,
+      });
     },
   });
 
