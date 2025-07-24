@@ -4,20 +4,16 @@ import {
   Copy,
   Download,
   Edit2,
-  Grid,
   Image,
   Loader2,
   MousePointer,
   Move,
   Palette,
   Redo,
-  Ruler,
   Save,
   Type,
   Undo,
   X,
-  ZoomIn,
-  ZoomOut,
 } from "lucide-react";
 import React, { useState } from "react";
 
@@ -34,9 +30,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     project,
     editorState,
     setTool,
-    setZoom,
-    toggleGrid,
-    toggleRulers,
     saveProject,
     undo,
     redo,
@@ -50,7 +43,7 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
 
-  const { tool, canvas, ui } = editorState;
+  const { tool } = editorState;
 
   const tools = [
     { id: "select", icon: MousePointer, label: "Select" },
@@ -59,14 +52,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     { id: "background", icon: Palette, label: "Background" },
     { id: "pan", icon: Move, label: "Pan" },
   ] as const;
-
-  const handleZoomIn = () => {
-    setZoom(canvas.zoom * 1.2);
-  };
-
-  const handleZoomOut = () => {
-    setZoom(canvas.zoom / 1.2);
-  };
 
   const handleStartRename = () => {
     if (project) {
@@ -95,7 +80,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
         <Button variant="outline" size="sm" onClick={onNewProject}>
           Go to Dashboard
         </Button>
-        
         {/* Project Name with inline editing */}
         {project && (
           <>
@@ -112,7 +96,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
                       handleCancelRename();
                     }
                   }}
-                  autoFocus
                 />
                 <Button variant="outline" size="sm" onClick={handleSaveRename} className="h-8 w-8 p-0">
                   <Check className="w-3 h-3" />
@@ -171,21 +154,7 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
       {/* Right Section - View Controls */}
       <div className="flex items-center space-x-2">
         <div className="w-px h-6 bg-gray-300 mx-2" />
-        <Button variant={ui.showGrid ? "default" : "outline"} size="sm" onClick={toggleGrid} title="Toggle Grid">
-          <Grid className="w-4 h-4" />
-        </Button>
-        <Button variant={ui.showRulers ? "default" : "outline"} size="sm" onClick={toggleRulers} title="Toggle Rulers">
-          <Ruler className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-2" />
-        <Button variant="outline" size="sm" onClick={handleZoomOut}>
-          <ZoomOut className="w-4 h-4" />
-        </Button>
-        <span className="text-sm text-gray-600 min-w-[60px] text-center">{Math.round(canvas.zoom * 100)}%</span>
-        <Button variant="outline" size="sm" onClick={handleZoomIn}>
-          <ZoomIn className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-2" />
+
         <Button variant="outline" size="sm" onClick={saveProject}>
           <Save className="w-4 h-4 mr-1" />
           Save

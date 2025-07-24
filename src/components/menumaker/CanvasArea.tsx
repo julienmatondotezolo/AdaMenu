@@ -117,6 +117,11 @@ export function CanvasArea() {
     canvasRef.current.width = canvasSize.width;
     canvasRef.current.height = canvasSize.height;
 
+    // Draw rulers if enabled
+    if (ui.showRulers) {
+      drawRulers(ctx, canvasSize, canvas);
+    }
+
     // Draw grid if enabled
     if (ui.showGrid) {
       drawGrid(ctx, canvasSize, ui.gridSize * canvas.zoom);
@@ -152,6 +157,88 @@ export function CanvasArea() {
     hoveredElementId,
     backgroundImageCache,
   ]);
+
+  const drawRulers = (ctx: CanvasRenderingContext2D, size: { width: number; height: number }, canvas: any) => {
+    const rulerSize = 20;
+    const tickSize = 5;
+    const majorTickSize = 10;
+    const scaleFactor = canvas.zoom;
+    const mmPerPixel = 0.264583; // 96 DPI conversion
+
+    // Draw ruler backgrounds
+    ctx.fillStyle = "#f8f8f8";
+    // Top ruler
+    ctx.fillRect(0, 0, size.width, rulerSize);
+    // Left ruler
+    ctx.fillRect(0, 0, rulerSize, size.height);
+
+    ctx.strokeStyle = "#d0d0d0";
+    ctx.lineWidth = 0.5;
+    ctx.fillStyle = "#666";
+    ctx.font = "10px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    // Top horizontal ruler
+    const startXmm = Math.floor((-pageOffset.x * mmPerPixel) / scaleFactor / 10) * 10;
+    const endXmm = Math.ceil(((size.width - pageOffset.x) * mmPerPixel) / scaleFactor / 10) * 10;
+
+    for (let mm = startXmm; mm <= endXmm; mm += 5) {
+      const x = pageOffset.x + (mm / mmPerPixel) * scaleFactor;
+
+      if (x >= rulerSize && x <= size.width) {
+        const isMajor = mm % 10 === 0;
+        const tickHeight = isMajor ? majorTickSize : tickSize;
+
+        ctx.beginPath();
+        ctx.moveTo(x, rulerSize - tickHeight);
+        ctx.lineTo(x, rulerSize);
+        ctx.stroke();
+
+        if (isMajor && mm % 20 === 0) {
+          ctx.fillText(`${mm}`, x, rulerSize - 12);
+        }
+      }
+    }
+
+    // Left vertical ruler
+    const startYmm = Math.floor((-pageOffset.y * mmPerPixel) / scaleFactor / 10) * 10;
+    const endYmm = Math.ceil(((size.height - pageOffset.y) * mmPerPixel) / scaleFactor / 10) * 10;
+
+    ctx.save();
+    ctx.translate(10, 0);
+    ctx.rotate(-Math.PI / 2);
+
+    for (let mm = startYmm; mm <= endYmm; mm += 5) {
+      const y = pageOffset.y + (mm / mmPerPixel) * scaleFactor;
+
+      if (y >= rulerSize && y <= size.height) {
+        const isMajor = mm % 10 === 0;
+        const tickHeight = isMajor ? majorTickSize : tickSize;
+
+        ctx.beginPath();
+        ctx.moveTo(-y, rulerSize - tickHeight);
+        ctx.lineTo(-y, rulerSize);
+        ctx.stroke();
+
+        if (isMajor && mm % 20 === 0) {
+          ctx.fillText(`${mm}`, -y, rulerSize - 12);
+        }
+      }
+    }
+
+    ctx.restore();
+
+    // Draw ruler borders
+    ctx.strokeStyle = "#ccc";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, rulerSize);
+    ctx.lineTo(size.width, rulerSize);
+    ctx.moveTo(rulerSize, 0);
+    ctx.lineTo(rulerSize, size.height);
+    ctx.stroke();
+  };
 
   const drawGrid = (ctx: CanvasRenderingContext2D, size: { width: number; height: number }, gridSize: number) => {
     ctx.strokeStyle = "#e0e0e0";

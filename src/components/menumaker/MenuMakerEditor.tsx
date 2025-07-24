@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { CanvasArea } from "./CanvasArea";
+import { CenterToolbar } from "./CenterToolbar";
 import { ExportLoader } from "./ExportLoader";
 import { LayersPanel } from "./LayersPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -119,8 +120,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
         )}
 
         {/* Canvas Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden relative">
           <CanvasArea />
+          <CenterToolbar />
         </div>
 
         {/* Right Sidebar */}

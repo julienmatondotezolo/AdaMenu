@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Calendar, Check, Clock, Edit2, FileText, Folder, Plus, Trash2, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
@@ -125,11 +126,11 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
             projects.map((p) =>
               p.id === projectId
                 ? {
-                    ...p,
-                    name: editingName.trim(),
-                    updatedAt: updatedProject.updatedAt,
-                    firstPage: updatedProject.pages[0], // Update first page in case it changed
-                  }
+                  ...p,
+                  name: editingName.trim(),
+                  updatedAt: updatedProject.updatedAt,
+                  firstPage: updatedProject.pages[0], // Update first page in case it changed
+                }
                 : p,
             ),
           );
