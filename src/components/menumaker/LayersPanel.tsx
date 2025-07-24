@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
 import { Copy, Eye, EyeOff, Lock, Plus, Trash2, Unlock } from "lucide-react";
 import React from "react";
 
@@ -16,6 +18,7 @@ export function LayersPanel() {
     updateLayerVisibility,
     updateLayerLock,
     selectLayer,
+    selectElements,
   } = useMenuMakerStore();
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -42,20 +45,40 @@ export function LayersPanel() {
     updateLayerLock(currentPageId!, layerId, !locked);
   };
 
-  const handleDuplicateLayer = (layerId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    duplicateLayer(currentPageId!, layerId);
+  const handleLayerNameChange = (layerId: string, name: string) => {
+    updateLayerName(currentPageId!, layerId, name);
   };
 
-  const handleDeleteLayer = (layerId: string, e: React.MouseEvent) => {
+  const handleElementClick = (elementId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (currentPage.layers.length > 1) {
-      deleteLayer(currentPageId!, layerId);
+
+    if (e.ctrlKey || e.metaKey) {
+      // Multi-select mode
+      const currentSelection = editorState.selectedElementIds;
+
+      if (currentSelection.includes(elementId)) {
+        // Remove from selection
+        selectElements(currentSelection.filter((id) => id !== elementId));
+      } else {
+        // Add to selection
+        selectElements([...currentSelection, elementId]);
+      }
+    } else {
+      // Single select mode
+      selectElements([elementId]);
     }
   };
 
-  const handleLayerNameChange = (layerId: string, name: string) => {
-    updateLayerName(currentPageId!, layerId, name);
+  const handleDuplicateSelectedLayer = () => {
+    if (editorState.selectedLayerId) {
+      duplicateLayer(currentPageId!, editorState.selectedLayerId);
+    }
+  };
+
+  const handleDeleteSelectedLayer = () => {
+    if (editorState.selectedLayerId && currentPage.layers.length > 1) {
+      deleteLayer(currentPageId!, editorState.selectedLayerId);
+    }
   };
 
   return (
@@ -64,16 +87,36 @@ export function LayersPanel() {
       <div className="p-4 border-b border-gray-200">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-gray-900">Layers</h3>
-          <Button variant="outline" size="sm" onClick={handleAddLayer}>
-            <Plus className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center space-x-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDuplicateSelectedLayer}
+              disabled={!editorState.selectedLayerId}
+              title="Duplicate selected layer"
+            >
+              <Copy className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDeleteSelectedLayer}
+              disabled={!editorState.selectedLayerId || currentPage.layers.length <= 1}
+              title="Delete selected layer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleAddLayer}>
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Layers List */}
       <div className="flex-1 overflow-y-auto">
         {/* Render layers in reverse order (top layer first) */}
-        {[...currentPage.layers].reverse().map((layer, index) => (
+        {[...currentPage.layers].reverse().map((layer) => (
           <div
             key={layer.id}
             className={`group border-b border-gray-100 cursor-pointer transition-colors ${
@@ -125,11 +168,13 @@ export function LayersPanel() {
                   {layer.elements.map((element) => (
                     <div
                       key={element.id}
-                      className={`text-xs p-1 rounded transition-colors ${
+                      className={`text-xs p-1 rounded transition-colors cursor-pointer ${
                         editorState.selectedElementIds.includes(element.id)
                           ? "bg-blue-100 text-blue-900"
                           : "text-gray-600 hover:bg-gray-100"
                       }`}
+                      onClick={(e) => handleElementClick(element.id, e)}
+                      title="Click to select element"
                     >
                       <div className="flex items-center justify-between">
                         <span className="capitalize">
@@ -144,32 +189,6 @@ export function LayersPanel() {
                   ))}
                 </div>
               )}
-
-              {/* Layer actions (visible on hover) */}
-              <div className="absolute top-3 right-12 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="flex space-x-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-6 h-6 p-0"
-                    onClick={(e) => handleDuplicateLayer(layer.id, e)}
-                    title="Duplicate layer"
-                  >
-                    <Copy className="w-3 h-3" />
-                  </Button>
-                  {currentPage.layers.length > 1 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="w-6 h-6 p-0"
-                      onClick={(e) => handleDeleteLayer(layer.id, e)}
-                      title="Delete layer"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         ))}

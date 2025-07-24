@@ -1,7 +1,10 @@
-import React, { useEffect, useRef } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
+import { BackgroundPanel } from "./BackgroundPanel";
 import { CanvasArea } from "./CanvasArea";
+import { ExportLoader } from "./ExportLoader";
 import { LayersPanel } from "./LayersPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
 import { ThumbnailsPanel } from "./ThumbnailsPanel";
@@ -15,6 +18,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const { project, currentPageId, editorState, saveProject } = useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [layersCollapsed, setLayersCollapsed] = useState(false);
+  const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
+  const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -80,6 +86,11 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
   const currentPage = project.pages.find((page) => page.id === currentPageId);
 
+  const selectedElements =
+    currentPage?.layers
+      .flatMap((layer) => layer.elements)
+      .filter((element) => editorState.selectedElementIds.includes(element.id)) || [];
+
   if (!currentPage) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -113,22 +124,124 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-80 flex-shrink-0 border-l border-gray-300 bg-white flex flex-col">
-          {/* Layers Panel */}
-          {editorState.ui.layersPanelOpen && (
-            <div className="flex-1 border-b border-gray-300">
-              <LayersPanel />
-            </div>
-          )}
+        <div className="w-80 flex-shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto">
+            {/* Layers Panel */}
+            {editorState.ui.layersPanelOpen && (
+              <div className="border-b border-gray-300">
+                {/* Layers Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setLayersCollapsed(!layersCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setLayersCollapsed(!layersCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!layersCollapsed}
+                  aria-controls="layers-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Layers</h3>
+                  <div className="flex items-center">
+                    {layersCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
 
-          {/* Properties Panel */}
-          {editorState.ui.propertiesPanelOpen && (
-            <div className="flex-1">
-              <PropertiesPanel />
-            </div>
-          )}
+                {/* Layers Content */}
+                {!layersCollapsed && (
+                  <div id="layers-content" className="max-h-96 overflow-y-auto">
+                    <LayersPanel />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Properties Panel */}
+            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && (
+              <div>
+                {/* Properties Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setPropertiesCollapsed(!propertiesCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!propertiesCollapsed}
+                  aria-controls="properties-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Properties</h3>
+                  <div className="flex items-center">
+                    {propertiesCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Properties Content */}
+                {!propertiesCollapsed && (
+                  <div id="properties-content" className="overflow-y-auto">
+                    <PropertiesPanel />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Background Panel */}
+            {editorState.ui.layersPanelOpen && (
+              <div className="border-b border-gray-300">
+                {/* Background Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setBackgroundCollapsed(!backgroundCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!backgroundCollapsed}
+                  aria-controls="background-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Background</h3>
+                  <div className="flex items-center">
+                    {backgroundCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Background Content */}
+                {!backgroundCollapsed && (
+                  <div id="background-content" className="max-h-96 overflow-y-auto">
+                    <BackgroundPanel />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Export Loader */}
+      <ExportLoader />
     </div>
   );
 }

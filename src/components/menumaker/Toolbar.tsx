@@ -1,12 +1,13 @@
 import {
   Clipboard,
   Copy,
+  Download,
   Grid,
   Image,
+  Loader2,
   MousePointer,
   Move,
   Palette,
-  Plus,
   Redo,
   Ruler,
   Save,
@@ -25,8 +26,20 @@ interface ToolbarProps {
 }
 
 export function Toolbar({ onNewProject }: ToolbarProps) {
-  const { editorState, setTool, setZoom, toggleGrid, toggleRulers, saveProject, undo, redo, copy, paste, addPage } =
-    useMenuMakerStore();
+  const {
+    editorState,
+    setTool,
+    setZoom,
+    toggleGrid,
+    toggleRulers,
+    saveProject,
+    undo,
+    redo,
+    copy,
+    paste,
+    exportToPDF,
+    isExportingPDF,
+  } = useMenuMakerStore();
 
   const { tool, canvas, ui } = editorState;
 
@@ -46,10 +59,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     setZoom(canvas.zoom / 1.2);
   };
 
-  const handleAddPage = () => {
-    addPage();
-  };
-
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
       {/* Left Section - File Actions */}
@@ -60,6 +69,10 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
         <Button variant="outline" size="sm" onClick={saveProject}>
           <Save className="w-4 h-4 mr-1" />
           Save
+        </Button>
+        <Button variant="outline" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
+          {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+          {isExportingPDF ? "Exporting..." : "Export"}
         </Button>
         <div className="w-px h-6 bg-gray-300 mx-2" />
         <Button variant="outline" size="sm" onClick={undo}>
@@ -94,10 +107,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
 
       {/* Right Section - View Controls */}
       <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm" onClick={handleAddPage}>
-          <Plus className="w-4 h-4 mr-1" />
-          Page
-        </Button>
         <div className="w-px h-6 bg-gray-300 mx-2" />
         <Button variant={ui.showGrid ? "default" : "outline"} size="sm" onClick={toggleGrid} title="Toggle Grid">
           <Grid className="w-4 h-4" />

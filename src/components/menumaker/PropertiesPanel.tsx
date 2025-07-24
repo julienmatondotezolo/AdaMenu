@@ -1,8 +1,8 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
@@ -32,34 +32,7 @@ export function PropertiesPanel() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h3 className="font-semibold text-gray-900">Properties</h3>
-      </div>
-
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Page Properties */}
-        <div>
-          <h4 className="text-sm font-semibold text-gray-900 mb-3">Page</h4>
-          <div className="space-y-3">
-            <div>
-              <Label htmlFor="page-bg-color">Background Color</Label>
-              <div className="flex mt-1">
-                <Input
-                  id="page-bg-color"
-                  type="color"
-                  value={currentPage.backgroundColor}
-                  onChange={(e) => handlePageBackgroundChange(e.target.value)}
-                  className="w-full"
-                />
-              </div>
-            </div>
-            <div className="text-xs text-gray-500">
-              Format: {currentPage.format.name} ({currentPage.format.printWidth}×{currentPage.format.printHeight}mm)
-            </div>
-          </div>
-        </div>
-
         {/* Element Properties */}
         {selectedElements.length > 0 && (
           <div>

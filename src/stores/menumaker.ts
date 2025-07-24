@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-unused-vars */
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -8,12 +10,15 @@ interface MenuMakerStore {
   project: MenuProject | null;
   currentPageId: string | null;
   editorState: EditorState;
+  isExportingPDF: boolean;
 
   // Actions for project management
   createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => void;
   loadProject: (project: MenuProject) => void;
   saveProject: () => void;
+  clearProject: () => void;
   updateProjectName: (name: string) => void;
+  exportToPDF: () => Promise<void>;
 
   // Actions for page management
   addPage: (format?: string) => void;
@@ -123,7 +128,7 @@ const createDefaultEditorState = (): EditorState => ({
     future: [],
   },
   canvas: {
-    zoom: 0.5,
+    zoom: 0.25,
     offsetX: 0,
     offsetY: 0,
     width: 800,
@@ -147,6 +152,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     project: null,
     currentPageId: null,
     editorState: createDefaultEditorState(),
+    isExportingPDF: false,
 
     createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => {
       const selectedFormat = format || "A4";
@@ -209,6 +215,14 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
         set({ project: updatedProject });
       }
+    },
+
+    clearProject: () => {
+      set({
+        project: null,
+        currentPageId: null,
+        editorState: createDefaultEditorState(),
+      });
     },
 
     updateProjectName: (name: string) => {
@@ -421,9 +435,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         const updatedPages = project.pages.map((page) =>
           page.id === pageId
             ? {
-                ...page,
-                backgroundColor: backgroundColor ?? page.backgroundColor,
-                backgroundImage: backgroundImage ?? page.backgroundImage,
+              ...page,
+              backgroundColor: backgroundColor ?? page.backgroundColor,
+              backgroundImage: backgroundImage ?? page.backgroundImage,
             }
             : page,
         );
@@ -498,11 +512,17 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
             if (layerIndex !== -1) {
               const originalLayer = page.layers[layerIndex];
-              const duplicatedLayer = {
-                ...JSON.parse(JSON.stringify(originalLayer)),
+              const duplicatedLayer = JSON.parse(JSON.stringify(originalLayer)) as Layer;
+              
+              // Generate new ID for the layer
+              duplicatedLayer.id = generateId();
+              duplicatedLayer.name = `${originalLayer.name} Copy`;
+              
+              // Generate new IDs for all elements in the duplicated layer
+              duplicatedLayer.elements = duplicatedLayer.elements.map((element: MenuElement) => ({
+                ...element,
                 id: generateId(),
-                name: `${originalLayer.name} Copy`,
-              };
+              }));
 
               const updatedLayers = [...page.layers];
 
@@ -1185,6 +1205,152 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             });
           }
         }
+      }
+    },
+
+    exportToPDF: async () => {
+      const { project } = get();
+
+      if (!project) {
+        console.warn("No project to export");
+        return;
+      }
+
+      // Only run on client side
+      if (typeof window === "undefined") {
+        console.warn("PDF export only available on client side");
+        return;
+      }
+
+      // Set loading state
+      set({ isExportingPDF: true });
+
+      try {
+        // Dynamic import to avoid server-side issues
+        const jsPDF = (await import("jspdf")).default;
+
+        // Create PDF with custom dimensions based on the first page format
+        const firstPage = project.pages[0];
+
+        if (!firstPage) return;
+
+        const pageWidth = firstPage.format.printWidth;
+        const pageHeight = firstPage.format.printHeight;
+
+        const pdf = new jsPDF({
+          orientation: pageWidth > pageHeight ? "landscape" : "portrait",
+          unit: "mm",
+          format: [pageWidth, pageHeight],
+          putOnlyUsedFonts: true,
+          floatPrecision: 16,
+        });
+
+        // Generate high-quality canvas images for each page
+        for (let i = 0; i < project.pages.length; i++) {
+          const page = project.pages[i];
+
+          if (i > 0) {
+            // Add new page for subsequent pages
+            pdf.addPage([page.format.printWidth, page.format.printHeight]);
+          }
+
+          // Create a high-resolution canvas to render the page
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) continue;
+
+          // Set high resolution for quality (300 DPI)
+          const scaleFactor = 3; // Higher resolution
+
+          canvas.width = page.format.width * scaleFactor;
+          canvas.height = page.format.height * scaleFactor;
+
+          ctx.scale(scaleFactor, scaleFactor);
+
+          // Clear canvas
+          ctx.clearRect(0, 0, page.format.width, page.format.height);
+
+          // Draw page background
+          ctx.fillStyle = page.backgroundColor;
+          ctx.fillRect(0, 0, page.format.width, page.format.height);
+
+          // Draw background image if available
+          if (page.backgroundImage) {
+            try {
+              const img = new Image();
+
+              await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = reject;
+                img.src = page.backgroundImage!;
+              });
+              ctx.drawImage(img, 0, 0, page.format.width, page.format.height);
+            } catch (error) {
+              console.warn("Failed to load background image for page", i + 1);
+            }
+          }
+
+          // Draw all elements from all layers
+          for (const layer of page.layers) {
+            if (!layer.visible) continue;
+
+            for (const element of layer.elements) {
+              if (!element.visible) continue;
+
+              ctx.save();
+              ctx.globalAlpha = element.opacity * layer.opacity;
+
+              if (element.type === "text") {
+                // Draw text element
+                ctx.font = `${element.fontStyle} ${element.fontSize}px ${element.fontFamily}`;
+                ctx.fillStyle = element.fill;
+                ctx.textAlign = element.align as "left" | "center" | "right" | "start" | "end";
+                ctx.fillText(element.content, element.x, element.y + element.fontSize);
+              } else if (element.type === "image" && (element as any).src) {
+                // Draw image element (if src is available)
+                try {
+                  const img = new Image();
+
+                  await new Promise<void>((resolve, reject) => {
+                    img.onload = () => resolve();
+                    img.onerror = reject;
+                    img.src = (element as any).src;
+                  });
+                  ctx.drawImage(img, element.x, element.y, element.width, element.height);
+                } catch (error) {
+                  // Draw placeholder for failed images
+                  ctx.fillStyle = "#f0f0f0";
+                  ctx.fillRect(element.x, element.y, element.width, element.height);
+                  ctx.strokeStyle = "#ccc";
+                  ctx.strokeRect(element.x, element.y, element.width, element.height);
+                  ctx.fillStyle = "#666";
+                  ctx.font = "14px Arial";
+                  ctx.textAlign = "center";
+                  ctx.fillText("Image", element.x + element.width / 2, element.y + element.height / 2);
+                }
+              }
+
+              ctx.restore();
+            }
+          }
+
+          // Convert canvas to image and add to PDF
+          const imageData = canvas.toDataURL("image/jpeg", 1.0);
+
+          pdf.addImage(imageData, "JPEG", 0, 0, page.format.printWidth, page.format.printHeight);
+        }
+
+        // Save the PDF
+        const fileName = `${project.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_menu.pdf`;
+
+        pdf.save(fileName);
+      } catch (error) {
+        console.error("Failed to export PDF:", error);
+        alert("Failed to export PDF. Please try again.");
+      } finally {
+        // Reset loading state
+        set({ isExportingPDF: false });
       }
     },
   })),
