@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 "use client";
 
 import { useLocale } from "next-intl";
