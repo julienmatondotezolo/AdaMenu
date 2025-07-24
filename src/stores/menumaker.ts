@@ -229,13 +229,14 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       const { project } = get();
 
       if (project) {
-        set({
-          project: {
-            ...project,
-            name,
-            updatedAt: new Date().toISOString(),
-          },
-        });
+        const updatedProject = {
+          ...project,
+          name,
+          updatedAt: new Date().toISOString(),
+        };
+
+        localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
+        set({ project: updatedProject });
       }
     },
 

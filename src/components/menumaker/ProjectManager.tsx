@@ -5,6 +5,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { MenuProject } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { PageThumbnail } from "./PageThumbnail";
 
 interface ProjectManagerProps {
   onCreateNew: () => void;
@@ -18,6 +19,7 @@ interface ProjectInfo {
   updatedAt: string;
   pageCount: number;
   thumbnail?: string;
+  firstPage?: any; // Store the first page for preview
 }
 
 export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerProps) {
@@ -50,6 +52,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                 updatedAt: project.updatedAt,
                 pageCount: project.pages.length,
                 thumbnail: project.pages[0]?.thumbnail,
+                firstPage: project.pages[0], // Store the first page for preview
               });
             }
           } catch (error) {
@@ -120,7 +123,14 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           // Update local state
           setProjects(
             projects.map((p) =>
-              p.id === projectId ? { ...p, name: editingName.trim(), updatedAt: updatedProject.updatedAt } : p,
+              p.id === projectId
+                ? {
+                    ...p,
+                    name: editingName.trim(),
+                    updatedAt: updatedProject.updatedAt,
+                    firstPage: updatedProject.pages[0], // Update first page in case it changed
+                  }
+                : p,
             ),
           );
         }
@@ -166,7 +176,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`bg-white rounded-lg border-2 transition-all cursor-pointer hover:shadow-lg ${
+              className={`bg-white rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg overflow-hidden ${
                 selectedProject === project.id ? "border-blue-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
               }`}
               onClick={() => setSelectedProject(project.id)}
@@ -181,17 +191,15 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
               aria-label={`Select project: ${project.name}`}
             >
               {/* Project Thumbnail */}
-              <div className="aspect-[3/4] bg-gray-100 rounded-t-lg flex items-center justify-center overflow-hidden">
-                {project.thumbnail ? (
-                  <img
-                    src={project.thumbnail}
-                    alt={`${project.name} thumbnail`}
-                    className="w-full h-full object-cover"
-                  />
+              <div className="h-64 bg-gray-100 rounded-t-lg flex items-center justify-center overflow-hidden">
+                {project.firstPage ? (
+                  <div className="w-full h-full">
+                    <PageThumbnail page={project.firstPage} width={240} height={128} />
+                  </div>
                 ) : (
                   <div className="text-center">
-                    <FileText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">No preview</p>
+                    <FileText className="w-8 h-8 text-gray-400 mx-auto mb-1" />
+                    <p className="text-xs text-gray-500">No preview</p>
                   </div>
                 )}
               </div>

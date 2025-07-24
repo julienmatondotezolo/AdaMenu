@@ -5,6 +5,7 @@ import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Button } from "../ui/button";
+import { PageThumbnail } from "./PageThumbnail";
 
 export function ThumbnailsPanel() {
   const { project, currentPageId, setCurrentPage, addPage, deletePage, duplicatePage, reorderPages } =
@@ -99,18 +100,18 @@ export function ThumbnailsPanel() {
             {/* Thumbnail */}
             <div className="p-3">
               <div
-                className="bg-white border border-gray-200 rounded shadow-sm mx-auto"
+                className="bg-white border border-gray-200 rounded shadow-sm mx-auto overflow-hidden"
                 style={{
                   width: "160px",
-                  height: `${(160 * page.format.height) / page.format.width}px`,
+                  height: `${Math.min((160 * page.format.height) / page.format.width, 200)}px`,
                   maxHeight: "200px",
-                  backgroundColor: page.backgroundColor,
                 }}
               >
-                {/* Page content preview would go here */}
-                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
-                  {page.layers.reduce((total, layer) => total + layer.elements.length, 0)} elements
-                </div>
+                <PageThumbnail
+                  page={page}
+                  width={160}
+                  height={Math.min((160 * page.format.height) / page.format.width, 200)}
+                />
               </div>
 
               {/* Page Info */}
