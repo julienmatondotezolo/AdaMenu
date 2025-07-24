@@ -5,6 +5,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, Tool } from "../types/menumaker";
+import { MenuData, Category } from "../types/adamenudata";
 
 interface MenuMakerStore {
   // Project state
@@ -13,13 +14,23 @@ interface MenuMakerStore {
   editorState: EditorState;
   isExportingPDF: boolean;
 
+  // Menu data state
+  menuData: MenuData;
+
   // Actions for project management
   createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => void;
   loadProject: (project: MenuProject) => void;
   saveProject: () => void;
   clearProject: () => void;
+  cleanupOldProjects: () => void;
   updateProjectName: (name: string) => void;
   exportToPDF: () => Promise<void>;
+
+  // Actions for menu data management
+  setMenuData: (categories: Category[]) => void;
+  setMenuLoading: (isLoading: boolean) => void;
+  setMenuError: (error: string | null) => void;
+  clearMenuData: () => void;
 
   // Actions for page management
   addPage: (format?: string) => void;
@@ -140,6 +151,14 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     editorState: createDefaultEditorState(),
     isExportingPDF: false,
 
+    // Menu data state
+    menuData: {
+      categories: [],
+      isLoading: false,
+      error: null,
+      isLoaded: false,
+    },
+
     createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => {
       const selectedFormat = format || "A4";
       let pageFormat = PAGE_FORMATS[selectedFormat];
@@ -198,8 +217,29 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           updatedAt: new Date().toISOString(),
         };
 
-        localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-        set({ project: updatedProject });
+        try {
+          localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
+          set({ project: updatedProject });
+        } catch (error) {
+          if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+            console.warn('LocalStorage quota exceeded. Attempting to clean up old projects...');
+            
+            // Try to clean up old projects and retry
+            get().cleanupOldProjects();
+            
+            try {
+              localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
+              set({ project: updatedProject });
+              console.info('Project saved successfully after cleanup.');
+            } catch (retryError) {
+              console.error('Failed to save project even after cleanup:', retryError);
+              alert('Storage full! Please delete some old projects to continue saving.');
+            }
+          } else {
+            console.error('Failed to save project:', error);
+            alert('Failed to save project. Please try again.');
+          }
+        }
       }
     },
 
@@ -209,6 +249,46 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         currentPageId: null,
         editorState: createDefaultEditorState(),
       });
+    },
+
+    cleanupOldProjects: () => {
+      try {
+        const projectKeys = Object.keys(localStorage).filter(key => key.startsWith('menumaker_project_'));
+        
+        if (projectKeys.length <= 5) {
+          // Keep at least 5 projects, no cleanup needed
+          return;
+        }
+
+        // Get projects with their timestamps
+        const projects = projectKeys.map(key => {
+          try {
+            const projectData = JSON.parse(localStorage.getItem(key) || '{}');
+            return {
+              key,
+              updatedAt: projectData.updatedAt || projectData.createdAt || '1970-01-01T00:00:00.000Z',
+              size: new Blob([localStorage.getItem(key) || '']).size
+            };
+          } catch {
+            return { key, updatedAt: '1970-01-01T00:00:00.000Z', size: 0 };
+          }
+        });
+
+        // Sort by updatedAt (oldest first) and remove the oldest projects
+        projects.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
+        
+        // Remove oldest projects until we have removed at least 3 projects
+        const projectsToRemove = projects.slice(0, Math.max(3, projects.length - 5));
+        
+        projectsToRemove.forEach(project => {
+          localStorage.removeItem(project.key);
+          console.info(`Removed old project: ${project.key}`);
+        });
+
+        console.info(`Cleaned up ${projectsToRemove.length} old projects to free storage space.`);
+      } catch (error) {
+        console.error('Failed to cleanup old projects:', error);
+      }
     },
 
     updateProjectName: (name: string) => {
@@ -1305,9 +1385,19 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
                  if (dataElement.dataType === "category" && dataElement.categoryData) {
                    // Show the actual category name
-                   displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "CATEGORY";
+                   displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Select category";
                  } else if (dataElement.dataType === "category" && dataElement.dataId) {
-                   displayText = "CATEGORY";
+                   displayText = "Select category";
+                 } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
+                   // Show the actual subcategory name
+                   displayText = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Select subcategory";
+                 } else if (dataElement.dataType === "subcategory" && dataElement.dataId) {
+                   displayText = "Select subcategory";
+                 } else if (dataElement.dataType === "menuitem" && dataElement.menuItemData) {
+                   // Show the actual menu item name
+                   displayText = dataElement.menuItemData.names?.en || dataElement.menuItemData.name || "Select menu item";
+                 } else if (dataElement.dataType === "menuitem" && dataElement.dataId) {
+                   displayText = "Select menu item";
                  } else {
                    displayText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
                  }
@@ -1339,6 +1429,20 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         // Reset loading state
         set({ isExportingPDF: false });
       }
+    },
+
+    // Actions for menu data management
+    setMenuData: (categories: Category[]) => {
+      set({ menuData: { ...get().menuData, categories, isLoaded: true } });
+    },
+    setMenuLoading: (isLoading: boolean) => {
+      set({ menuData: { ...get().menuData, isLoading } });
+    },
+    setMenuError: (error: string | null) => {
+      set({ menuData: { ...get().menuData, error } });
+    },
+    clearMenuData: () => {
+      set({ menuData: { categories: [], isLoading: false, error: null, isLoaded: false } });
     },
   })),
 );

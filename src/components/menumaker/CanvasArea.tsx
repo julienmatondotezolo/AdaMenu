@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+import { fetchMenuItemByCategoryId } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
 
@@ -32,6 +33,69 @@ export function CanvasArea() {
   >({});
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
+
+  // Function to draw menu items list for menuitem data type
+  const drawMenuItemsList = async (ctx: CanvasRenderingContext2D, element: any, x: number, y: number, canvas: any) => {
+    try {
+      const menuItems = await fetchMenuItemByCategoryId({ categoryId: element.subcategoryData.id });
+
+      if (menuItems && menuItems.length > 0) {
+        ctx.fillStyle = element.textColor || "#333";
+        const fontSize = (element.fontSize || 12) * canvas.zoom;
+
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+
+        const padding = 10 * canvas.zoom;
+        const lineHeight = fontSize * 1.2;
+        let currentY = y + padding;
+
+        // Draw subcategory title
+        ctx.font = `bold ${fontSize * 1.2}px Arial`;
+        const subcategoryTitle = element.subcategoryData.names?.en || element.subcategoryData.name || "Menu Items";
+
+        ctx.fillText(subcategoryTitle, x + padding, currentY);
+        currentY += lineHeight * 1.5;
+
+        // Draw menu items
+        ctx.font = `${fontSize}px Arial`;
+        menuItems.forEach((menuItem: any) => {
+          if (currentY < y + element.height - padding) {
+            // Check if we're still within the element bounds
+            const itemName = menuItem.names?.en || menuItem.name || "Unnamed Item";
+            const price = menuItem.price ? `€${menuItem.price.toFixed(2)}` : "";
+            const itemText = price ? `${itemName} - ${price}` : itemName;
+
+            ctx.fillText(itemText, x + padding, currentY);
+            currentY += lineHeight;
+          }
+        });
+      } else {
+        // No menu items available
+        ctx.fillStyle = element.textColor || "#333";
+        const fontSize = (element.fontSize || 12) * canvas.zoom;
+
+        ctx.font = `${fontSize}px Arial`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        const padding = 10 * canvas.zoom;
+
+        ctx.fillText("No menu items available", x + padding, y + padding);
+      }
+    } catch (error) {
+      // Error fetching menu items
+      ctx.fillStyle = element.textColor || "#333";
+      const fontSize = (element.fontSize || 12) * canvas.zoom;
+
+      ctx.font = `${fontSize}px Arial`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+      const padding = 10 * canvas.zoom;
+
+      ctx.fillText("Error loading menu items", x + padding, y + padding);
+    }
+  };
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -233,22 +297,37 @@ export function CanvasArea() {
     ctx.textAlign = element.align as any;
     ctx.globalAlpha = element.opacity;
 
+    // Measure text to get actual dimensions
+    const textMetrics = ctx.measureText(element.content);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize;
+
+    // Calculate text baseline position
+    const textBaseline = y + fontSize * 0.8; // Adjust baseline to be more accurate
+
     // Draw text
-    ctx.fillText(element.content, x, y + fontSize);
+    ctx.fillText(element.content, x, textBaseline);
 
     // Draw selection border and resize handles
     if (isSelected) {
       ctx.strokeStyle = "#0066cc";
       ctx.lineWidth = 2;
       ctx.globalAlpha = 1;
-      const textMetrics = ctx.measureText(element.content);
-      const selectionWidth = textMetrics.width + 4;
-      const selectionHeight = fontSize + 4;
+      
+      // Calculate bounding box that properly wraps the text
+      const selectionPadding = 2;
+      const selectionX = x - selectionPadding;
+      const selectionY = y - selectionPadding;
+      const selectionWidth = textWidth + (selectionPadding * 2);
+      const selectionHeight = textHeight + (selectionPadding * 2);
 
-      ctx.strokeRect(x - 2, y, selectionWidth, selectionHeight);
+      // Draw selection border
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(selectionX, selectionY, selectionWidth, selectionHeight);
+      ctx.setLineDash([]);
 
       // Draw resize handles for text elements
-      drawResizeHandles(ctx, x - 2, y, selectionWidth, selectionHeight);
+      drawResizeHandles(ctx, selectionX, selectionY, selectionWidth, selectionHeight);
     }
 
     ctx.globalAlpha = 1;
@@ -350,14 +429,20 @@ export function CanvasArea() {
 
     if (element.dataType === "category" && element.categoryData) {
       // Show the actual category name
-      displayText = element.categoryData.names?.en || element.categoryData.name || "CATEGORY";
+      displayText = element.categoryData.names?.en || element.categoryData.name || "Select category";
     } else if (element.dataType === "category" && element.dataId) {
-      displayText = "CATEGORY";
+      displayText = "Select category";
     } else if (element.dataType === "subcategory" && element.subcategoryData) {
       // Show the actual subcategory name
-      displayText = element.subcategoryData.names?.en || element.subcategoryData.name || "SUBCATEGORY";
+      displayText = element.subcategoryData.names?.en || element.subcategoryData.name || "Select subcategory";
     } else if (element.dataType === "subcategory" && element.dataId) {
-      displayText = "SUBCATEGORY";
+      displayText = "Select subcategory";
+    } else if (element.dataType === "menuitem" && element.subcategoryData) {
+      // Draw menu items list instead of simple text
+      drawMenuItemsList(ctx, element, x, y, canvas);
+      return; // Early return since we've already drawn the content
+    } else if (element.dataType === "menuitem") {
+      displayText = "Select category and subcategory";
     } else {
       displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
     }
@@ -548,14 +633,42 @@ export function CanvasArea() {
 
     const elementX = tempPos ? tempPos.x : element.x;
     const elementY = tempPos ? tempPos.y : element.y;
-    const elementWidth = tempDim ? tempDim.width : element.width;
-    const elementHeight = tempDim ? tempDim.height : element.height;
 
     // Convert to screen coordinates
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
+
+    let width, height;
+
+    // For text elements, calculate dimensions based on actual text size
+    if (element.type === "text") {
+      const canvasElement = canvasRef.current;
+      if (canvasElement) {
+        const ctx = canvasElement.getContext("2d");
+        if (ctx) {
+          const fontSize = (element as any).fontSize * canvas.zoom;
+          ctx.font = `${(element as any).fontStyle} ${fontSize}px ${(element as any).fontFamily}`;
+          const textMetrics = ctx.measureText((element as any).content);
+          const selectionPadding = 2;
+          width = textMetrics.width + (selectionPadding * 2);
+          height = fontSize + (selectionPadding * 2);
+        } else {
+          // Fallback if context not available
+          width = element.width * canvas.zoom;
+          height = element.height * canvas.zoom;
+        }
+      } else {
+        // Fallback if canvas not available
+        width = element.width * canvas.zoom;
+        height = element.height * canvas.zoom;
+      }
+    } else {
+      // For non-text elements, use normal dimensions
+      const elementWidth = tempDim ? tempDim.width : element.width;
+      const elementHeight = tempDim ? tempDim.height : element.height;
+      width = elementWidth * canvas.zoom;
+      height = elementHeight * canvas.zoom;
+    }
 
     const handleSize = 12;
     const handleRadius = handleSize / 2;
@@ -624,16 +737,24 @@ export function CanvasArea() {
     const y = pageOffset.y + elementY * canvas.zoom;
     const fontSize = hoveredElement.fontSize * canvas.zoom;
 
-    // Calculate text width
+    // Calculate text dimensions
     ctx.font = `${hoveredElement.fontStyle} ${fontSize}px ${hoveredElement.fontFamily}`;
     const textMetrics = ctx.measureText(hoveredElement.content);
     const textWidth = textMetrics.width;
+    const textHeight = fontSize;
+
+    // Calculate proper bounding box position (matching the selection box)
+    const selectionPadding = 2;
+    const hoverX = x - selectionPadding;
+    const hoverY = y - selectionPadding;
+    const hoverWidth = textWidth + (selectionPadding * 2);
+    const hoverHeight = textHeight + (selectionPadding * 2);
 
     // Draw hover bounding box
     ctx.strokeStyle = "#ff6b35";
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
-    ctx.strokeRect(x - 2, y, textWidth + 4, fontSize + 4);
+    ctx.strokeRect(hoverX, hoverY, hoverWidth, hoverHeight);
     ctx.setLineDash([]);
   };
 
@@ -666,16 +787,41 @@ export function CanvasArea() {
         const elementX = tempPos ? tempPos.x : element.x;
         const elementY = tempPos ? tempPos.y : element.y;
 
-        // Check if click is within text element bounds
-        const textHeight = element.fontSize || 16;
-        const textWidth = element.content
-          ? element.content.length * (element.fontSize || 16) * 0.6
-          : element.width || 0;
+        // Check if click is within text element bounds using proper text measurement
+        const canvasElement = canvasRef.current;
+        let textWidth, textHeight;
 
-        const elementRight = elementX + textWidth;
-        const elementBottom = elementY + textHeight;
+        if (canvasElement) {
+          const ctx = canvasElement.getContext("2d");
+          if (ctx) {
+            // Measure actual text dimensions
+            ctx.font = `${element.fontStyle} ${element.fontSize}px ${element.fontFamily}`;
+            const textMetrics = ctx.measureText(element.content);
+            const selectionPadding = 2;
+            textWidth = textMetrics.width + (selectionPadding * 2);
+            textHeight = element.fontSize + (selectionPadding * 2);
+          } else {
+            // Fallback to rough approximation
+            textHeight = element.fontSize || 16;
+            textWidth = element.content
+              ? element.content.length * (element.fontSize || 16) * 0.6
+              : element.width || 0;
+          }
+        } else {
+          // Fallback to rough approximation
+          textHeight = element.fontSize || 16;
+          textWidth = element.content
+            ? element.content.length * (element.fontSize || 16) * 0.6
+            : element.width || 0;
+        }
 
-        if (pageX >= elementX && pageY >= elementY && pageX <= elementRight && pageY <= elementBottom) {
+        // Adjust for selection padding positioning (matching the bounding box)
+        const adjustedX = elementX;
+        const adjustedY = elementY;
+        const elementRight = adjustedX + textWidth;
+        const elementBottom = adjustedY + textHeight;
+
+        if (pageX >= adjustedX && pageY >= adjustedY && pageX <= elementRight && pageY <= elementBottom) {
           return element.id;
         }
       }

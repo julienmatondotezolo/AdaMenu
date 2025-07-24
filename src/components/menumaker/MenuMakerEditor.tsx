@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
+import { fetchCompleteMenu } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { CanvasArea } from "./CanvasArea";
@@ -17,12 +18,52 @@ interface MenuMakerEditorProps {
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { project, currentPageId, editorState, saveProject } = useMenuMakerStore();
+  const { 
+    project, 
+    currentPageId, 
+    editorState, 
+    saveProject,
+    menuData,
+    setMenuData,
+    setMenuLoading,
+    setMenuError
+  } = useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [layersCollapsed, setLayersCollapsed] = useState(false);
   const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
+
+  // Ref to track if menu has been fetched to prevent multiple calls
+  const menuFetched = useRef(false);
+
+  // Fetch menu data on component mount (only once)
+  useEffect(() => {
+    const loadMenuData = async () => {
+      // Only fetch if not already loaded and not currently loading
+      if (menuFetched.current || menuData.isLoaded || menuData.isLoading) return;
+      
+      menuFetched.current = true;
+      setMenuLoading(true);
+      setMenuError(null);
+
+      try {
+        const menuResponse = await fetchCompleteMenu();
+        if (menuResponse) {
+          setMenuData(menuResponse);
+        } else {
+          setMenuError("Failed to fetch menu data");
+        }
+      } catch (error) {
+        console.error("Error fetching menu data:", error);
+        setMenuError(error instanceof Error ? error.message : "Unknown error occurred");
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    loadMenuData();
+  }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -206,43 +247,6 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
               </div>
             )}
 
-            {/* Background Panel (Removed - use Data Panel instead) */}
-            {false && editorState.tool === "background" && (
-              <div className="border-b border-gray-300">
-                {/* Background Header */}
-                <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
-                  onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setBackgroundCollapsed(!backgroundCollapsed);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-expanded={!backgroundCollapsed}
-                  aria-controls="background-content"
-                >
-                  <h3 className="font-semibold text-gray-900">Background</h3>
-                  <div className="flex items-center">
-                    {backgroundCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Background Content */}
-                {!backgroundCollapsed && (
-                  <div id="background-content" className="max-h-96 overflow-y-auto">
-                    <BackgroundPanel />
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Data Panel - shown when data tool is selected OR when data element is selected */}
             {(editorState.tool === "data" || hasSelectedDataElement) && (
               <div className="border-b border-gray-300">
@@ -284,6 +288,41 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 {editorState.tool === "data" && !hasSelectedDataElement && <DataPanel />}
               </div>
             )}
+
+            {/* Background Panel (Removed - use Data Panel instead) */}
+            <div className="border-b border-gray-300">
+                {/* Background Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setBackgroundCollapsed(!backgroundCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!backgroundCollapsed}
+                  aria-controls="background-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Background</h3>
+                  <div className="flex items-center">
+                    {backgroundCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Background Content */}
+                {!backgroundCollapsed && (
+                  <div id="background-content" className="max-h-96 overflow-y-auto">
+                    <BackgroundPanel />
+                  </div>
+                )}
+              </div>
           </div>
         </div>
       </div>

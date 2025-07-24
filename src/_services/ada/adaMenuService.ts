@@ -116,6 +116,27 @@ export const toggleCategoryVisibility = async ({ categoryId, hidden }: { categor
 /* ================================= MENU =================================== */
 /* ========================================================================== */
 
+export async function fetchCompleteMenu(): Promise<any> {
+  try {
+    const responseMenu: Response = await fetch(adaMenuUrl + `/menu`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        // Authorization: `Bearer ${session.session.user.token}`,
+        "ngrok-skip-browser-warning": "1",
+      },
+    });
+
+    if (responseMenu.ok) {
+      return responseMenu.json();
+    } else {
+      throw responseMenu;
+    }
+  } catch (error) {
+    console.error("Impossible to fetch complete menu:", error);
+  }
+}
+
 export async function fetchMenuItemByCategoryId({ categoryId }: { categoryId: string }): Promise<any> {
   try {
     const responseMenuItem: Response = await fetch(adaMenuUrl + `/menu-item/category/${categoryId}`, {

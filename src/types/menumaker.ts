@@ -116,6 +116,7 @@ export interface DataElement extends BaseElement {
   dataId?: string;
   categoryData?: any; // Store the full category data
   subcategoryData?: any; // Store the full subcategory data
+  menuItemData?: any; // Store the full menu item data
   backgroundColor: string;
   borderColor: string;
   borderSize: number;
