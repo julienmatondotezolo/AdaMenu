@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
 import { create } from "zustand";
@@ -60,11 +61,6 @@ interface MenuMakerStore {
   resetCanvasView: () => void;
 
   // Actions for UI state
-  toggleGrid: () => void;
-  toggleRulers: () => void;
-  toggleGuides: () => void;
-  toggleSnapToGrid: () => void;
-  setGridSize: (size: number) => void;
   setSidebarWidth: (width: number) => void;
   toggleThumbnailsPanel: () => void;
   toggleLayersPanel: () => void;
@@ -108,11 +104,6 @@ const createDefaultProject = (name: string): MenuProject => ({
   pages: [createDefaultPage()],
   settings: {
     defaultFormat: "A4",
-    gridEnabled: true,
-    gridSize: 20,
-    snapToGrid: false,
-    showRulers: true,
-    showGuides: true,
     zoom: 1,
   },
 });
@@ -135,11 +126,6 @@ const createDefaultEditorState = (): EditorState => ({
     height: 600,
   },
   ui: {
-    showGrid: true,
-    showRulers: true,
-    showGuides: true,
-    snapToGrid: false,
-    gridSize: 20,
     sidebarWidth: 300,
     thumbnailsPanelOpen: true,
     layersPanelOpen: true,
@@ -230,9 +216,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
       if (project) {
         const updatedProject = {
-          ...project,
-          name,
-          updatedAt: new Date().toISOString(),
+            ...project,
+            name,
+            updatedAt: new Date().toISOString(),
         };
 
         localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
@@ -960,65 +946,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       });
     },
 
-    toggleGrid: () => {
-      set({
-        editorState: {
-          ...get().editorState,
-          ui: {
-            ...get().editorState.ui,
-            showGrid: !get().editorState.ui.showGrid,
-          },
-        },
-      });
-    },
 
-    toggleRulers: () => {
-      set({
-        editorState: {
-          ...get().editorState,
-          ui: {
-            ...get().editorState.ui,
-            showRulers: !get().editorState.ui.showRulers,
-          },
-        },
-      });
-    },
-
-    toggleGuides: () => {
-      set({
-        editorState: {
-          ...get().editorState,
-          ui: {
-            ...get().editorState.ui,
-            showGuides: !get().editorState.ui.showGuides,
-          },
-        },
-      });
-    },
-
-    toggleSnapToGrid: () => {
-      set({
-        editorState: {
-          ...get().editorState,
-          ui: {
-            ...get().editorState.ui,
-            snapToGrid: !get().editorState.ui.snapToGrid,
-          },
-        },
-      });
-    },
-
-    setGridSize: (size: number) => {
-      set({
-        editorState: {
-          ...get().editorState,
-          ui: {
-            ...get().editorState.ui,
-            gridSize: Math.max(5, Math.min(100, size)),
-          },
-        },
-      });
-    },
 
     setSidebarWidth: (width: number) => {
       set({

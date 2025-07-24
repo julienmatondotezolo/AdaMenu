@@ -21,11 +21,12 @@ export function CanvasArea() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [elementStartPositions, setElementStartPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [tempElementPositions, setTempElementPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
-  const { canvas, tool, ui } = editorState;
+  const { canvas, tool } = editorState;
 
   // Update canvas size based on page format and container
   useEffect(() => {
@@ -117,16 +118,6 @@ export function CanvasArea() {
     canvasRef.current.width = canvasSize.width;
     canvasRef.current.height = canvasSize.height;
 
-    // Draw rulers if enabled
-    if (ui.showRulers) {
-      drawRulers(ctx, canvasSize, canvas);
-    }
-
-    // Draw grid if enabled
-    if (ui.showGrid) {
-      drawGrid(ctx, canvasSize, ui.gridSize * canvas.zoom);
-    }
-
     // Draw page background
     drawPageBackground(ctx, currentPage, canvas);
 
@@ -146,8 +137,7 @@ export function CanvasArea() {
     currentPage,
     canvasSize,
     pageOffset,
-    ui.showGrid,
-    ui.gridSize,
+
     canvas,
     editorState.selectedElementIds,
     isSelecting,
@@ -156,114 +146,8 @@ export function CanvasArea() {
     tool,
     hoveredElementId,
     backgroundImageCache,
+    tempElementPositions,
   ]);
-
-  const drawRulers = (ctx: CanvasRenderingContext2D, size: { width: number; height: number }, canvas: any) => {
-    const rulerSize = 20;
-    const tickSize = 5;
-    const majorTickSize = 10;
-    const scaleFactor = canvas.zoom;
-    const mmPerPixel = 0.264583; // 96 DPI conversion
-
-    // Draw ruler backgrounds
-    ctx.fillStyle = "#f8f8f8";
-    // Top ruler
-    ctx.fillRect(0, 0, size.width, rulerSize);
-    // Left ruler
-    ctx.fillRect(0, 0, rulerSize, size.height);
-
-    ctx.strokeStyle = "#d0d0d0";
-    ctx.lineWidth = 0.5;
-    ctx.fillStyle = "#666";
-    ctx.font = "10px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Top horizontal ruler
-    const startXmm = Math.floor((-pageOffset.x * mmPerPixel) / scaleFactor / 10) * 10;
-    const endXmm = Math.ceil(((size.width - pageOffset.x) * mmPerPixel) / scaleFactor / 10) * 10;
-
-    for (let mm = startXmm; mm <= endXmm; mm += 5) {
-      const x = pageOffset.x + (mm / mmPerPixel) * scaleFactor;
-
-      if (x >= rulerSize && x <= size.width) {
-        const isMajor = mm % 10 === 0;
-        const tickHeight = isMajor ? majorTickSize : tickSize;
-
-        ctx.beginPath();
-        ctx.moveTo(x, rulerSize - tickHeight);
-        ctx.lineTo(x, rulerSize);
-        ctx.stroke();
-
-        if (isMajor && mm % 20 === 0) {
-          ctx.fillText(`${mm}`, x, rulerSize - 12);
-        }
-      }
-    }
-
-    // Left vertical ruler
-    const startYmm = Math.floor((-pageOffset.y * mmPerPixel) / scaleFactor / 10) * 10;
-    const endYmm = Math.ceil(((size.height - pageOffset.y) * mmPerPixel) / scaleFactor / 10) * 10;
-
-    ctx.save();
-    ctx.translate(10, 0);
-    ctx.rotate(-Math.PI / 2);
-
-    for (let mm = startYmm; mm <= endYmm; mm += 5) {
-      const y = pageOffset.y + (mm / mmPerPixel) * scaleFactor;
-
-      if (y >= rulerSize && y <= size.height) {
-        const isMajor = mm % 10 === 0;
-        const tickHeight = isMajor ? majorTickSize : tickSize;
-
-        ctx.beginPath();
-        ctx.moveTo(-y, rulerSize - tickHeight);
-        ctx.lineTo(-y, rulerSize);
-        ctx.stroke();
-
-        if (isMajor && mm % 20 === 0) {
-          ctx.fillText(`${mm}`, -y, rulerSize - 12);
-        }
-      }
-    }
-
-    ctx.restore();
-
-    // Draw ruler borders
-    ctx.strokeStyle = "#ccc";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, rulerSize);
-    ctx.lineTo(size.width, rulerSize);
-    ctx.moveTo(rulerSize, 0);
-    ctx.lineTo(rulerSize, size.height);
-    ctx.stroke();
-  };
-
-  const drawGrid = (ctx: CanvasRenderingContext2D, size: { width: number; height: number }, gridSize: number) => {
-    ctx.strokeStyle = "#e0e0e0";
-    ctx.lineWidth = 0.5;
-
-    // Only draw grid on the page area
-    const pageWidth = currentPage!.format.width * canvas.zoom;
-    const pageHeight = currentPage!.format.height * canvas.zoom;
-
-    // Vertical lines
-    for (let x = 0; x <= pageWidth; x += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(pageOffset.x + x, pageOffset.y);
-      ctx.lineTo(pageOffset.x + x, pageOffset.y + pageHeight);
-      ctx.stroke();
-    }
-
-    // Horizontal lines
-    for (let y = 0; y <= pageHeight; y += gridSize) {
-      ctx.beginPath();
-      ctx.moveTo(pageOffset.x, pageOffset.y + y);
-      ctx.lineTo(pageOffset.x + pageWidth, pageOffset.y + y);
-      ctx.stroke();
-    }
-  };
 
   const drawPageBackground = (ctx: CanvasRenderingContext2D, page: any, canvas: any) => {
     const pageWidth = page.format.width * canvas.zoom;
@@ -321,8 +205,13 @@ export function CanvasArea() {
   };
 
   const drawTextElement = (ctx: CanvasRenderingContext2D, element: TextElement, canvas: any, isSelected: boolean) => {
-    const x = pageOffset.x + element.x * canvas.zoom;
-    const y = pageOffset.y + element.y * canvas.zoom;
+    // Use temporary position if dragging, otherwise use element position
+    const tempPos = tempElementPositions[element.id];
+    const elementX = tempPos ? tempPos.x : element.x;
+    const elementY = tempPos ? tempPos.y : element.y;
+
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
     const fontSize = element.fontSize * canvas.zoom;
 
     // Set text properties
@@ -348,8 +237,13 @@ export function CanvasArea() {
   };
 
   const drawImageElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {
-    const x = pageOffset.x + element.x * canvas.zoom;
-    const y = pageOffset.y + element.y * canvas.zoom;
+    // Use temporary position if dragging, otherwise use element position
+    const tempPos = tempElementPositions[element.id];
+    const elementX = tempPos ? tempPos.x : element.x;
+    const elementY = tempPos ? tempPos.y : element.y;
+
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
     const width = element.width * canvas.zoom;
     const height = element.height * canvas.zoom;
 
@@ -409,16 +303,16 @@ export function CanvasArea() {
       if (!layer.visible) return;
 
       layer.elements.forEach((element) => {
-        // Check if element is within selection box
-        const elementRight = element.x + (element.width || 0);
-        const elementBottom = element.y + (element.height || 0);
+        // Use temporary position if dragging, otherwise use element position
+        const tempPos = tempElementPositions[element.id];
+        const elementX = tempPos ? tempPos.x : element.x;
+        const elementY = tempPos ? tempPos.y : element.y;
 
-        if (
-          element.x >= pageStartX &&
-          element.y >= pageStartY &&
-          elementRight <= pageEndX &&
-          elementBottom <= pageEndY
-        ) {
+        // Check if element is within selection box
+        const elementRight = elementX + (element.width || 0);
+        const elementBottom = elementY + (element.height || 0);
+
+        if (elementX >= pageStartX && elementY >= pageStartY && elementRight <= pageEndX && elementBottom <= pageEndY) {
           selectedElementIds.push(element.id);
         }
       });
@@ -451,6 +345,11 @@ export function CanvasArea() {
 
         if (!element.visible) continue;
 
+        // Use temporary position if dragging, otherwise use element position
+        const tempPos = tempElementPositions[element.id];
+        const elementX = tempPos ? tempPos.x : element.x;
+        const elementY = tempPos ? tempPos.y : element.y;
+
         // Check if click is within element bounds
         let elementWidth = element.width || 0;
         let elementHeight = element.height || 0;
@@ -465,10 +364,10 @@ export function CanvasArea() {
           elementHeight = Math.max(elementHeight, textHeight);
         }
 
-        const elementRight = element.x + elementWidth;
-        const elementBottom = element.y + elementHeight;
+        const elementRight = elementX + elementWidth;
+        const elementBottom = elementY + elementHeight;
 
-        if (pageX >= element.x && pageY >= element.y && pageX <= elementRight && pageY <= elementBottom) {
+        if (pageX >= elementX && pageY >= elementY && pageX <= elementRight && pageY <= elementBottom) {
           return element.id;
         }
       }
@@ -494,8 +393,13 @@ export function CanvasArea() {
 
     if (!hoveredElement || hoveredElement.type !== "text") return;
 
-    const x = pageOffset.x + hoveredElement.x * canvas.zoom;
-    const y = pageOffset.y + hoveredElement.y * canvas.zoom;
+    // Use temporary position if dragging, otherwise use element position
+    const tempPos = tempElementPositions[hoveredElement.id];
+    const elementX = tempPos ? tempPos.x : hoveredElement.x;
+    const elementY = tempPos ? tempPos.y : hoveredElement.y;
+
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
     const fontSize = hoveredElement.fontSize * canvas.zoom;
 
     // Calculate text width
@@ -535,16 +439,21 @@ export function CanvasArea() {
 
         if (!element.visible || element.type !== "text") continue;
 
+        // Use temporary position if dragging, otherwise use element position
+        const tempPos = tempElementPositions[element.id];
+        const elementX = tempPos ? tempPos.x : element.x;
+        const elementY = tempPos ? tempPos.y : element.y;
+
         // Check if click is within text element bounds
         const textHeight = element.fontSize || 16;
         const textWidth = element.content
           ? element.content.length * (element.fontSize || 16) * 0.6
           : element.width || 0;
 
-        const elementRight = element.x + textWidth;
-        const elementBottom = element.y + textHeight;
+        const elementRight = elementX + textWidth;
+        const elementBottom = elementY + textHeight;
 
-        if (pageX >= element.x && pageY >= element.y && pageX <= elementRight && pageY <= elementBottom) {
+        if (pageX >= elementX && pageY >= elementY && pageX <= elementRight && pageY <= elementBottom) {
           return element.id;
         }
       }
@@ -641,28 +550,24 @@ export function CanvasArea() {
 
     if (tool === "select") {
       if (isDragging) {
-        // Handle element dragging
+        // Handle element dragging - update temporary positions only
         const deltaX = (mouseX - dragStart.x) / canvas.zoom;
         const deltaY = (mouseY - dragStart.y) / canvas.zoom;
 
-        // Update positions of all selected elements
+        // Update temporary positions for all selected elements
+        const newTempPositions: Record<string, { x: number; y: number }> = {};
+
         editorState.selectedElementIds.forEach((elementId) => {
           const startPos = elementStartPositions[elementId];
 
-          if (startPos && currentPage) {
-            const newX = startPos.x + deltaX;
-            const newY = startPos.y + deltaY;
-
-            // Find which layer contains this element and update it
-            currentPage.layers.forEach((layer) => {
-              const elementExists = layer.elements.some((el) => el.id === elementId);
-
-              if (elementExists) {
-                updateElement(currentPageId!, layer.id, elementId, { x: newX, y: newY });
-              }
-            });
+          if (startPos) {
+            newTempPositions[elementId] = {
+              x: startPos.x + deltaX,
+              y: startPos.y + deltaY,
+            };
           }
         });
+        setTempElementPositions(newTempPositions);
       } else if (isSelecting) {
         // Handle selection box
         setSelectionEnd({ x: mouseX, y: mouseY });
@@ -689,9 +594,24 @@ export function CanvasArea() {
   const handleCanvasMouseUp = () => {
     if (tool === "select") {
       if (isDragging) {
-        // End dragging
+        // Commit temporary positions to store on mouse up
+        Object.entries(tempElementPositions).forEach(([elementId, position]) => {
+          if (currentPage) {
+            // Find which layer contains this element and update it
+            currentPage.layers.forEach((layer) => {
+              const elementExists = layer.elements.some((el) => el.id === elementId);
+
+              if (elementExists) {
+                updateElement(currentPageId!, layer.id, elementId, { x: position.x, y: position.y });
+              }
+            });
+          }
+        });
+
+        // End dragging and clear temporary state
         setIsDragging(false);
         setElementStartPositions({});
+        setTempElementPositions({});
       } else if (isSelecting) {
         // Only update selection if we actually dragged (selection box has some size)
         const dragDistance = Math.abs(selectionEnd.x - selectionStart.x) + Math.abs(selectionEnd.y - selectionStart.y);

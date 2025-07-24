@@ -175,11 +175,6 @@ export interface EditorState {
     height: number;
   };
   ui: {
-    showGrid: boolean;
-    showRulers: boolean;
-    showGuides: boolean;
-    snapToGrid: boolean;
-    gridSize: number;
     sidebarWidth: number;
     thumbnailsPanelOpen: boolean;
     layersPanelOpen: boolean;
@@ -230,14 +225,9 @@ export const MENU_PROJECT_SCHEMA = {
     },
     settings: {
       type: "object",
-      required: ["defaultFormat", "gridEnabled", "gridSize", "snapToGrid", "showRulers", "showGuides", "zoom"],
+      required: ["defaultFormat", "zoom"],
       properties: {
         defaultFormat: { type: "string" },
-        gridEnabled: { type: "boolean" },
-        gridSize: { type: "number" },
-        snapToGrid: { type: "boolean" },
-        showRulers: { type: "boolean" },
-        showGuides: { type: "boolean" },
         zoom: { type: "number" },
       },
     },

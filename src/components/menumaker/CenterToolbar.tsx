@@ -1,19 +1,17 @@
-import { ChevronLeft, ChevronRight, Grid, Minus, Plus, Ruler } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minus, Plus } from "lucide-react";
 import React from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Button } from "../ui/button";
 
 export function CenterToolbar() {
-  const { project, currentPageId, editorState, setCurrentPage, setZoom, toggleGrid, toggleRulers } =
-    useMenuMakerStore();
+  const { project, currentPageId, editorState, setCurrentPage, setZoom } = useMenuMakerStore();
 
   if (!project || !currentPageId) return null;
 
   const currentPageIndex = project.pages.findIndex((page) => page.id === currentPageId);
   const totalPages = project.pages.length;
   const { zoom } = editorState.canvas;
-  const { ui } = editorState;
 
   const handlePreviousPage = () => {
     if (currentPageIndex > 0) {
@@ -89,30 +87,6 @@ export function CenterToolbar() {
 
         <Button variant="ghost" size="sm" onClick={handleZoomIn} className="h-8 w-8 p-0 text-white hover:bg-gray-700">
           <Plus className="w-4 h-4" />
-        </Button>
-
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-600" />
-
-        {/* Grid and Rulers toggle */}
-        <Button
-          variant={ui.showGrid ? "default" : "ghost"}
-          size="sm"
-          onClick={toggleGrid}
-          className="h-8 w-8 p-0 text-white hover:bg-gray-700"
-          title="Toggle Grid"
-        >
-          <Grid className="w-4 h-4" />
-        </Button>
-
-        <Button
-          variant={ui.showRulers ? "default" : "ghost"}
-          size="sm"
-          onClick={toggleRulers}
-          className="h-8 w-8 p-0 text-white hover:bg-gray-700"
-          title="Toggle Rulers"
-        >
-          <Ruler className="w-4 h-4" />
         </Button>
 
         {/* Divider */}
