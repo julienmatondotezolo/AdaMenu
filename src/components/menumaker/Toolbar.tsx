@@ -2,13 +2,13 @@ import {
   Check,
   Clipboard,
   Copy,
+  Database,
   Download,
   Edit2,
   Image,
   Loader2,
   MousePointer,
   Move,
-  Palette,
   Redo,
   Save,
   Type,
@@ -18,6 +18,7 @@ import {
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
+import { Tool } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -28,8 +29,10 @@ interface ToolbarProps {
 export function Toolbar({ onNewProject }: ToolbarProps) {
   const {
     project,
+    currentPageId,
     editorState,
     setTool,
+    addElement,
     saveProject,
     undo,
     redo,
@@ -49,7 +52,7 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     { id: "select", icon: MousePointer, label: "Select" },
     { id: "text", icon: Type, label: "Add Text" },
     { id: "image", icon: Image, label: "Add Image" },
-    { id: "background", icon: Palette, label: "Background" },
+    { id: "data", icon: Database, label: "Add Data" },
     { id: "pan", icon: Move, label: "Pan" },
   ] as const;
 
@@ -71,6 +74,47 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     }
     setIsEditingName(false);
     setEditingName("");
+  };
+
+  const handleToolSelect = (toolId: Tool) => {
+    setTool(toolId);
+
+    // If data tool is selected, add a default data element
+    if (toolId === "data" && project && currentPageId) {
+      const currentPage = project.pages.find((page) => page.id === currentPageId);
+
+      if (currentPage && currentPage.layers.length > 0) {
+        // Calculate center position based on page format
+        const centerX = (currentPage.format.width - 1000) / 2;
+        const centerY = (currentPage.format.height - 400) / 2;
+
+        // Create default data element
+        const defaultDataElement = {
+          type: "data" as const,
+          x: Math.max(0, centerX), // Ensure it's not negative
+          y: Math.max(0, centerY), // Ensure it's not negative
+          width: 1000,
+          height: 400,
+          rotation: 0,
+          scaleX: 1,
+          scaleY: 1,
+          zIndex: 1,
+          locked: false,
+          visible: true,
+          opacity: 1,
+          dataType: "" as any, // Empty dataType
+          dataId: "",
+          backgroundColor: "#ffffff", // White background
+          borderColor: "#000000", // Black border
+          borderSize: 1,
+          borderType: "solid" as const,
+          borderRadius: 0,
+        };
+
+        // Add to first layer
+        addElement(currentPageId, currentPage.layers[0].id, defaultDataElement);
+      }
+    }
   };
 
   return (
@@ -143,7 +187,7 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
             key={toolItem.id}
             variant={tool === toolItem.id ? "default" : "ghost"}
             size="sm"
-            onClick={() => setTool(toolItem.id)}
+            onClick={() => handleToolSelect(toolItem.id)}
             title={toolItem.label}
           >
             <toolItem.icon className="w-4 h-4" />

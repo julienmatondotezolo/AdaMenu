@@ -1258,6 +1258,48 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   ctx.textAlign = "center";
                   ctx.fillText("Image", element.x + element.width / 2, element.y + element.height / 2);
                 }
+              } else if (element.type === "data") {
+                // Draw data element
+                const dataElement = element as any;
+                
+                // Draw background
+                ctx.fillStyle = dataElement.backgroundColor || "#ffffff";
+                ctx.fillRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
+
+                // Draw border
+                const borderSize = dataElement.borderSize || 1;
+
+                if (borderSize > 0) {
+                  ctx.strokeStyle = dataElement.borderColor || "#000000";
+                  ctx.lineWidth = borderSize;
+
+                  // Set border type
+                  if (dataElement.borderType === "dashed") {
+                    ctx.setLineDash([5, 5]);
+                  } else if (dataElement.borderType === "dotted") {
+                    ctx.setLineDash([2, 2]);
+                  } else {
+                    ctx.setLineDash([]);
+                  }
+
+                  // Draw border with border radius if specified
+                  if (dataElement.borderRadius > 0) {
+                    ctx.beginPath();
+                    ctx.roundRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height, dataElement.borderRadius);
+                    ctx.stroke();
+                  } else {
+                    ctx.strokeRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
+                  }
+                  ctx.setLineDash([]);
+                }
+
+                // Draw data type indicator
+                ctx.fillStyle = "#333";
+                ctx.font = "12px Arial";
+                ctx.textAlign = "center";
+                const dataTypeText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
+
+                ctx.fillText(dataTypeText, dataElement.x + dataElement.width / 2, dataElement.y + dataElement.height / 2);
               }
 
               ctx.restore();

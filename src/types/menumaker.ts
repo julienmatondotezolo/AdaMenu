@@ -32,7 +32,7 @@ export const PAGE_FORMATS: Record<string, PageFormat> = {
 };
 
 // Element types
-export type ElementType = "text" | "image" | "background";
+export type ElementType = "text" | "image" | "background" | "data";
 
 // Base element interface
 export interface BaseElement {
@@ -109,8 +109,20 @@ export interface BackgroundElement extends BaseElement {
   };
 }
 
+// Data element
+export interface DataElement extends BaseElement {
+  type: "data";
+  dataType: "category" | "subcategory" | "menuitem";
+  dataId?: string;
+  backgroundColor: string;
+  borderColor: string;
+  borderSize: number;
+  borderType: "solid" | "dashed" | "dotted";
+  borderRadius: number;
+}
+
 // Union type for all elements
-export type MenuElement = TextElement | ImageElement | BackgroundElement;
+export type MenuElement = TextElement | ImageElement | BackgroundElement | DataElement;
 
 // Layer interface
 export interface Layer {
@@ -144,17 +156,12 @@ export interface MenuProject {
   pages: MenuPage[];
   settings: {
     defaultFormat: string;
-    gridEnabled: boolean;
-    gridSize: number;
-    snapToGrid: boolean;
-    showRulers: boolean;
-    showGuides: boolean;
     zoom: number;
   };
 }
 
 // Tool types
-export type Tool = "select" | "text" | "image" | "background" | "pan" | "zoom";
+export type Tool = "select" | "text" | "image" | "background" | "data" | "pan" | "zoom";
 
 // Editor state
 export interface EditorState {

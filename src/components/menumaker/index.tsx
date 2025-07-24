@@ -2,6 +2,7 @@
 export { BackgroundPanel } from "./BackgroundPanel";
 export { CanvasArea } from "./CanvasArea";
 export { CenterToolbar } from "./CenterToolbar";
+export { DataPanel } from "./DataPanel";
 export { ExportLoader } from "./ExportLoader";
 export { LayersPanel } from "./LayersPanel";
 export { MenuMakerEditor } from "./MenuMakerEditor";

@@ -108,6 +108,36 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
               ctx.textAlign = "center";
               ctx.fillText("Img", x + elementWidth / 2, y + elementHeight / 2);
             }
+          } else if (element.type === "data") {
+            // Draw data element
+            const dataElement = element as any;
+            const x = dataElement.x * scale;
+            const y = dataElement.y * scale;
+            const elementWidth = dataElement.width * scale;
+            const elementHeight = dataElement.height * scale;
+
+            // Draw background
+            ctx.fillStyle = dataElement.backgroundColor || "#ffffff";
+            ctx.fillRect(x, y, elementWidth, elementHeight);
+
+            // Draw border if large enough
+            const borderSize = (dataElement.borderSize || 1) * scale;
+
+            if (borderSize > 0 && elementWidth > 2 && elementHeight > 2) {
+              ctx.strokeStyle = dataElement.borderColor || "#000000";
+              ctx.lineWidth = Math.max(borderSize, 0.5);
+              ctx.strokeRect(x, y, elementWidth, elementHeight);
+            }
+
+            // Draw data type text if element is large enough
+            if (elementWidth > 15 && elementHeight > 8) {
+              ctx.fillStyle = "#333";
+              ctx.font = `${Math.min(elementHeight * 0.2, 6)}px Arial`;
+              ctx.textAlign = "center";
+              const dataTypeText = dataElement.dataType ? dataElement.dataType.substring(0, 4).toUpperCase() : "DATA";
+
+              ctx.fillText(dataTypeText, x + elementWidth / 2, y + elementHeight / 2);
+            }
           }
 
           ctx.restore();

@@ -5,6 +5,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { BackgroundPanel } from "./BackgroundPanel";
 import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
+import { DataPanel } from "./DataPanel";
 import { ExportLoader } from "./ExportLoader";
 import { LayersPanel } from "./LayersPanel";
 import { PropertiesPanel } from "./PropertiesPanel";
@@ -92,6 +93,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
       .flatMap((layer) => layer.elements)
       .filter((element) => editorState.selectedElementIds.includes(element.id)) || [];
 
+  // Check if any selected element is a data element
+  const hasSelectedDataElement = selectedElements.some((element) => element.type === "data");
+
   if (!currentPage) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -166,7 +170,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && (
+            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && (
               <div>
                 {/* Properties Header */}
                 <div
@@ -202,8 +206,8 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
               </div>
             )}
 
-            {/* Background Panel */}
-            {editorState.ui.layersPanelOpen && (
+            {/* Background Panel (Removed - use Data Panel instead) */}
+            {false && editorState.tool === "background" && (
               <div className="border-b border-gray-300">
                 {/* Background Header */}
                 <div
@@ -236,6 +240,48 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                     <BackgroundPanel />
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Data Panel - shown when data tool is selected OR when data element is selected */}
+            {(editorState.tool === "data" || hasSelectedDataElement) && (
+              <div className="border-b border-gray-300">
+                {hasSelectedDataElement && (
+                  <>
+                    {/* Data Properties Header */}
+                    <div
+                      className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                      onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          setPropertiesCollapsed(!propertiesCollapsed);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={!propertiesCollapsed}
+                      aria-controls="data-properties-content"
+                    >
+                      <h3 className="font-semibold text-gray-900">Data Properties</h3>
+                      <div className="flex items-center">
+                        {propertiesCollapsed ? (
+                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Data Properties Content */}
+                    {!propertiesCollapsed && (
+                      <div id="data-properties-content" className="overflow-y-auto">
+                        <DataPanel />
+                      </div>
+                    )}
+                  </>
+                )}
+                {editorState.tool === "data" && !hasSelectedDataElement && <DataPanel />}
               </div>
             )}
           </div>

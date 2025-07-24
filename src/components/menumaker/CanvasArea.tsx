@@ -19,10 +19,19 @@ export function CanvasArea() {
   const [selectionEnd, setSelectionEnd] = useState({ x: 0, y: 0 });
   const [isCanvasHovered, setIsCanvasHovered] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeHandle, setResizeHandle] = useState<string | null>(null); // 'tl', 'tr', 'bl', 'br'
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [elementStartPositions, setElementStartPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [elementStartDimensions, setElementStartDimensions] = useState<
+    Record<string, { width: number; height: number }>
+  >({});
   const [tempElementPositions, setTempElementPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [tempElementDimensions, setTempElementDimensions] = useState<
+    Record<string, { width: number; height: number; x?: number; y?: number }>
+  >({});
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
+  const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -137,7 +146,6 @@ export function CanvasArea() {
     currentPage,
     canvasSize,
     pageOffset,
-
     canvas,
     editorState.selectedElementIds,
     isSelecting,
@@ -147,6 +155,7 @@ export function CanvasArea() {
     hoveredElementId,
     backgroundImageCache,
     tempElementPositions,
+    tempElementDimensions,
   ]);
 
   const drawPageBackground = (ctx: CanvasRenderingContext2D, page: any, canvas: any) => {
@@ -199,16 +208,20 @@ export function CanvasArea() {
           drawTextElement(ctx, element, canvas, isSelected);
         } else if (element.type === "image") {
           drawImageElement(ctx, element, canvas, isSelected);
+        } else if (element.type === "data") {
+          drawDataElement(ctx, element, canvas, isSelected);
         }
       });
     });
   };
 
   const drawTextElement = (ctx: CanvasRenderingContext2D, element: TextElement, canvas: any, isSelected: boolean) => {
-    // Use temporary position if dragging, otherwise use element position
+    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
     const tempPos = tempElementPositions[element.id];
-    const elementX = tempPos ? tempPos.x : element.x;
-    const elementY = tempPos ? tempPos.y : element.y;
+    const tempDim = tempElementDimensions[element.id];
+
+    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
@@ -223,29 +236,38 @@ export function CanvasArea() {
     // Draw text
     ctx.fillText(element.content, x, y + fontSize);
 
-    // Draw selection border
+    // Draw selection border and resize handles
     if (isSelected) {
       ctx.strokeStyle = "#0066cc";
       ctx.lineWidth = 2;
       ctx.globalAlpha = 1;
       const textMetrics = ctx.measureText(element.content);
+      const selectionWidth = textMetrics.width + 4;
+      const selectionHeight = fontSize + 4;
 
-      ctx.strokeRect(x - 2, y, textMetrics.width + 4, fontSize + 4);
+      ctx.strokeRect(x - 2, y, selectionWidth, selectionHeight);
+
+      // Draw resize handles for text elements
+      drawResizeHandles(ctx, x - 2, y, selectionWidth, selectionHeight);
     }
 
     ctx.globalAlpha = 1;
   };
 
   const drawImageElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {
-    // Use temporary position if dragging, otherwise use element position
+    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
     const tempPos = tempElementPositions[element.id];
-    const elementX = tempPos ? tempPos.x : element.x;
-    const elementY = tempPos ? tempPos.y : element.y;
+    const tempDim = tempElementDimensions[element.id];
+
+    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
-    const width = element.width * canvas.zoom;
-    const height = element.height * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
 
     // Draw placeholder
     ctx.fillStyle = "#f0f0f0";
@@ -256,11 +278,85 @@ export function CanvasArea() {
     ctx.lineWidth = isSelected ? 2 : 1;
     ctx.strokeRect(x, y, width, height);
 
+    // Draw resize handles if selected
+    if (isSelected) {
+      drawResizeHandles(ctx, x, y, width, height);
+    }
+
     // Draw "Image" text
     ctx.fillStyle = "#666";
     ctx.font = "14px Arial";
     ctx.textAlign = "center";
     ctx.fillText("Image", x + width / 2, y + height / 2);
+  };
+
+  const drawDataElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {
+    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
+    const tempPos = tempElementPositions[element.id];
+    const tempDim = tempElementDimensions[element.id];
+
+    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
+
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
+
+    // Draw background
+    ctx.fillStyle = element.backgroundColor || "#ffffff";
+    ctx.fillRect(x, y, width, height);
+
+    // Draw border
+    const borderSize = (element.borderSize || 1) * canvas.zoom;
+
+    if (borderSize > 0) {
+      ctx.strokeStyle = element.borderColor || "#000000";
+      ctx.lineWidth = borderSize;
+
+      // Set border type
+      if (element.borderType === "dashed") {
+        ctx.setLineDash([5 * canvas.zoom, 5 * canvas.zoom]);
+      } else if (element.borderType === "dotted") {
+        ctx.setLineDash([2 * canvas.zoom, 2 * canvas.zoom]);
+      } else {
+        ctx.setLineDash([]);
+      }
+
+      // Draw border with border radius if specified
+      if (element.borderRadius > 0) {
+        const radius = element.borderRadius * canvas.zoom;
+
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(x, y, width, height);
+      }
+      ctx.setLineDash([]);
+    }
+
+    // Draw data type indicator
+    ctx.fillStyle = "#333";
+    ctx.font = `${Math.min(12 * canvas.zoom, 12)}px Arial`;
+    ctx.textAlign = "center";
+    const dataTypeText = element.dataType ? element.dataType.toUpperCase() : "DATA";
+
+    ctx.fillText(dataTypeText, x + width / 2, y + height / 2 - 5);
+
+    // Draw selection border and resize handles if selected
+    if (isSelected) {
+      ctx.strokeStyle = "#0066cc";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(x - 2, y - 2, width + 4, height + 4);
+      ctx.setLineDash([]);
+
+      // Draw resize handles at corners
+      drawResizeHandles(ctx, x, y, width, height);
+    }
   };
 
   const drawSelectionBox = (ctx: CanvasRenderingContext2D) => {
@@ -345,14 +441,16 @@ export function CanvasArea() {
 
         if (!element.visible) continue;
 
-        // Use temporary position if dragging, otherwise use element position
+        // Use temporary position/dimensions if dragging/resizing, otherwise use element values
         const tempPos = tempElementPositions[element.id];
-        const elementX = tempPos ? tempPos.x : element.x;
-        const elementY = tempPos ? tempPos.y : element.y;
+        const tempDim = tempElementDimensions[element.id];
+
+        const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+        const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
 
         // Check if click is within element bounds
-        let elementWidth = element.width || 0;
-        let elementHeight = element.height || 0;
+        let elementWidth = tempDim ? tempDim.width : element.width || 0;
+        let elementHeight = tempDim ? tempDim.height : element.height || 0;
 
         // For text elements, use a more accurate bounding box calculation
         if (element.type === "text") {
@@ -376,6 +474,107 @@ export function CanvasArea() {
     return null;
   };
 
+  const drawResizeHandles = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
+    const handleSize = 12;
+    const handleRadius = handleSize / 2;
+
+    // Save current styles
+    ctx.save();
+
+    // Handle style
+    ctx.fillStyle = "#0066cc";
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+
+    // Define handle positions
+    const handles = [
+      { x: x - handleRadius, y: y - handleRadius }, // Top-left
+      { x: x + width - handleRadius, y: y - handleRadius }, // Top-right
+      { x: x - handleRadius, y: y + height - handleRadius }, // Bottom-left
+      { x: x + width - handleRadius, y: y + height - handleRadius }, // Bottom-right
+    ];
+
+    // Draw each handle
+    handles.forEach((handle) => {
+      ctx.fillRect(handle.x, handle.y, handleSize, handleSize);
+      ctx.strokeRect(handle.x, handle.y, handleSize, handleSize);
+    });
+
+    // Restore styles
+    ctx.restore();
+  };
+
+  const getResizeHandleAtPosition = (mouseX: number, mouseY: number, elementId: string): string | null => {
+    if (!currentPage) return null;
+
+    // Find the element
+    let element = null;
+
+    for (const layer of currentPage.layers) {
+      const found = layer.elements.find((el) => el.id === elementId);
+
+      if (found) {
+        element = found;
+        break;
+      }
+    }
+
+    if (!element || !editorState.selectedElementIds.includes(elementId)) return null;
+
+    // Use temporary dimensions/positions if resizing, otherwise use element values
+    const tempPos = tempElementPositions[element.id];
+    const tempDim = tempElementDimensions[element.id];
+
+    const elementX = tempPos ? tempPos.x : element.x;
+    const elementY = tempPos ? tempPos.y : element.y;
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
+
+    // Convert to screen coordinates
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
+
+    const handleSize = 12;
+    const handleRadius = handleSize / 2;
+
+    // Define handle positions
+    const handles = {
+      tl: { x: x - handleRadius, y: y - handleRadius, cursor: "nw-resize" }, // Top-left
+      tr: { x: x + width - handleRadius, y: y - handleRadius, cursor: "ne-resize" }, // Top-right
+      bl: { x: x - handleRadius, y: y + height - handleRadius, cursor: "sw-resize" }, // Bottom-left
+      br: { x: x + width - handleRadius, y: y + height - handleRadius, cursor: "se-resize" }, // Bottom-right
+    };
+
+    // Check if mouse is over any handle
+    for (const [handleId, handle] of Object.entries(handles)) {
+      if (
+        mouseX >= handle.x &&
+        mouseX <= handle.x + handleSize &&
+        mouseY >= handle.y &&
+        mouseY <= handle.y + handleSize
+      ) {
+        return handleId;
+      }
+    }
+
+    return null;
+  };
+
+  const getResizeCursor = (handleId: string | null): string => {
+    if (!handleId) return "default";
+
+    const cursors: Record<string, string> = {
+      tl: "nw-resize",
+      tr: "ne-resize",
+      bl: "sw-resize",
+      br: "se-resize",
+    };
+
+    return cursors[handleId] || "default";
+  };
+
   const drawHoverBoundingBox = (ctx: CanvasRenderingContext2D, elementId: string) => {
     if (!currentPage) return;
 
@@ -393,10 +592,12 @@ export function CanvasArea() {
 
     if (!hoveredElement || hoveredElement.type !== "text") return;
 
-    // Use temporary position if dragging, otherwise use element position
+    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
     const tempPos = tempElementPositions[hoveredElement.id];
-    const elementX = tempPos ? tempPos.x : hoveredElement.x;
-    const elementY = tempPos ? tempPos.y : hoveredElement.y;
+    const tempDim = tempElementDimensions[hoveredElement.id];
+
+    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : hoveredElement.x;
+    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : hoveredElement.y;
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
@@ -474,7 +675,36 @@ export function CanvasArea() {
     const mouseY = e.clientY - rect.top;
 
     if (tool === "select") {
-      // Check if clicking on an element first
+      // First check if clicking on a resize handle
+      if (editorState.selectedElementIds.length === 1) {
+        const elementId = editorState.selectedElementIds[0];
+        const handle = getResizeHandleAtPosition(mouseX, mouseY, elementId);
+
+        if (handle) {
+          // Start resizing
+          setIsResizing(true);
+          setResizeHandle(handle);
+          setDragStart({ x: mouseX, y: mouseY });
+
+          // Store initial dimensions and positions
+          const initialDimensions: Record<string, { width: number; height: number }> = {};
+          const initialPositions: Record<string, { x: number; y: number }> = {};
+
+          currentPage.layers.forEach((layer) => {
+            layer.elements.forEach((element) => {
+              if (element.id === elementId) {
+                initialDimensions[element.id] = { width: element.width, height: element.height };
+                initialPositions[element.id] = { x: element.x, y: element.y };
+              }
+            });
+          });
+          setElementStartDimensions(initialDimensions);
+          setElementStartPositions(initialPositions);
+          return;
+        }
+      }
+
+      // Check if clicking on an element
       const clickedElementId = getElementAtPosition(mouseX, mouseY);
 
       if (clickedElementId) {
@@ -549,7 +779,50 @@ export function CanvasArea() {
     const mouseY = e.clientY - rect.top;
 
     if (tool === "select") {
-      if (isDragging) {
+      if (isResizing && resizeHandle && editorState.selectedElementIds.length === 1) {
+        // Handle element resizing
+        const elementId = editorState.selectedElementIds[0];
+        const startDim = elementStartDimensions[elementId];
+        const startPos = elementStartPositions[elementId];
+
+        if (startDim && startPos) {
+          const deltaX = (mouseX - dragStart.x) / canvas.zoom;
+          const deltaY = (mouseY - dragStart.y) / canvas.zoom;
+
+          let newWidth = startDim.width;
+          let newHeight = startDim.height;
+          let newX = startPos.x;
+          let newY = startPos.y;
+
+          // Apply resize based on handle
+          switch (resizeHandle) {
+            case "tl": // Top-left
+              newWidth = Math.max(20, startDim.width - deltaX);
+              newHeight = Math.max(20, startDim.height - deltaY);
+              newX = startPos.x + (startDim.width - newWidth);
+              newY = startPos.y + (startDim.height - newHeight);
+              break;
+            case "tr": // Top-right
+              newWidth = Math.max(20, startDim.width + deltaX);
+              newHeight = Math.max(20, startDim.height - deltaY);
+              newY = startPos.y + (startDim.height - newHeight);
+              break;
+            case "bl": // Bottom-left
+              newWidth = Math.max(20, startDim.width - deltaX);
+              newHeight = Math.max(20, startDim.height + deltaY);
+              newX = startPos.x + (startDim.width - newWidth);
+              break;
+            case "br": // Bottom-right
+              newWidth = Math.max(20, startDim.width + deltaX);
+              newHeight = Math.max(20, startDim.height + deltaY);
+              break;
+          }
+
+          setTempElementDimensions({
+            [elementId]: { width: newWidth, height: newHeight, x: newX, y: newY },
+          });
+        }
+      } else if (isDragging) {
         // Handle element dragging - update temporary positions only
         const deltaX = (mouseX - dragStart.x) / canvas.zoom;
         const deltaY = (mouseY - dragStart.y) / canvas.zoom;
@@ -571,6 +844,16 @@ export function CanvasArea() {
       } else if (isSelecting) {
         // Handle selection box
         setSelectionEnd({ x: mouseX, y: mouseY });
+      } else {
+        // Check for hover over resize handles
+        if (editorState.selectedElementIds.length === 1) {
+          const elementId = editorState.selectedElementIds[0];
+          const handle = getResizeHandleAtPosition(mouseX, mouseY, elementId);
+
+          setHoveredResizeHandle(handle);
+        } else {
+          setHoveredResizeHandle(null);
+        }
       }
     } else if (tool === "text") {
       // Handle hover detection for text elements
@@ -593,7 +876,37 @@ export function CanvasArea() {
   // Handle canvas mouse up
   const handleCanvasMouseUp = () => {
     if (tool === "select") {
-      if (isDragging) {
+      if (isResizing) {
+        // Commit temporary dimensions to store on mouse up
+        Object.entries(tempElementDimensions).forEach(([elementId, dimensions]) => {
+          if (currentPage) {
+            // Find which layer contains this element and update it
+            currentPage.layers.forEach((layer) => {
+              const elementExists = layer.elements.some((el) => el.id === elementId);
+
+              if (elementExists) {
+                const updates: any = {
+                  width: dimensions.width,
+                  height: dimensions.height,
+                };
+
+                // Update position if it changed (for tl, tr, bl handles)
+                if (dimensions.x !== undefined) updates.x = dimensions.x;
+                if (dimensions.y !== undefined) updates.y = dimensions.y;
+
+                updateElement(currentPageId!, layer.id, elementId, updates);
+              }
+            });
+          }
+        });
+
+        // End resizing and clear temporary state
+        setIsResizing(false);
+        setResizeHandle(null);
+        setElementStartDimensions({});
+        setElementStartPositions({});
+        setTempElementDimensions({});
+      } else if (isDragging) {
         // Commit temporary positions to store on mouse up
         Object.entries(tempElementPositions).forEach(([elementId, position]) => {
           if (currentPage) {
@@ -724,7 +1037,17 @@ export function CanvasArea() {
         onMouseUp={handleCanvasMouseUp}
         onMouseEnter={handleCanvasMouseEnter}
         onMouseLeave={handleCanvasMouseLeave}
-        className={`cursor-${tool === "select" ? (isDragging ? "grabbing" : "default") : "crosshair"}`}
+        className={`cursor-${
+          tool === "select"
+            ? isResizing
+              ? getResizeCursor(resizeHandle)
+              : isDragging
+                ? "grabbing"
+                : hoveredResizeHandle
+                  ? getResizeCursor(hoveredResizeHandle)
+                  : "default"
+            : "crosshair"
+        }`}
         style={{ display: "block" }}
         tabIndex={0}
       />
