@@ -338,13 +338,34 @@ export function CanvasArea() {
       ctx.setLineDash([]);
     }
 
-    // Draw data type indicator
-    ctx.fillStyle = "#333";
-    ctx.font = `${Math.min(12 * canvas.zoom, 12)}px Arial`;
-    ctx.textAlign = "center";
-    const dataTypeText = element.dataType ? element.dataType.toUpperCase() : "DATA";
+    // Draw data content
+    ctx.fillStyle = element.textColor || "#333";
+    const fontSize = (element.fontSize || 64) * canvas.zoom;
 
-    ctx.fillText(dataTypeText, x + width / 2, y + height / 2 - 5);
+    ctx.font = `${fontSize}px Arial`;
+    ctx.textAlign = "left";
+    ctx.textBaseline = "top";
+
+    let displayText = "";
+
+    if (element.dataType === "category" && element.categoryData) {
+      // Show the actual category name
+      displayText = element.categoryData.names?.en || element.categoryData.name || "CATEGORY";
+    } else if (element.dataType === "category" && element.dataId) {
+      displayText = "CATEGORY";
+    } else if (element.dataType === "subcategory" && element.subcategoryData) {
+      // Show the actual subcategory name
+      displayText = element.subcategoryData.names?.en || element.subcategoryData.name || "SUBCATEGORY";
+    } else if (element.dataType === "subcategory" && element.dataId) {
+      displayText = "SUBCATEGORY";
+    } else {
+      displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
+    }
+
+    // Position text at top-left with some padding
+    const padding = 10 * canvas.zoom;
+
+    ctx.fillText(displayText, x + padding, y + padding);
 
     // Draw selection border and resize handles if selected
     if (isSelected) {

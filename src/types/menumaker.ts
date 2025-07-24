@@ -114,11 +114,15 @@ export interface DataElement extends BaseElement {
   type: "data";
   dataType: "category" | "subcategory" | "menuitem";
   dataId?: string;
+  categoryData?: any; // Store the full category data
+  subcategoryData?: any; // Store the full subcategory data
   backgroundColor: string;
   borderColor: string;
   borderSize: number;
   borderType: "solid" | "dashed" | "dotted";
   borderRadius: number;
+  textColor: string;
+  fontSize: number;
 }
 
 // Union type for all elements

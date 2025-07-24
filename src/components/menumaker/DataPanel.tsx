@@ -1,16 +1,11 @@
 import { Database } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 
 import { fetchCategories, fetchMenuItemByCategoryId } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
-
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-}
 
 interface SubCategory {
   id: string;
@@ -32,14 +27,23 @@ export function DataPanel() {
   const { currentPageId, project, addElement, updateElement, editorState } = useMenuMakerStore();
 
   // Data states
-  const [categories, setCategories] = useState<Category[]>([]);
   const [subCategories, setSubCategories] = useState<SubCategory[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
+  // Fetch categories using the same logic as Categories.tsx
+  const fetchAllCategories = () => fetchCategories();
+  const { data: categories } = useQuery("categories", fetchAllCategories, {
+    refetchOnWindowFocus: false,
+    select: (data) => data.sort((a: any, b: any) => a.order - b.order),
+  });
+
   // Selection states
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCategoryData, setSelectedCategoryData] = useState<any>(null);
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
+  const [selectedSubCategoryData, setSelectedSubCategoryData] = useState<any>(null);
   const [selectedMenuItem, setSelectedMenuItem] = useState<string>("");
+  const [availableSubCategories, setAvailableSubCategories] = useState<any[]>([]);
 
   // Data type selection
   const [selectedDataType, setSelectedDataType] = useState<"category" | "subcategory" | "menuitem">("category");
@@ -50,6 +54,8 @@ export function DataPanel() {
   const [borderSize, setBorderSize] = useState(1);
   const [borderType, setBorderType] = useState<"solid" | "dashed" | "dotted">("solid");
   const [borderRadius, setBorderRadius] = useState(0);
+  const [textColor, setTextColor] = useState("#000000");
+  const [fontSize, setFontSize] = useState(12);
 
   // Get selected data element if any
   const selectedDataElement = React.useMemo(() => {
@@ -68,10 +74,12 @@ export function DataPanel() {
 
   const isEditingMode = !!selectedDataElement;
 
-  // Load data on mount
+  // Load menu items when category changes
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (selectedCategory && selectedDataType !== "category") {
+      loadMenuItems(selectedCategory);
+    }
+  }, [selectedCategory, selectedDataType]);
 
   // Populate form when editing an existing element (prevent infinite loops)
   const [isPopulatingForm, setIsPopulatingForm] = useState(false);
@@ -86,13 +94,27 @@ export function DataPanel() {
       setBorderSize(selectedDataElement.borderSize || 1);
       setBorderType(selectedDataElement.borderType || "solid");
       setBorderRadius(selectedDataElement.borderRadius || 0);
+      setTextColor(selectedDataElement.textColor || "#000000");
+      setFontSize(selectedDataElement.fontSize || 64);
 
       // Set data selection based on dataId
       if (selectedDataElement.dataId) {
         if (selectedDataElement.dataType === "category") {
           setSelectedCategory(selectedDataElement.dataId);
+          setSelectedCategoryData(selectedDataElement.categoryData || null);
         } else if (selectedDataElement.dataType === "subcategory") {
           setSelectedSubCategory(selectedDataElement.dataId);
+          setSelectedSubCategoryData(selectedDataElement.subcategoryData || null);
+          // If subcategory is selected, also populate the parent category for the dropdown
+          if (selectedDataElement.subcategoryData?.parentCategoryId) {
+            setSelectedCategory(selectedDataElement.subcategoryData.parentCategoryId);
+            const parentCategory = categories?.find(
+              (cat: any) => cat.id === selectedDataElement.subcategoryData.parentCategoryId,
+            );
+
+            setSelectedCategoryData(parentCategory || null);
+            setAvailableSubCategories(parentCategory?.subCategories || []);
+          }
         } else if (selectedDataElement.dataType === "menuitem") {
           setSelectedMenuItem(selectedDataElement.dataId);
         }
@@ -104,13 +126,6 @@ export function DataPanel() {
       setIsPopulatingForm(false);
     }
   }, [selectedDataElement]);
-
-  // Load subcategories and menu items when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      loadMenuItems(selectedCategory);
-    }
-  }, [selectedCategory]);
 
   // Update element automatically when properties change (only in editing mode)
   useEffect(() => {
@@ -126,26 +141,18 @@ export function DataPanel() {
     isEditingMode,
     selectedDataType,
     selectedCategory,
+    selectedCategoryData,
     selectedSubCategory,
+    selectedSubCategoryData,
     selectedMenuItem,
     backgroundColor,
     borderColor,
     borderSize,
     borderType,
     borderRadius,
+    textColor,
+    fontSize,
   ]);
-
-  const loadCategories = async () => {
-    try {
-      const data = await fetchCategories();
-
-      if (data) {
-        setCategories(data);
-      }
-    } catch (error) {
-      console.error("Failed to load categories:", error);
-    }
-  };
 
   const loadMenuItems = async (categoryId: string) => {
     try {
@@ -192,11 +199,15 @@ export function DataPanel() {
       ...selectedDataElement,
       dataType: selectedDataType,
       dataId: dataId,
+      categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
+      subcategoryData: selectedDataType === "subcategory" ? selectedSubCategoryData : undefined,
       backgroundColor,
       borderColor,
       borderSize,
       borderType,
       borderRadius,
+      textColor,
+      fontSize,
     };
 
     // Find the layer containing this element
@@ -257,6 +268,10 @@ export function DataPanel() {
       borderSize,
       borderType,
       borderRadius,
+      textColor,
+      fontSize,
+      categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
+      subcategoryData: selectedDataType === "subcategory" ? selectedSubCategoryData : undefined,
     };
 
     // Add to first layer
@@ -312,13 +327,21 @@ export function DataPanel() {
           <Label className="text-sm font-medium">Category</Label>
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              const categoryId = e.target.value;
+
+              setSelectedCategory(categoryId);
+              // Find and store the full category data
+              const categoryData = categories?.find((cat: any) => cat.id === categoryId);
+
+              setSelectedCategoryData(categoryData || null);
+            }}
             className="w-full mt-1 p-2 border border-gray-300 rounded-md"
           >
             <option value="">Select Category</option>
-            {categories.map((category) => (
+            {categories?.map((category: any) => (
               <option key={category.id} value={category.id}>
-                {category.name}
+                {category.names?.en || category.name}
               </option>
             ))}
           </select>
@@ -335,7 +358,7 @@ export function DataPanel() {
               disabled={!selectedCategory}
             >
               <option value="">Select Subcategory</option>
-              {subCategories.map((subCategory) => (
+              {subCategories.map((subCategory: any) => (
                 <option key={subCategory.id} value={subCategory.id}>
                   {subCategory.name}
                 </option>
@@ -355,7 +378,7 @@ export function DataPanel() {
               disabled={!selectedCategory}
             >
               <option value="">Select Menu Item</option>
-              {menuItems.map((menuItem) => (
+              {menuItems.map((menuItem: any) => (
                 <option key={menuItem.id} value={menuItem.id}>
                   {menuItem.name}
                 </option>
@@ -456,6 +479,39 @@ export function DataPanel() {
               className="w-full mt-1"
             />
             <div className="text-xs text-gray-500 text-right">{borderRadius}px</div>
+          </div>
+
+          {/* Text Color */}
+          <div className="mb-3">
+            <Label className="text-sm font-medium">Text Color</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                type="color"
+                value={textColor}
+                onChange={(e) => setTextColor(e.target.value)}
+                className="h-8 w-16 rounded border border-gray-300"
+              />
+              <input
+                type="text"
+                value={textColor}
+                onChange={(e) => setTextColor(e.target.value)}
+                className="flex-1 p-1 text-xs border border-gray-300 rounded"
+              />
+            </div>
+          </div>
+
+          {/* Font Size */}
+          <div className="mb-3">
+            <Label className="text-sm font-medium">Font Size</Label>
+            <input
+              type="range"
+              min="12"
+              max="120"
+              value={fontSize}
+              onChange={(e) => setFontSize(Number(e.target.value))}
+              className="w-full mt-1"
+            />
+            <div className="text-xs text-gray-500 text-right">{fontSize}px</div>
           </div>
         </div>
 

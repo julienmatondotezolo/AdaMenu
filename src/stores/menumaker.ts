@@ -1293,13 +1293,29 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   ctx.setLineDash([]);
                 }
 
-                // Draw data type indicator
-                ctx.fillStyle = "#333";
-                ctx.font = "12px Arial";
-                ctx.textAlign = "center";
-                const dataTypeText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
+                                 // Draw data content
+                 ctx.fillStyle = dataElement.textColor || "#333";
+                 const fontSize = dataElement.fontSize || 64;
 
-                ctx.fillText(dataTypeText, dataElement.x + dataElement.width / 2, dataElement.y + dataElement.height / 2);
+                 ctx.font = `${fontSize}px Arial`;
+                 ctx.textAlign = "left";
+                 ctx.textBaseline = "top";
+
+                 let displayText = "";
+
+                 if (dataElement.dataType === "category" && dataElement.categoryData) {
+                   // Show the actual category name
+                   displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "CATEGORY";
+                 } else if (dataElement.dataType === "category" && dataElement.dataId) {
+                   displayText = "CATEGORY";
+                 } else {
+                   displayText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
+                 }
+
+                 // Position text at top-left with some padding
+                 const padding = 10;
+
+                 ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
               }
 
               ctx.restore();
