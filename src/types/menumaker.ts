@@ -127,6 +127,10 @@ export interface DataElement extends BaseElement {
   borderRadius: number;
   textColor: string;
   fontSize: number;
+  fontFamily?: string;
+  fontWeight?: FontWeight;
+  lineSpacing?: number;
+  itemNameLanguage?: "en" | "fr" | "it" | "nl";
   // Menu item specific properties
   showSubcategoryTitle?: boolean; // Toggle to show/hide subcategory title
   showMenuDescription?: boolean; // Toggle to show/hide menu description

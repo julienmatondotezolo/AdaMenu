@@ -11,6 +11,32 @@ export interface DrawMenuItemsListOptions {
   isThumbnail?: boolean;
 }
 
+// Helper function to ensure font is loaded and get the proper font family
+const getFontFamily = (fontFamily: string): string => {
+  // Extract the first font from the font family string for Canvas compatibility
+  const firstFont = fontFamily.split(",")[0].trim();
+
+  // Remove quotes if present
+  const cleanFont = firstFont.replace(/['"]/g, "");
+
+  // For Canvas, we need to use the actual font name, not CSS font stacks
+  const fontMapping: { [key: string]: string } = {
+    Poppins: "Poppins",
+    Arial: "Arial",
+    Helvetica: "Helvetica",
+    "Times New Roman": "Times New Roman",
+    Georgia: "Georgia",
+    Verdana: "Verdana",
+    Tahoma: "Tahoma",
+    "Trebuchet MS": "Trebuchet MS",
+    Impact: "Impact",
+    "Comic Sans MS": "Comic Sans MS",
+    "Courier New": "Courier New",
+  };
+
+  return fontMapping[cleanFont] || "Arial";
+};
+
 // Helper function to break text into lines based on character count
 const breakTextIntoLines = (text: string, maxCharsPerLine: number): string[] => {
   if (!text || maxCharsPerLine <= 0) return [text || ""];
@@ -66,13 +92,17 @@ export const drawMenuItemsList = ({
       ctx.fillStyle = element.textColor || "#333";
       const baseFontSize = element.fontSize || 12;
       const fontSize = isThumbnail ? Math.max(baseFontSize * scale * 0.3, 2) : baseFontSize * scale;
+      const fontFamily = getFontFamily(element.fontFamily || "Arial, sans-serif");
+      const fontWeight = element.fontWeight || "normal";
+      const lineSpacing = element.lineSpacing || 1.2;
 
-      ctx.font = `${fontSize}px Arial`;
+      // Ensure proper Canvas font format: [weight] [size]px [family]
+      ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}"`;
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
       const padding = isThumbnail ? Math.max(2 * scale, 1) : 10 * 0;
-      const lineHeight = fontSize * 1.2;
+      const lineHeight = fontSize * lineSpacing;
       let currentY = y + padding;
 
       // Draw subcategory title (if enabled)
@@ -97,7 +127,7 @@ export const drawMenuItemsList = ({
         ctx.fillStyle = titleColor;
         const titleFontWeight = element.subcategoryTitleTextFontWeight || "bold";
 
-        ctx.font = `${titleFontWeight} ${titleFontSize}px Arial`;
+        ctx.font = `${titleFontWeight} ${titleFontSize}px "Arial"`;
 
         // Get title text in specified language
         const titleLanguage = element.subcategoryTitleLanguage || "en";
@@ -134,7 +164,6 @@ export const drawMenuItemsList = ({
       }
 
       // Draw menu items
-      ctx.font = `${fontSize}px Arial`;
       let itemsDrawn = 0;
       const maxItems = isThumbnail ? Math.floor((height - currentY + y - padding) / lineHeight) : Infinity;
 
@@ -144,7 +173,24 @@ export const drawMenuItemsList = ({
 
       menuItems.forEach((menuItem: MenuItem) => {
         if ((!isThumbnail || itemsDrawn < maxItems) && currentY < y + height - padding) {
-          const itemName = menuItem.names?.en || "Unnamed Item";
+          // Get item name in specified language
+          const itemLanguage = element.itemNameLanguage || "en";
+          let itemName = "Unnamed Item";
+          
+          if (menuItem.names) {
+            if (itemLanguage === "en" && menuItem.names.en) {
+              itemName = menuItem.names.en;
+            } else if (itemLanguage === "fr" && menuItem.names.fr) {
+              itemName = menuItem.names.fr;
+            } else if (itemLanguage === "it" && menuItem.names.it) {
+              itemName = menuItem.names.it;
+            } else if (itemLanguage === "nl" && menuItem.names.nl) {
+              itemName = menuItem.names.nl;
+            } else {
+              itemName = menuItem.names.en || "Unnamed Item";
+            }
+          }
+
           const description = showDescription ? menuItem.descriptions?.en || "" : "";
           const price = menuItem.price
             ? showCurrency
@@ -156,12 +202,14 @@ export const drawMenuItemsList = ({
             // Justified layout: text on left, price on right
             const rightPadding = padding;
 
-            // Draw item name on the left
+            // Draw item name on the left with custom font
+            ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}"`;
             ctx.textAlign = "left";
             ctx.fillText(itemName, x + padding, currentY);
 
-            // Draw price on the right
+            // Draw price on the right with default font
             if (price) {
+              ctx.font = `normal ${fontSize}px Arial`;
               ctx.textAlign = "right";
               ctx.fillText(price, x + width - rightPadding, currentY);
             }
@@ -204,7 +252,7 @@ export const drawMenuItemsList = ({
               if (descriptionText) {
                 const descriptionFontWeight = element.showMenuDescriptionTextFontWeight || "normal";
 
-                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px Arial`;
+                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px "Arial"`;
                 ctx.textAlign = "left";
                 ctx.fillStyle = descriptionColor;
 
@@ -218,37 +266,48 @@ export const drawMenuItemsList = ({
                 descriptionLines.forEach((line, lineIndex) => {
                   ctx.fillText(line, x + descMarginLeft, currentY);
                   if (lineIndex < descriptionLines.length - 1) {
-                    currentY += descriptionFontSize * 1.1; // Line spacing
+                    currentY += descriptionFontSize * lineSpacing; // Use configurable line spacing
                   }
                 });
 
                 ctx.fillStyle = element.textColor || "#333"; // Reset color
-                ctx.font = `${fontSize}px Arial`; // Reset font
+                ctx.font = `normal ${fontSize}px "Arial"`; // Reset font
                 currentY += descriptionFontSize + descMarginBottom;
               }
             }
           } else {
-            // Left layout: all text on the left (current behavior)
+            // Left layout: item name and price on the left
             ctx.textAlign = "left";
 
-            let itemText = itemName;
-
-            if (price) {
-              itemText = `${itemName} - ${price}`;
-            }
-
             if (isThumbnail) {
+              // For thumbnails, combine text for simplicity
+              let itemText = itemName;
+              if (price) {
+                itemText = `${itemName} - ${price}`;
+              }
+
               // Truncate item text if too long for thumbnail
               const maxItemWidth = width - padding * 2;
-
               if (ctx.measureText(itemText).width > maxItemWidth) {
                 const truncatedName = itemName.substring(0, Math.floor(maxItemWidth / (fontSize * 0.6))) + "...";
-
                 itemText = price ? `${truncatedName} - ${price}` : truncatedName;
+              }
+
+              ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}"`;
+              ctx.fillText(itemText, x + padding, currentY);
+            } else {
+              // For full size, draw item name with custom font
+              ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}"`;
+              ctx.fillText(itemName, x + padding, currentY);
+
+              // Draw price with default font (if present)
+              if (price) {
+                const itemNameWidth = ctx.measureText(itemName).width;
+                ctx.font = `normal ${fontSize}px Arial`;
+                ctx.fillText(` - ${price}`, x + padding + itemNameWidth, currentY);
               }
             }
 
-            ctx.fillText(itemText, x + padding, currentY);
             currentY += lineHeight;
 
             // Draw description if enabled (smaller font, slightly indented)
@@ -283,7 +342,7 @@ export const drawMenuItemsList = ({
               if (descriptionText) {
                 const descriptionFontWeight = element.showMenuDescriptionTextFontWeight || "normal";
 
-                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px Arial`;
+                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px "Arial"`;
                 ctx.fillStyle = descriptionColor;
 
                 currentY += descMarginTop;
@@ -296,12 +355,12 @@ export const drawMenuItemsList = ({
                 descriptionLines.forEach((line, lineIndex) => {
                   ctx.fillText(line, x + padding + descMarginLeft, currentY);
                   if (lineIndex < descriptionLines.length - 1) {
-                    currentY += descriptionFontSize * 1.1; // Line spacing
+                    currentY += descriptionFontSize * lineSpacing; // Use configurable line spacing
                   }
                 });
 
                 ctx.fillStyle = element.textColor || "#333"; // Reset color
-                ctx.font = `${fontSize}px Arial`; // Reset font
+                ctx.font = `normal ${fontSize}px "Arial"`; // Reset font
                 currentY += descriptionFontSize + descMarginBottom;
               }
             }
@@ -319,7 +378,10 @@ export const drawMenuItemsList = ({
     } else {
       // No menu items available
       ctx.fillStyle = element.textColor || "#333";
-      ctx.font = `${isThumbnail ? Math.max((element.fontSize || 12) * scale * 0.3, 2) : (element.fontSize || 12) * scale}px Arial`;
+      const fallbackFontSize = isThumbnail
+        ? Math.max((element.fontSize || 12) * scale * 0.3, 2)
+        : (element.fontSize || 12) * scale;
+      ctx.font = `normal ${fallbackFontSize}px "Arial"`;
       ctx.textAlign = "center";
       ctx.fillText(isThumbnail ? "No items" : "No menu items available", x + width / 2, y + height / 2);
     }
@@ -327,7 +389,10 @@ export const drawMenuItemsList = ({
     console.warn("Error drawing menu items:", error);
     // Fallback display
     ctx.fillStyle = "#333";
-    ctx.font = `${isThumbnail ? Math.max((element.fontSize || 12) * scale * 0.3, 2) : (element.fontSize || 12) * scale}px Arial`;
+    const errorFontSize = isThumbnail
+      ? Math.max((element.fontSize || 12) * scale * 0.3, 2)
+      : (element.fontSize || 12) * scale;
+    ctx.font = `normal ${errorFontSize}px "Arial"`;
     ctx.textAlign = "center";
     ctx.fillText(isThumbnail ? "MENU" : "Error loading menu items", x + width / 2, y + height / 2);
   }

@@ -40,6 +40,18 @@ export function DataPanel() {
   const [borderRadius, setBorderRadius] = useState(0);
   const [textColor, setTextColor] = useState("#000000");
   const [fontSize, setFontSize] = useState(12);
+  const [fontFamily, setFontFamily] = useState("Arial, sans-serif");
+  const [fontWeight, setFontWeight] = useState<
+    "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  >("normal");
+  const [lineSpacing, setLineSpacing] = useState(1.2);
+  const [itemNameLanguage, setItemNameLanguage] = useState<"en" | "fr" | "it" | "nl">("en");
+
+  // Position and size properties
+  const [elementX, setElementX] = useState(50);
+  const [elementY, setElementY] = useState(50);
+  const [elementWidth, setElementWidth] = useState(200);
+  const [elementHeight, setElementHeight] = useState(100);
 
   // Menu item specific properties
   const [showSubcategoryTitle, setShowSubcategoryTitle] = useState(true);
@@ -97,6 +109,10 @@ export function DataPanel() {
       setIsPopulatingForm(true);
 
       setSelectedDataType(selectedDataElement.dataType || "category");
+      setElementX(Math.round(selectedDataElement.x || 50));
+      setElementY(Math.round(selectedDataElement.y || 50));
+      setElementWidth(Math.round(selectedDataElement.width || 200));
+      setElementHeight(Math.round(selectedDataElement.height || 100));
       setBackgroundColor(selectedDataElement.backgroundColor || "#ffffff");
       setBorderColor(selectedDataElement.borderColor || "#000000");
       setBorderSize(selectedDataElement.borderSize || 0);
@@ -104,6 +120,10 @@ export function DataPanel() {
       setBorderRadius(selectedDataElement.borderRadius || 0);
       setTextColor(selectedDataElement.textColor || "#000000");
       setFontSize(selectedDataElement.fontSize || 48);
+      setFontFamily(selectedDataElement.fontFamily || "Arial, sans-serif");
+      setFontWeight(selectedDataElement.fontWeight || "normal");
+      setLineSpacing(selectedDataElement.lineSpacing || 1.2);
+      setItemNameLanguage(selectedDataElement.itemNameLanguage || "en");
 
       // Menu item specific properties
       setShowSubcategoryTitle(selectedDataElement.showSubcategoryTitle !== false); // Default to true
@@ -197,6 +217,10 @@ export function DataPanel() {
     selectedCategoryData,
     selectedSubCategory,
     selectedSubCategoryData,
+    elementX,
+    elementY,
+    elementWidth,
+    elementHeight,
     backgroundColor,
     borderColor,
     borderSize,
@@ -204,6 +228,10 @@ export function DataPanel() {
     borderRadius,
     textColor,
     fontSize,
+    fontFamily,
+    fontWeight,
+    lineSpacing,
+    itemNameLanguage,
     showSubcategoryTitle,
     showMenuDescription,
     showCurrencySign,
@@ -251,6 +279,10 @@ export function DataPanel() {
 
     const updatedElement = {
       ...selectedDataElement,
+      x: elementX,
+      y: elementY,
+      width: elementWidth,
+      height: elementHeight,
       dataType: selectedDataType,
       dataId: dataId,
       categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
@@ -267,6 +299,10 @@ export function DataPanel() {
       borderRadius,
       textColor,
       fontSize,
+      fontFamily,
+      fontWeight,
+      lineSpacing,
+      itemNameLanguage,
       // Menu item specific properties
       showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
       showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
@@ -350,10 +386,10 @@ export function DataPanel() {
     // Create data element
     const dataElement = {
       type: "data" as const,
-      x: 50,
-      y: 50,
-      width: 200,
-      height: 100,
+      x: elementX,
+      y: elementY,
+      width: elementWidth,
+      height: elementHeight,
       rotation: 0,
       scaleX: 1,
       scaleY: 1,
@@ -370,6 +406,10 @@ export function DataPanel() {
       borderRadius,
       textColor,
       fontSize,
+      fontFamily,
+      fontWeight,
+      lineSpacing,
+      itemNameLanguage,
       categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
       subcategoryData:
         selectedDataType === "subcategory"
@@ -563,47 +603,207 @@ export function DataPanel() {
           </>
         )}
 
-        <div className="border-t pt-4 space-y-4">
-          <h4 className="font-medium text-gray-900 mb-3">Text</h4>
+        {/* Position & Size Section */}
+        <div className="border-t pt-4">
+          <h4 className="font-medium text-gray-900 mb-3">Position & Size</h4>
 
-          {/* Text Color */}
-          <section>
-            <Label className="text-sm font-medium">Text Color</Label>
-            <div className="mt-1 flex items-center gap-2">
+          {/* X and Y Position */}
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-1 block">X</Label>
               <input
-                type="color"
-                value={textColor}
-                onChange={(e) => setTextColor(e.target.value)}
-                className="h-8 w-16 rounded border border-gray-300"
-              />
-              <input
-                type="text"
-                value={textColor}
-                onChange={(e) => setTextColor(e.target.value)}
-                className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                type="number"
+                step="1"
+                value={elementX}
+                onChange={(e) => setElementX(Math.round(Number(e.target.value)))}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-          </section>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-1 block">Y</Label>
+              <input
+                type="number"
+                step="1"
+                value={elementY}
+                onChange={(e) => setElementY(Math.round(Number(e.target.value)))}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
 
-          {/* Font Size */}
-          <section>
-            <Label className="text-sm font-medium">Font Size</Label>
-            <input
-              type="range"
-              min="12"
-              max="120"
-              value={fontSize}
-              onChange={(e) => setFontSize(Number(e.target.value))}
-              className="w-full mt-1"
-            />
-            <div className="text-xs text-gray-500 text-right">{fontSize}px</div>
-          </section>
+          {/* Width and Height */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-1 block">Width</Label>
+              <div className="relative">
+                <input
+                  type="number"
+                  step="1"
+                  value={elementWidth}
+                  onChange={(e) => setElementWidth(Math.round(Number(e.target.value)))}
+                  className="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setElementWidth(elementWidth + 10)}
+                    className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+                  >
+                    ▲
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setElementWidth(Math.max(10, elementWidth - 10))}
+                    className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+                  >
+                    ▼
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <Label className="text-sm font-medium text-gray-700 mb-1 block">Height</Label>
+              <input
+                type="number"
+                step="1"
+                value={elementHeight}
+                onChange={(e) => setElementHeight(Math.round(Number(e.target.value)))}
+                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
         </div>
 
         {/* Menu Item Properties (only if menuitem is selected) */}
         {selectedDataType === "menuitem" && (
           <div className="border-t pt-4">
             <h4 className="font-medium text-gray-900 mb-3">Menu Item Options</h4>
+
+            {/* Menu items text properties */}
+            <div className="border-b pb-4 mb-4 space-y-4">
+              {/* Text Color */}
+              <h5 className="font-medium text-gray-800 mb-3">Menu Item Title</h5>
+              <section>
+                <Label className="text-sm font-medium">Items Color</Label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="h-8 w-16 rounded border border-gray-300"
+                  />
+                  <input
+                    type="text"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                  />
+                </div>
+              </section>
+
+              {/* Font Size */}
+              <section>
+                <Label className="text-sm font-medium">Items Font Size</Label>
+                <input
+                  type="range"
+                  min="12"
+                  max="120"
+                  value={fontSize}
+                  onChange={(e) => setFontSize(Number(e.target.value))}
+                  className="w-full mt-1"
+                />
+                <div className="text-xs text-gray-500 text-right">{fontSize}px</div>
+              </section>
+
+              {/* Font Family */}
+              <section>
+                <Label className="text-sm font-medium">Items Font Family</Label>
+                <select
+                  value={fontFamily}
+                  onChange={(e) => setFontFamily(e.target.value)}
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="Poppins, sans-serif">Poppins</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="Helvetica, sans-serif">Helvetica</option>
+                  <option value="Times New Roman, serif">Times New Roman</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="Verdana, sans-serif">Verdana</option>
+                  <option value="Tahoma, sans-serif">Tahoma</option>
+                  <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                  <option value="Impact, sans-serif">Impact</option>
+                  <option value="Comic Sans MS, cursive">Comic Sans MS</option>
+                  <option value="Courier New, monospace">Courier New</option>
+                </select>
+              </section>
+
+              {/* Font Weight */}
+              <section>
+                <Label className="text-sm font-medium">Items Font Weight</Label>
+                <select
+                  value={fontWeight}
+                  onChange={(e) =>
+                    setFontWeight(
+                      e.target.value as
+                        | "normal"
+                        | "bold"
+                        | "100"
+                        | "200"
+                        | "300"
+                        | "400"
+                        | "500"
+                        | "600"
+                        | "700"
+                        | "800"
+                        | "900",
+                    )
+                  }
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Bold</option>
+                  <option value="100">100 - Thin</option>
+                  <option value="200">200 - Extra Light</option>
+                  <option value="300">300 - Light</option>
+                  <option value="400">400 - Normal</option>
+                  <option value="500">500 - Medium</option>
+                  <option value="600">600 - Semi Bold</option>
+                  <option value="700">700 - Bold</option>
+                  <option value="800">800 - Extra Bold</option>
+                  <option value="900">900 - Black</option>
+                </select>
+              </section>
+
+                             {/* Vertical Line Spacing */}
+               <section>
+                 <Label className="text-sm font-medium">Items Vertical Line Spacing</Label>
+                 <input
+                   type="range"
+                   min="0.8"
+                   max="3.0"
+                   step="0.1"
+                   value={lineSpacing}
+                   onChange={(e) => setLineSpacing(Number(e.target.value))}
+                   className="w-full mt-1"
+                 />
+                 <div className="text-xs text-gray-500 text-right">{lineSpacing.toFixed(1)}x</div>
+               </section>
+
+               {/* Item Name Language */}
+               <section>
+                 <Label className="text-sm font-medium">Item Name Language</Label>
+                 <select
+                   value={itemNameLanguage}
+                   onChange={(e) => setItemNameLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
+                   className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                 >
+                   <option value="en">English</option>
+                   <option value="fr">Français</option>
+                   <option value="it">Italiano</option>
+                   <option value="nl">Nederlands</option>
+                 </select>
+               </section>
+             </div>
 
             {/* Show Subcategory Title Toggle */}
             <div className="mb-3 flex items-center justify-between">

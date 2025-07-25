@@ -1,10 +1,15 @@
 import "../../assets/styles/globals.css";
 
 import type { Metadata, Viewport } from "next";
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, Poppins } from "next/font/google";
 import React from "react";
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
+});
 
 const APP_NAME = "Ada menu";
 const APP_DEFAULT_TITLE = "Adaptive Menu app";
@@ -57,7 +62,7 @@ export default function RootLayout({
 }) {
   return (
     <html suppressHydrationWarning={true} lang={locale}>
-      <body className={`${dmSans.className}`}>{children}</body>
+      <body className={`${dmSans.className} ${poppins.variable}`}>{children}</body>
     </html>
   );
 }
