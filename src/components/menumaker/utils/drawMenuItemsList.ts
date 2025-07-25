@@ -144,7 +144,7 @@ export const drawMenuItemsList = ({
               const descMarginTop = isThumbnail ? 0 : (element.showMenuDescriptionTextMarginTop || 2) * scale;
               const descMarginLeft = isThumbnail
                 ? Math.max(2 * scale, 1)
-                : (element.showMenuDescriptionTextMarginLeft || 10) * scale;
+                : (element.showMenuDescriptionTextMarginLeft || 0) * scale;
               const descMarginBottom = isThumbnail ? 0 : (element.showMenuDescriptionTextMarginBottom || 5) * scale;
 
               // Get description text in specified language
@@ -211,7 +211,7 @@ export const drawMenuItemsList = ({
 
               // Apply margins (scaled)
               const descMarginTop = (element.showMenuDescriptionTextMarginTop || 2) * scale;
-              const descMarginLeft = (element.showMenuDescriptionTextMarginLeft || 10) * scale;
+              const descMarginLeft = (element.showMenuDescriptionTextMarginLeft || 0) * scale;
               const descMarginBottom = (element.showMenuDescriptionTextMarginBottom || 5) * scale;
 
               // Get description text in specified language
