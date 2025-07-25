@@ -88,6 +88,10 @@ export const drawMenuItemsList = ({
         } else {
           ctx.fillText(subcategoryTitle, x + titleMarginLeft, currentY);
         }
+
+        // Reset fillStyle back to original text color after drawing title
+        ctx.fillStyle = element.textColor || "#333";
+
         currentY += titleFontSize + titleMarginBottom;
       }
 
