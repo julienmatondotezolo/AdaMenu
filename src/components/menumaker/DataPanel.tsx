@@ -56,7 +56,14 @@ export function DataPanel() {
   // Menu item specific properties
   const [showSubcategoryTitle, setShowSubcategoryTitle] = useState(true);
   const [showMenuDescription, setShowMenuDescription] = useState(false);
+  const [showPrice, setShowPrice] = useState(true);
   const [showCurrencySign, setShowCurrencySign] = useState(true);
+  const [priceColor, setPriceColor] = useState("#000000");
+  const [priceFontFamily, setPriceFontFamily] = useState("Arial, sans-serif");
+  const [priceFontWeight, setPriceFontWeight] = useState<
+    "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  >("normal");
+  const [priceSeparator, setPriceSeparator] = useState<"." | ",">(".");
   const [menuLayout, setMenuLayout] = useState<"left" | "justified">("left");
 
   // Subcategory title properties
@@ -128,7 +135,12 @@ export function DataPanel() {
       // Menu item specific properties
       setShowSubcategoryTitle(selectedDataElement.showSubcategoryTitle !== false); // Default to true
       setShowMenuDescription(selectedDataElement.showMenuDescription === true); // Default to false
+      setShowPrice(selectedDataElement.showPrice !== false); // Default to true
       setShowCurrencySign(selectedDataElement.showCurrencySign !== false); // Default to true
+      setPriceColor(selectedDataElement.priceColor || "#000000");
+      setPriceFontFamily(selectedDataElement.priceFontFamily || "Arial, sans-serif");
+      setPriceFontWeight(selectedDataElement.priceFontWeight || "normal");
+      setPriceSeparator(selectedDataElement.priceSeparator || ".");
       setMenuLayout(selectedDataElement.menuLayout || "left"); // Default to left
 
       // Subcategory title properties
@@ -234,7 +246,12 @@ export function DataPanel() {
     itemNameLanguage,
     showSubcategoryTitle,
     showMenuDescription,
+    showPrice,
     showCurrencySign,
+    priceColor,
+    priceFontFamily,
+    priceFontWeight,
+    priceSeparator,
     menuLayout,
     subcategoryTitleTextColor,
     subcategoryTitleTextFontSize,
@@ -306,7 +323,12 @@ export function DataPanel() {
       // Menu item specific properties
       showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
       showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
+      showPrice: selectedDataType === "menuitem" ? showPrice : undefined,
       showCurrencySign: selectedDataType === "menuitem" ? showCurrencySign : undefined,
+      priceColor: selectedDataType === "menuitem" ? priceColor : undefined,
+      priceFontFamily: selectedDataType === "menuitem" ? priceFontFamily : undefined,
+      priceFontWeight: selectedDataType === "menuitem" ? priceFontWeight : undefined,
+      priceSeparator: selectedDataType === "menuitem" ? priceSeparator : undefined,
       menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
       // Subcategory title properties
       subcategoryTitleTextColor:
@@ -420,7 +442,12 @@ export function DataPanel() {
       // Menu item specific properties
       showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
       showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
+      showPrice: selectedDataType === "menuitem" ? showPrice : undefined,
       showCurrencySign: selectedDataType === "menuitem" ? showCurrencySign : undefined,
+      priceColor: selectedDataType === "menuitem" ? priceColor : undefined,
+      priceFontFamily: selectedDataType === "menuitem" ? priceFontFamily : undefined,
+      priceFontWeight: selectedDataType === "menuitem" ? priceFontWeight : undefined,
+      priceSeparator: selectedDataType === "menuitem" ? priceSeparator : undefined,
       menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
       // Subcategory title properties
       subcategoryTitleTextColor:
@@ -681,8 +708,25 @@ export function DataPanel() {
 
             {/* Menu items text properties */}
             <div className="border-b pb-4 mb-4 space-y-4">
-              {/* Text Color */}
+              {/* Menu Item Title */}
               <h5 className="font-medium text-gray-800 mb-3">Menu Item Title</h5>
+
+              {/* Item Language */}
+              <section>
+                <Label className="text-sm font-medium">Item Language</Label>
+                <select
+                  value={itemNameLanguage}
+                  onChange={(e) => setItemNameLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
+                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                >
+                  <option value="en">English</option>
+                  <option value="fr">Français</option>
+                  <option value="it">Italiano</option>
+                  <option value="nl">Nederlands</option>
+                </select>
+              </section>
+
+              {/* Items Color */}
               <section>
                 <Label className="text-sm font-medium">Items Color</Label>
                 <div className="mt-1 flex items-center gap-2">
@@ -774,36 +818,150 @@ export function DataPanel() {
                 </select>
               </section>
 
-                             {/* Vertical Line Spacing */}
-               <section>
-                 <Label className="text-sm font-medium">Items Vertical Line Spacing</Label>
-                 <input
-                   type="range"
-                   min="0.8"
-                   max="3.0"
-                   step="0.1"
-                   value={lineSpacing}
-                   onChange={(e) => setLineSpacing(Number(e.target.value))}
-                   className="w-full mt-1"
-                 />
-                 <div className="text-xs text-gray-500 text-right">{lineSpacing.toFixed(1)}x</div>
-               </section>
+              {/* Vertical Line Spacing */}
+              <section>
+                <Label className="text-sm font-medium">Items Vertical Line Spacing</Label>
+                <input
+                  type="range"
+                  min="0.8"
+                  max="3.0"
+                  step="0.1"
+                  value={lineSpacing}
+                  onChange={(e) => setLineSpacing(Number(e.target.value))}
+                  className="w-full mt-1"
+                />
+                <div className="text-xs text-gray-500 text-right">{lineSpacing.toFixed(1)}x</div>
+              </section>
+            </div>
 
-               {/* Item Name Language */}
-               <section>
-                 <Label className="text-sm font-medium">Item Name Language</Label>
-                 <select
-                   value={itemNameLanguage}
-                   onChange={(e) => setItemNameLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
-                   className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                 >
-                   <option value="en">English</option>
-                   <option value="fr">Français</option>
-                   <option value="it">Italiano</option>
-                   <option value="nl">Nederlands</option>
-                 </select>
-               </section>
-             </div>
+            {/* Menu Item Price */}
+            <div className="border-b pb-4 mb-4">
+              {/* Menu Item Price */}
+              <h5 className="font-medium text-gray-800 mb-3">Menu Item Price</h5>
+
+              {/* Show Price Toggle */}
+              <div className="mb-3 flex items-center justify-between">
+                <Label className="text-sm font-medium">Show Price</Label>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={showPrice}
+                    onChange={(e) => setShowPrice(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+
+              {showPrice && (
+                <div className="space-y-3">
+                  {/* Show Currency Sign Toggle */}
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Show € Sign</Label>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={showCurrencySign}
+                        onChange={(e) => setShowCurrencySign(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+
+                  {/* Price Color */}
+                  <div>
+                    <Label className="text-sm font-medium">Price Color</Label>
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="color"
+                        value={priceColor}
+                        onChange={(e) => setPriceColor(e.target.value)}
+                        className="h-8 w-16 rounded border border-gray-300"
+                      />
+                      <input
+                        type="text"
+                        value={priceColor}
+                        onChange={(e) => setPriceColor(e.target.value)}
+                        className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Price Font Family */}
+                  <div>
+                    <Label className="text-sm font-medium">Price Font Family</Label>
+                    <select
+                      value={priceFontFamily}
+                      onChange={(e) => setPriceFontFamily(e.target.value)}
+                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="Poppins, sans-serif">Poppins</option>
+                      <option value="Arial, sans-serif">Arial</option>
+                      <option value="Helvetica, sans-serif">Helvetica</option>
+                      <option value="Times New Roman, serif">Times New Roman</option>
+                      <option value="Georgia, serif">Georgia</option>
+                      <option value="Verdana, sans-serif">Verdana</option>
+                      <option value="Tahoma, sans-serif">Tahoma</option>
+                      <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                      <option value="Impact, sans-serif">Impact</option>
+                      <option value="Comic Sans MS, cursive">Comic Sans MS</option>
+                      <option value="Courier New, monospace">Courier New</option>
+                    </select>
+                  </div>
+
+                  {/* Price Font Weight */}
+                  <div>
+                    <Label className="text-sm font-medium">Price Font Weight</Label>
+                    <select
+                      value={priceFontWeight}
+                      onChange={(e) =>
+                        setPriceFontWeight(
+                          e.target.value as
+                            | "normal"
+                            | "bold"
+                            | "100"
+                            | "200"
+                            | "300"
+                            | "400"
+                            | "500"
+                            | "600"
+                            | "700"
+                            | "800"
+                            | "900",
+                        )
+                      }
+                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="normal">Normal</option>
+                      <option value="bold">Bold</option>
+                      <option value="100">100 - Thin</option>
+                      <option value="200">200 - Extra Light</option>
+                      <option value="300">300 - Light</option>
+                      <option value="400">400 - Normal</option>
+                      <option value="500">500 - Medium</option>
+                      <option value="600">600 - Semi Bold</option>
+                      <option value="700">700 - Bold</option>
+                      <option value="800">800 - Extra Bold</option>
+                      <option value="900">900 - Black</option>
+                    </select>
+                  </div>
+
+                  {/* Price Separator */}
+                  <div>
+                    <Label className="text-sm font-medium">Price Decimal Separator</Label>
+                    <select
+                      value={priceSeparator}
+                      onChange={(e) => setPriceSeparator(e.target.value as "." | ",")}
+                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    >
+                      <option value=".">Dot (10.00)</option>
+                      <option value=",">Comma (10,00)</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Show Subcategory Title Toggle */}
             <div className="mb-3 flex items-center justify-between">
@@ -1153,20 +1311,6 @@ export function DataPanel() {
                 </div>
               </div>
             )}
-
-            {/* Show Currency Sign Toggle */}
-            <div className="mb-3 flex items-center justify-between">
-              <Label className="text-sm font-medium">Show € Sign</Label>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={showCurrencySign}
-                  onChange={(e) => setShowCurrencySign(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
 
             {/* Menu Layout Selection */}
             <div className="mb-3">

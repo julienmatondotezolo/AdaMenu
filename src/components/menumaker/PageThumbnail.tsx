@@ -125,11 +125,11 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
             ctx.fillRect(x, y, elementWidth, elementHeight);
 
             // Draw border if large enough
-            const borderSize = (dataElement.borderSize || 1) * scale;
+            const borderSize = (dataElement.borderSize || 0) * scale;
 
             if (borderSize > 0 && elementWidth > 2 && elementHeight > 2) {
               ctx.strokeStyle = dataElement.borderColor || "#000000";
-              ctx.lineWidth = Math.max(borderSize, 0.5);
+              ctx.lineWidth = Math.max(borderSize, 0.1);
               ctx.strokeRect(x, y, elementWidth, elementHeight);
             }
 

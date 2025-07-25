@@ -1361,7 +1361,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                 ctx.fillRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
 
                 // Draw border
-                const borderSize = dataElement.borderSize || 1;
+                const borderSize = dataElement.borderSize || 0;
 
                 if (borderSize > 0) {
                   ctx.strokeStyle = dataElement.borderColor || "#000000";

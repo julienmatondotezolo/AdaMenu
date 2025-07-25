@@ -134,7 +134,12 @@ export interface DataElement extends BaseElement {
   // Menu item specific properties
   showSubcategoryTitle?: boolean; // Toggle to show/hide subcategory title
   showMenuDescription?: boolean; // Toggle to show/hide menu description
+  showPrice?: boolean; // Toggle to show/hide price
   showCurrencySign?: boolean; // Toggle to show/hide € sign
+  priceColor?: string; // Price color
+  priceFontFamily?: string; // Price font family
+  priceFontWeight?: FontWeight; // Price font weight
+  priceSeparator?: "." | ","; // Price decimal separator
   menuLayout?: "left" | "justified"; // Layout: "left" (current) or "justified" (text left, price right)
   // Subcategory title properties (when showSubcategoryTitle is true)
   subcategoryTitleTextColor?: string;

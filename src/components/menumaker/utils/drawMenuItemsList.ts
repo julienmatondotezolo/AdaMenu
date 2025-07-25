@@ -169,14 +169,16 @@ export const drawMenuItemsList = ({
 
       const layout = element.menuLayout || "left"; // Default to left layout
       const showDescription = element.showMenuDescription === true; // Default to false
+      const showPrice = element.showPrice !== false; // Default to true
       const showCurrency = element.showCurrencySign !== false; // Default to true
+      const priceSeparator = element.priceSeparator || "."; // Default to dot
 
       menuItems.forEach((menuItem: MenuItem) => {
         if ((!isThumbnail || itemsDrawn < maxItems) && currentY < y + height - padding) {
           // Get item name in specified language
           const itemLanguage = element.itemNameLanguage || "en";
           let itemName = "Unnamed Item";
-          
+
           if (menuItem.names) {
             if (itemLanguage === "en" && menuItem.names.en) {
               itemName = menuItem.names.en;
@@ -192,11 +194,12 @@ export const drawMenuItemsList = ({
           }
 
           const description = showDescription ? menuItem.descriptions?.en || "" : "";
-          const price = menuItem.price
-            ? showCurrency
-              ? `€${menuItem.price.toFixed(2)}`
-              : menuItem.price.toFixed(2)
-            : "";
+          const price =
+            showPrice && menuItem.price
+              ? showCurrency
+                ? `€${menuItem.price.toFixed(2).replace(".", priceSeparator)}`
+                : menuItem.price.toFixed(2).replace(".", priceSeparator)
+              : "";
 
           if (layout === "justified" && !isThumbnail) {
             // Justified layout: text on left, price on right
@@ -207,11 +210,17 @@ export const drawMenuItemsList = ({
             ctx.textAlign = "left";
             ctx.fillText(itemName, x + padding, currentY);
 
-            // Draw price on the right with default font
+            // Draw price on the right with custom price styling
             if (price) {
-              ctx.font = `normal ${fontSize}px Arial`;
+              const priceFontFamily = getFontFamily(element.priceFontFamily || "Arial, sans-serif");
+              const priceFontWeight = element.priceFontWeight || "normal";
+              const priceColor = element.priceColor || "#000000";
+
+              ctx.font = `${priceFontWeight} ${fontSize}px "${priceFontFamily}"`;
+              ctx.fillStyle = priceColor;
               ctx.textAlign = "right";
               ctx.fillText(price, x + width - rightPadding, currentY);
+              ctx.fillStyle = element.textColor || "#333"; // Reset color
             }
 
             currentY += lineHeight;
@@ -282,14 +291,17 @@ export const drawMenuItemsList = ({
             if (isThumbnail) {
               // For thumbnails, combine text for simplicity
               let itemText = itemName;
+
               if (price) {
                 itemText = `${itemName} - ${price}`;
               }
 
               // Truncate item text if too long for thumbnail
               const maxItemWidth = width - padding * 2;
+
               if (ctx.measureText(itemText).width > maxItemWidth) {
                 const truncatedName = itemName.substring(0, Math.floor(maxItemWidth / (fontSize * 0.6))) + "...";
+
                 itemText = price ? `${truncatedName} - ${price}` : truncatedName;
               }
 
@@ -300,11 +312,17 @@ export const drawMenuItemsList = ({
               ctx.font = `${fontWeight} ${fontSize}px "${fontFamily}"`;
               ctx.fillText(itemName, x + padding, currentY);
 
-              // Draw price with default font (if present)
+              // Draw price with custom price styling (if present)
               if (price) {
                 const itemNameWidth = ctx.measureText(itemName).width;
-                ctx.font = `normal ${fontSize}px Arial`;
+                const priceFontFamily = getFontFamily(element.priceFontFamily || "Arial, sans-serif");
+                const priceFontWeight = element.priceFontWeight || "normal";
+                const priceColor = element.priceColor || "#000000";
+
+                ctx.font = `${priceFontWeight} ${fontSize}px "${priceFontFamily}"`;
+                ctx.fillStyle = priceColor;
                 ctx.fillText(` - ${price}`, x + padding + itemNameWidth, currentY);
+                ctx.fillStyle = element.textColor || "#333"; // Reset color
               }
             }
 
@@ -381,6 +399,7 @@ export const drawMenuItemsList = ({
       const fallbackFontSize = isThumbnail
         ? Math.max((element.fontSize || 12) * scale * 0.3, 2)
         : (element.fontSize || 12) * scale;
+
       ctx.font = `normal ${fallbackFontSize}px "Arial"`;
       ctx.textAlign = "center";
       ctx.fillText(isThumbnail ? "No items" : "No menu items available", x + width / 2, y + height / 2);
@@ -392,6 +411,7 @@ export const drawMenuItemsList = ({
     const errorFontSize = isThumbnail
       ? Math.max((element.fontSize || 12) * scale * 0.3, 2)
       : (element.fontSize || 12) * scale;
+
     ctx.font = `normal ${errorFontSize}px "Arial"`;
     ctx.textAlign = "center";
     ctx.fillText(isThumbnail ? "MENU" : "Error loading menu items", x + width / 2, y + height / 2);
