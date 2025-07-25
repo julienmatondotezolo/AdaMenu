@@ -44,7 +44,7 @@ export function BackgroundPanel() {
   };
 
   const handleRemoveImage = () => {
-    updatePageBackground(currentPageId, undefined, "");
+    updatePageBackground(currentPageId, undefined, ""); // Opacity automatically resets to 1 in store
     saveProject();
   };
 

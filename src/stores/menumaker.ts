@@ -515,7 +515,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
               ...page,
               backgroundColor: backgroundColor !== undefined ? backgroundColor : page.backgroundColor,
               backgroundImage: backgroundImage !== undefined ? (backgroundImage || undefined) : page.backgroundImage,
-              backgroundImageOpacity: backgroundImageOpacity !== undefined ? backgroundImageOpacity : page.backgroundImageOpacity ?? 1,
+              backgroundImageOpacity: backgroundImage === "" ? 1 : (backgroundImageOpacity !== undefined ? backgroundImageOpacity : page.backgroundImageOpacity ?? 1),
             }
             : page,
         );

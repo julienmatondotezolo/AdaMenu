@@ -35,7 +35,7 @@ export function DataPanel() {
   // Style properties
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
   const [borderColor, setBorderColor] = useState("#000000");
-  const [borderSize, setBorderSize] = useState(1);
+  const [borderSize, setBorderSize] = useState(0);
   const [borderType, setBorderType] = useState<"solid" | "dashed" | "dotted">("solid");
   const [borderRadius, setBorderRadius] = useState(0);
   const [textColor, setTextColor] = useState("#000000");
@@ -416,31 +416,6 @@ export function DataPanel() {
     // Add to first layer
     addElement(currentPageId, currentPage.layers[0].id, dataElement);
   };
-
-  const colorPalette = [
-    "#ffffff",
-    "#f8f9fa",
-    "#e9ecef",
-    "#dee2e6",
-    "#ced4da",
-    "#adb5bd",
-    "#6c757d",
-    "#495057",
-    "#343a40",
-    "#212529",
-    "#000000",
-    "#dc3545",
-    "#fd7e14",
-    "#ffc107",
-    "#28a745",
-    "#20c997",
-    "#17a2b8",
-    "#007bff",
-    "#6f42c1",
-    "#e83e8c",
-    "#fd1d53",
-    "#20c9a6",
-  ];
 
   if (!project || !currentPageId) return null;
 
@@ -994,16 +969,6 @@ export function DataPanel() {
                 onChange={(e) => setBackgroundColor(e.target.value)}
                 className="flex-1 p-1 text-xs border border-gray-300 rounded"
               />
-            </div>
-            <div className="grid grid-cols-11 gap-1 mt-2">
-              {colorPalette.map((color) => (
-                <button
-                  key={color}
-                  className="w-6 h-6 rounded border border-gray-300 hover:scale-110 transition-transform"
-                  style={{ backgroundColor: color }}
-                  onClick={() => setBackgroundColor(color)}
-                />
-              ))}
             </div>
           </div>
 

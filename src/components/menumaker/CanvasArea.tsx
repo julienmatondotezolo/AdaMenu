@@ -414,7 +414,7 @@ export function CanvasArea() {
     ctx.fillRect(x, y, width, height);
 
     // Draw border
-    const borderSize = (element.borderSize || 1) * canvas.zoom;
+    const borderSize = (element.borderSize || 0) * canvas.zoom;
 
     if (borderSize > 0) {
       ctx.strokeStyle = element.borderColor || "#000000";
