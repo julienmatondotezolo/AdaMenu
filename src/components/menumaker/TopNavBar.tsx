@@ -1,24 +1,7 @@
-import {
-  Check,
-  Clipboard,
-  Copy,
-  Database,
-  Download,
-  Edit2,
-  Image,
-  Loader2,
-  MousePointer,
-  Move,
-  Redo,
-  Save,
-  Type,
-  Undo,
-  X,
-} from "lucide-react";
+import { Check, Download, Edit2, Loader2, Save, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { Tool } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -26,35 +9,11 @@ interface ToolbarProps {
   onNewProject: () => void;
 }
 
-export function Toolbar({ onNewProject }: ToolbarProps) {
-  const {
-    project,
-    currentPageId,
-    editorState,
-    setTool,
-    addElement,
-    saveProject,
-    undo,
-    redo,
-    copy,
-    paste,
-    exportToPDF,
-    isExportingPDF,
-    updateProjectName,
-  } = useMenuMakerStore();
+export function TopNavBar({ onNewProject }: ToolbarProps) {
+  const { project, saveProject, exportToPDF, isExportingPDF, updateProjectName } = useMenuMakerStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
-
-  const { tool } = editorState;
-
-  const tools = [
-    { id: "select", icon: MousePointer, label: "Select" },
-    { id: "text", icon: Type, label: "Add Text" },
-    { id: "image", icon: Image, label: "Add Image" },
-    { id: "data", icon: Database, label: "Add Data" },
-    { id: "pan", icon: Move, label: "Pan" },
-  ] as const;
 
   const handleStartRename = () => {
     if (project) {
@@ -76,47 +35,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
     setEditingName("");
   };
 
-  const handleToolSelect = (toolId: Tool) => {
-    setTool(toolId);
-
-    // If data tool is selected, add a default data element
-    if (toolId === "data" && project && currentPageId) {
-      const currentPage = project.pages.find((page) => page.id === currentPageId);
-
-      if (currentPage && currentPage.layers.length > 0) {
-        // Calculate center position based on page format
-        const centerX = (currentPage.format.width - 1000) / 2;
-        const centerY = (currentPage.format.height - 400) / 2;
-
-        // Create default data element
-        const defaultDataElement = {
-          type: "data" as const,
-          x: Math.max(0, centerX), // Ensure it's not negative
-          y: Math.max(0, centerY), // Ensure it's not negative
-          width: 1000,
-          height: 400,
-          rotation: 0,
-          scaleX: 1,
-          scaleY: 1,
-          zIndex: 1,
-          locked: false,
-          visible: true,
-          opacity: 1,
-          dataType: "" as any, // Empty dataType
-          dataId: "",
-          backgroundColor: "#ffffff", // White background
-          borderColor: "#000000", // Black border
-          borderSize: 1,
-          borderType: "solid" as const,
-          borderRadius: 0,
-        };
-
-        // Add to first layer
-        addElement(currentPageId, currentPage.layers[0].id, defaultDataElement);
-      }
-    }
-  };
-
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
       {/* Left Section - File Actions */}
@@ -124,6 +42,11 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
         <Button variant="outline" size="sm" onClick={onNewProject}>
           Go to Dashboard
         </Button>
+
+        <div className="w-px h-6 bg-gray-300 mx-2" />
+      </div>
+
+      <div className="flex items-center space-x-2">
         {/* Project Name with inline editing */}
         {project && (
           <>
@@ -151,7 +74,7 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
             ) : (
               <div className="flex items-center gap-2 group">
                 <span className="font-medium text-gray-900" title={project.name}>
-                  {project.name.length > 10 ? `${project.name.substring(0, 10)}...` : project.name}
+                  {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
                 </span>
                 <Button
                   variant="ghost"
@@ -165,34 +88,6 @@ export function Toolbar({ onNewProject }: ToolbarProps) {
             )}
           </>
         )}
-        <Button variant="outline" size="sm" onClick={undo}>
-          <Undo className="w-4 h-4" />
-        </Button>
-        <Button variant="outline" size="sm" onClick={redo}>
-          <Redo className="w-4 h-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-2" />
-        <Button variant="outline" size="sm" onClick={copy}>
-          <Copy className="w-4 h-4" />
-        </Button>
-        <Button variant="outline" size="sm" onClick={paste}>
-          <Clipboard className="w-4 h-4" />
-        </Button>
-      </div>
-
-      {/* Center Section - Tools */}
-      <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
-        {tools.map((toolItem) => (
-          <Button
-            key={toolItem.id}
-            variant={tool === toolItem.id ? "default" : "ghost"}
-            size="sm"
-            onClick={() => handleToolSelect(toolItem.id)}
-            title={toolItem.label}
-          >
-            <toolItem.icon className="w-4 h-4" />
-          </Button>
-        ))}
       </div>
 
       {/* Right Section - View Controls */}

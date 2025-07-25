@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import { Copy, Database, Eye, EyeOff, Image, Lock, Plus, Trash2, Type, Unlock } from "lucide-react";
@@ -206,24 +207,18 @@ export function LayersPanel() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1">
-                          {element.type === "data" && (
-                            <Database className="w-3 h-3 text-blue-600" />
-                          )}
-                          {element.type === "text" && (
-                            <Type className="w-3 h-3 text-green-600" />
-                          )}
-                          {element.type === "image" && (
-                            <Image className="w-3 h-3 text-purple-600" />
-                          )}
+                          {element.type === "data" && <Database className="w-3 h-3 text-blue-600" />}
+                          {element.type === "text" && <Type className="w-3 h-3 text-green-600" />}
+                          {element.type === "image" && <Image className="w-3 h-3 text-purple-600" />}
                           <span className="capitalize">
-                            {element.type === "data" ? (() => {
-                              const dataInfo = getDataElementInfo(element);
-                              return dataInfo ? `Data "${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
-                            })() : element.type === "text" ? (
-                              <>
-                                Text{" "}
-                                {element.content ? `"${element.content.slice(0, 20)}..."` : ""}
-                              </>
+                            {element.type === "data" ? (
+                              (() => {
+                                const dataInfo = getDataElementInfo(element);
+
+                                return dataInfo ? `Data "${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
+                              })()
+                            ) : element.type === "text" ? (
+                              <>Text {element.content ? `"${element.content.slice(0, 20)}..."` : ""}</>
                             ) : element.type === "image" ? (
                               "Image"
                             ) : (

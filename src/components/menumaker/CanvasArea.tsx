@@ -8,8 +8,17 @@ import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
 export function CanvasArea() {
-  const { project, currentPageId, editorState, selectElements, addElement, deleteElement, updateElement } =
-    useMenuMakerStore();
+  const {
+    project,
+    currentPageId,
+    editorState,
+    selectElements,
+    addElement,
+    deleteElement,
+    updateElement,
+    setZoom,
+    setCanvasOffset,
+  } = useMenuMakerStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,10 +74,10 @@ export function CanvasArea() {
           height: finalHeight,
         });
 
-        // Calculate page offset to center it
+        // Calculate page offset to center it, incorporating canvas offset
         setPageOffset({
-          x: (finalWidth - pageWidth) / 2,
-          y: (finalHeight - pageHeight) / 2,
+          x: (finalWidth - pageWidth) / 2 + canvas.offsetX,
+          y: (finalHeight - pageHeight) / 2 + canvas.offsetY,
         });
       }
     };
@@ -76,7 +85,7 @@ export function CanvasArea() {
     updateSize();
     window.addEventListener("resize", updateSize);
     return () => window.removeEventListener("resize", updateSize);
-  }, [currentPage, canvas.zoom]);
+  }, [currentPage, canvas.zoom, canvas.offsetX, canvas.offsetY]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -113,6 +122,81 @@ export function CanvasArea() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isCanvasHovered, editorState.selectedElementIds, currentPage, currentPageId, deleteElement, selectElements]);
+
+  // Handle zoom with wheel events (pinch zoom and Ctrl+wheel)
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      // Check if the event target is the canvas or its container
+      const canvasElement = canvasRef.current;
+      const containerElement = containerRef.current;
+
+      if (!canvasElement || !containerElement || !currentPage) return;
+
+      // Check if the wheel event is over the canvas area
+      const rect = containerElement.getBoundingClientRect();
+      const isOverCanvas =
+        e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom;
+
+      if (!isOverCanvas) return;
+
+      // Detect pinch zoom (trackpad) or Ctrl+wheel (mouse)
+      const isPinchZoom = e.ctrlKey; // Trackpad pinch gestures set ctrlKey to true
+      const isCtrlWheel = e.ctrlKey && e.deltaY !== 0;
+
+      if (isPinchZoom || isCtrlWheel) {
+        e.preventDefault(); // Prevent page zoom
+
+        // Calculate zoom delta
+        const zoomSensitivity = 0.001;
+        const deltaY = e.deltaY;
+        const zoomDelta = -deltaY * zoomSensitivity;
+
+        // Get current zoom and calculate new zoom
+        const currentZoom = canvas.zoom;
+        const minZoom = 0.1;
+        const maxZoom = 5.0;
+        const newZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom + zoomDelta));
+
+        // Get mouse position relative to the container
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        // Calculate the center of the canvas for default centering
+        const canvasCenterX = (canvasSize.width - currentPage.format.width * currentZoom) / 2;
+        const canvasCenterY = (canvasSize.height - currentPage.format.height * currentZoom) / 2;
+
+        // Calculate zoom center point relative to the page content
+        const pageMouseX = (mouseX - canvasCenterX - canvas.offsetX) / currentZoom;
+        const pageMouseY = (mouseY - canvasCenterY - canvas.offsetY) / currentZoom;
+
+        // Calculate new canvas center
+        const newCanvasCenterX = (canvasSize.width - currentPage.format.width * newZoom) / 2;
+        const newCanvasCenterY = (canvasSize.height - currentPage.format.height * newZoom) / 2;
+
+        // Calculate new offset to keep the same point under the mouse
+        const newOffsetX = mouseX - newCanvasCenterX - pageMouseX * newZoom;
+        const newOffsetY = mouseY - newCanvasCenterY - pageMouseY * newZoom;
+
+        // Update zoom and offset
+        setZoom(newZoom);
+        setCanvasOffset(newOffsetX, newOffsetY);
+      }
+    };
+
+    // Add wheel event listener to the container
+    const containerElement = containerRef.current;
+
+    if (containerElement) {
+      containerElement.addEventListener("wheel", handleWheel, { passive: false });
+    }
+
+    // Cleanup
+    return () => {
+      if (containerElement) {
+        containerElement.removeEventListener("wheel", handleWheel);
+      }
+    };
+  }, [canvas.zoom, canvas.offsetX, canvas.offsetY, canvasSize, currentPage, setZoom, setCanvasOffset]);
 
   // Draw canvas content
   useEffect(() => {
@@ -1147,7 +1231,7 @@ export function CanvasArea() {
   }
 
   return (
-    <div ref={containerRef} className="h-full w-full bg-gray-50 overflow-auto">
+    <div ref={containerRef} className="h-full w-full bg-gray-50 overflow-auto" style={{ overscrollBehaviorX: "none" }}>
       <canvas
         ref={canvasRef}
         width={canvasSize.width}

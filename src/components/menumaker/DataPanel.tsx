@@ -66,7 +66,7 @@ export function DataPanel() {
     "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
   >("normal");
   const [showMenuDescriptionTextMarginTop, setShowMenuDescriptionTextMarginTop] = useState(2);
-  const [showMenuDescriptionTextMarginLeft, setShowMenuDescriptionTextMarginLeft] = useState(10);
+  const [showMenuDescriptionTextMarginLeft, setShowMenuDescriptionTextMarginLeft] = useState(0);
   const [showMenuDescriptionTextMarginRight, setShowMenuDescriptionTextMarginRight] = useState(0);
   const [showMenuDescriptionTextMarginBottom, setShowMenuDescriptionTextMarginBottom] = useState(5);
   const [showMenuDescriptionLanguage, setShowMenuDescriptionLanguage] = useState<"en" | "fr" | "it" | "nl">("en");
@@ -128,7 +128,7 @@ export function DataPanel() {
       );
       setShowMenuDescriptionTextFontWeight(selectedDataElement.showMenuDescriptionTextFontWeight || "normal");
       setShowMenuDescriptionTextMarginTop(selectedDataElement.showMenuDescriptionTextMarginTop || 2);
-      setShowMenuDescriptionTextMarginLeft(selectedDataElement.showMenuDescriptionTextMarginLeft || 10);
+      setShowMenuDescriptionTextMarginLeft(selectedDataElement.showMenuDescriptionTextMarginLeft || 0);
       setShowMenuDescriptionTextMarginRight(selectedDataElement.showMenuDescriptionTextMarginRight || 0);
       setShowMenuDescriptionTextMarginBottom(selectedDataElement.showMenuDescriptionTextMarginBottom || 50);
       setShowMenuDescriptionLanguage(selectedDataElement.showMenuDescriptionLanguage || "en");
@@ -729,7 +729,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={subcategoryTitleTextMarginTop}
                         onChange={(e) => setSubcategoryTitleTextMarginTop(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -740,7 +740,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={subcategoryTitleTextMarginBottom}
                         onChange={(e) => setSubcategoryTitleTextMarginBottom(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -751,7 +751,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={subcategoryTitleTextMarginLeft}
                         onChange={(e) => setSubcategoryTitleTextMarginLeft(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -762,7 +762,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={subcategoryTitleTextMarginRight}
                         onChange={(e) => setSubcategoryTitleTextMarginRight(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -886,7 +886,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={showMenuDescriptionTextMarginTop}
                         onChange={(e) => setShowMenuDescriptionTextMarginTop(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -897,7 +897,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={showMenuDescriptionTextMarginBottom}
                         onChange={(e) => setShowMenuDescriptionTextMarginBottom(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -908,7 +908,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={showMenuDescriptionTextMarginLeft}
                         onChange={(e) => setShowMenuDescriptionTextMarginLeft(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"
@@ -919,7 +919,7 @@ export function DataPanel() {
                       <input
                         type="number"
                         min="0"
-                        max="50"
+                        max="100"
                         value={showMenuDescriptionTextMarginRight}
                         onChange={(e) => setShowMenuDescriptionTextMarginRight(Number(e.target.value))}
                         className="w-full p-1 text-xs border border-gray-300 rounded"

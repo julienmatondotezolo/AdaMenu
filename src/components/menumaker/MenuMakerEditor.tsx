@@ -9,25 +9,18 @@ import { CenterToolbar } from "./CenterToolbar";
 import { DataPanel } from "./DataPanel";
 import { ExportLoader } from "./ExportLoader";
 import { LayersPanel } from "./LayersPanel";
+import { MainToolbar } from "./MainToolbar";
 import { PropertiesPanel } from "./PropertiesPanel";
 import { ThumbnailsPanel } from "./ThumbnailsPanel";
-import { Toolbar } from "./Toolbar";
+import { TopNavBar } from "./TopNavBar";
 
 interface MenuMakerEditorProps {
   onNewProject: () => void;
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { 
-    project, 
-    currentPageId, 
-    editorState, 
-    saveProject,
-    menuData,
-    setMenuData,
-    setMenuLoading,
-    setMenuError
-  } = useMenuMakerStore();
+  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError } =
+    useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [layersCollapsed, setLayersCollapsed] = useState(false);
@@ -42,13 +35,14 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     const loadMenuData = async () => {
       // Only fetch if not already loaded and not currently loading
       if (menuFetched.current || menuData.isLoaded || menuData.isLoading) return;
-      
+
       menuFetched.current = true;
       setMenuLoading(true);
       setMenuError(null);
 
       try {
         const menuResponse = await fetchCompleteMenu();
+
         if (menuResponse) {
           setMenuData(menuResponse);
         } else {
@@ -152,7 +146,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     <div className="flex flex-col h-full bg-gray-100" ref={containerRef}>
       {/* Top Toolbar */}
       <div className="flex-shrink-0 border-b border-gray-300 bg-white">
-        <Toolbar onNewProject={onNewProject} />
+        <TopNavBar onNewProject={onNewProject} />
       </div>
 
       {/* Main Content Area */}
@@ -167,6 +161,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
         {/* Canvas Area */}
         <div className="flex-1 overflow-hidden relative">
           <CanvasArea />
+          <MainToolbar />
           <CenterToolbar />
         </div>
 
@@ -291,38 +286,38 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
             {/* Background Panel (Removed - use Data Panel instead) */}
             <div className="border-b border-gray-300">
-                {/* Background Header */}
-                <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
-                  onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setBackgroundCollapsed(!backgroundCollapsed);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-expanded={!backgroundCollapsed}
-                  aria-controls="background-content"
-                >
-                  <h3 className="font-semibold text-gray-900">Background</h3>
-                  <div className="flex items-center">
-                    {backgroundCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
-                    )}
-                  </div>
+              {/* Background Header */}
+              <div
+                className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setBackgroundCollapsed(!backgroundCollapsed);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={!backgroundCollapsed}
+                aria-controls="background-content"
+              >
+                <h3 className="font-semibold text-gray-900">Background</h3>
+                <div className="flex items-center">
+                  {backgroundCollapsed ? (
+                    <ChevronRight className="w-4 h-4 text-gray-500" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                  )}
                 </div>
-
-                {/* Background Content */}
-                {!backgroundCollapsed && (
-                  <div id="background-content" className="max-h-96 overflow-y-auto">
-                    <BackgroundPanel />
-                  </div>
-                )}
               </div>
+
+              {/* Background Content */}
+              {!backgroundCollapsed && (
+                <div id="background-content" className="max-h-96 overflow-y-auto">
+                  <BackgroundPanel />
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

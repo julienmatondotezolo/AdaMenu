@@ -35,7 +35,7 @@ export const drawMenuItemsList = ({
       ctx.textAlign = "left";
       ctx.textBaseline = "top";
 
-      const padding = isThumbnail ? Math.max(2 * scale, 1) : 10 * scale;
+      const padding = isThumbnail ? Math.max(2 * scale, 1) : 10 * 0;
       const lineHeight = fontSize * 1.2;
       let currentY = y + padding;
 
