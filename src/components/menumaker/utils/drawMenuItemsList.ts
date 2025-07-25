@@ -59,7 +59,9 @@ export const drawMenuItemsList = ({
           : (element.subcategoryTitleTextMarginBottom || 10) * scale;
 
         ctx.fillStyle = titleColor;
-        ctx.font = `bold ${titleFontSize}px Arial`;
+        const titleFontWeight = element.subcategoryTitleTextFontWeight || "bold";
+
+        ctx.font = `${titleFontWeight} ${titleFontSize}px Arial`;
 
         // Get title text in specified language
         const titleLanguage = element.subcategoryTitleLanguage || "en";
@@ -164,7 +166,9 @@ export const drawMenuItemsList = ({
               }
 
               if (descriptionText) {
-                ctx.font = `${descriptionFontSize}px Arial`;
+                const descriptionFontWeight = element.showMenuDescriptionTextFontWeight || "normal";
+
+                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px Arial`;
                 ctx.textAlign = "left";
                 ctx.fillStyle = descriptionColor;
 
@@ -229,7 +233,9 @@ export const drawMenuItemsList = ({
               }
 
               if (descriptionText) {
-                ctx.font = `${descriptionFontSize}px Arial`;
+                const descriptionFontWeight = element.showMenuDescriptionTextFontWeight || "normal";
+
+                ctx.font = `${descriptionFontWeight} ${descriptionFontSize}px Arial`;
                 ctx.fillStyle = descriptionColor;
 
                 currentY += descMarginTop;

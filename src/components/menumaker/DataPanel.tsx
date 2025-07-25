@@ -50,6 +50,9 @@ export function DataPanel() {
   // Subcategory title properties
   const [subcategoryTitleTextColor, setSubcategoryTitleTextColor] = useState("#000000");
   const [subcategoryTitleTextFontSize, setSubcategoryTitleTextFontSize] = useState(64);
+  const [subcategoryTitleTextFontWeight, setSubcategoryTitleTextFontWeight] = useState<
+    "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  >("bold");
   const [subcategoryTitleTextMarginTop, setSubcategoryTitleTextMarginTop] = useState(0);
   const [subcategoryTitleTextMarginLeft, setSubcategoryTitleTextMarginLeft] = useState(0);
   const [subcategoryTitleTextMarginRight, setSubcategoryTitleTextMarginRight] = useState(0);
@@ -59,6 +62,9 @@ export function DataPanel() {
   // Menu description properties
   const [showMenuDescriptionTextColor, setShowMenuDescriptionTextColor] = useState("#000");
   const [showMenuDescriptionTextFontSize, setShowMenuDescriptionTextFontSize] = useState(51); // 20% less than subcategoryTitle default
+  const [showMenuDescriptionTextFontWeight, setShowMenuDescriptionTextFontWeight] = useState<
+    "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  >("normal");
   const [showMenuDescriptionTextMarginTop, setShowMenuDescriptionTextMarginTop] = useState(2);
   const [showMenuDescriptionTextMarginLeft, setShowMenuDescriptionTextMarginLeft] = useState(10);
   const [showMenuDescriptionTextMarginRight, setShowMenuDescriptionTextMarginRight] = useState(0);
@@ -107,6 +113,7 @@ export function DataPanel() {
       // Subcategory title properties
       setSubcategoryTitleTextColor(selectedDataElement.subcategoryTitleTextColor || "#000000");
       setSubcategoryTitleTextFontSize(selectedDataElement.subcategoryTitleTextFontSize || 58);
+      setSubcategoryTitleTextFontWeight(selectedDataElement.subcategoryTitleTextFontWeight || "bold");
       setSubcategoryTitleTextMarginTop(selectedDataElement.subcategoryTitleTextMarginTop || 0);
       setSubcategoryTitleTextMarginLeft(selectedDataElement.subcategoryTitleTextMarginLeft || 0);
       setSubcategoryTitleTextMarginRight(selectedDataElement.subcategoryTitleTextMarginRight || 0);
@@ -119,6 +126,7 @@ export function DataPanel() {
         selectedDataElement.showMenuDescriptionTextFontSize ||
           Math.round((selectedDataElement.subcategoryTitleTextFontSize || 48) * 0.8),
       );
+      setShowMenuDescriptionTextFontWeight(selectedDataElement.showMenuDescriptionTextFontWeight || "normal");
       setShowMenuDescriptionTextMarginTop(selectedDataElement.showMenuDescriptionTextMarginTop || 2);
       setShowMenuDescriptionTextMarginLeft(selectedDataElement.showMenuDescriptionTextMarginLeft || 10);
       setShowMenuDescriptionTextMarginRight(selectedDataElement.showMenuDescriptionTextMarginRight || 0);
@@ -200,6 +208,7 @@ export function DataPanel() {
     menuLayout,
     subcategoryTitleTextColor,
     subcategoryTitleTextFontSize,
+    subcategoryTitleTextFontWeight,
     subcategoryTitleTextMarginTop,
     subcategoryTitleTextMarginLeft,
     subcategoryTitleTextMarginRight,
@@ -207,6 +216,7 @@ export function DataPanel() {
     subcategoryTitleLanguage,
     showMenuDescriptionTextColor,
     showMenuDescriptionTextFontSize,
+    showMenuDescriptionTextFontWeight,
     showMenuDescriptionTextMarginTop,
     showMenuDescriptionTextMarginLeft,
     showMenuDescriptionTextMarginRight,
@@ -264,6 +274,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
       subcategoryTitleTextFontSize:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontSize : undefined,
+      subcategoryTitleTextFontWeight:
+        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontWeight : undefined,
       subcategoryTitleTextMarginTop:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginTop : undefined,
       subcategoryTitleTextMarginLeft:
@@ -279,6 +291,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextColor : undefined,
       showMenuDescriptionTextFontSize:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontSize : undefined,
+      showMenuDescriptionTextFontWeight:
+        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontWeight : undefined,
       showMenuDescriptionTextMarginTop:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginTop : undefined,
       showMenuDescriptionTextMarginLeft:
@@ -368,6 +382,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
       subcategoryTitleTextFontSize:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontSize : undefined,
+      subcategoryTitleTextFontWeight:
+        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontWeight : undefined,
       subcategoryTitleTextMarginTop:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginTop : undefined,
       subcategoryTitleTextMarginLeft:
@@ -383,6 +399,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextColor : undefined,
       showMenuDescriptionTextFontSize:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontSize : undefined,
+      showMenuDescriptionTextFontWeight:
+        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontWeight : undefined,
       showMenuDescriptionTextMarginTop:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginTop : undefined,
       showMenuDescriptionTextMarginLeft:
@@ -665,6 +683,43 @@ export function DataPanel() {
                   <div className="text-xs text-gray-500 text-right">{subcategoryTitleTextFontSize}px</div>
                 </div>
 
+                {/* Subcategory Title Font Weight */}
+                <div className="mb-3">
+                  <Label className="text-sm font-medium">Title Font Weight</Label>
+                  <select
+                    value={subcategoryTitleTextFontWeight}
+                    onChange={(e) =>
+                      setSubcategoryTitleTextFontWeight(
+                        e.target.value as
+                          | "normal"
+                          | "bold"
+                          | "100"
+                          | "200"
+                          | "300"
+                          | "400"
+                          | "500"
+                          | "600"
+                          | "700"
+                          | "800"
+                          | "900",
+                      )
+                    }
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                    <option value="100">100 - Thin</option>
+                    <option value="200">200 - Extra Light</option>
+                    <option value="300">300 - Light</option>
+                    <option value="400">400 - Normal</option>
+                    <option value="500">500 - Medium</option>
+                    <option value="600">600 - Semi Bold</option>
+                    <option value="700">700 - Bold</option>
+                    <option value="800">800 - Extra Bold</option>
+                    <option value="900">900 - Black</option>
+                  </select>
+                </div>
+
                 {/* Subcategory Title Margins */}
                 <div className="mb-3">
                   <Label className="text-sm font-medium">Title Margins</Label>
@@ -783,6 +838,43 @@ export function DataPanel() {
                     className="w-full mt-1"
                   />
                   <div className="text-xs text-gray-500 text-right">{showMenuDescriptionTextFontSize}px</div>
+                </div>
+
+                {/* Menu Description Font Weight */}
+                <div className="mb-3">
+                  <Label className="text-sm font-medium">Description Font Weight</Label>
+                  <select
+                    value={showMenuDescriptionTextFontWeight}
+                    onChange={(e) =>
+                      setShowMenuDescriptionTextFontWeight(
+                        e.target.value as
+                          | "normal"
+                          | "bold"
+                          | "100"
+                          | "200"
+                          | "300"
+                          | "400"
+                          | "500"
+                          | "600"
+                          | "700"
+                          | "800"
+                          | "900",
+                      )
+                    }
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold</option>
+                    <option value="100">100 - Thin</option>
+                    <option value="200">200 - Extra Light</option>
+                    <option value="300">300 - Light</option>
+                    <option value="400">400 - Normal</option>
+                    <option value="500">500 - Medium</option>
+                    <option value="600">600 - Semi Bold</option>
+                    <option value="700">700 - Bold</option>
+                    <option value="800">800 - Extra Bold</option>
+                    <option value="900">900 - Black</option>
+                  </select>
                 </div>
 
                 {/* Menu Description Margins */}

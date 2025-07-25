@@ -132,6 +132,18 @@ export interface DataElement extends BaseElement {
   // Subcategory title properties (when showSubcategoryTitle is true)
   subcategoryTitleTextColor?: string;
   subcategoryTitleTextFontSize?: number;
+  subcategoryTitleTextFontWeight?:
+    | "normal"
+    | "bold"
+    | "100"
+    | "200"
+    | "300"
+    | "400"
+    | "500"
+    | "600"
+    | "700"
+    | "800"
+    | "900";
   subcategoryTitleTextMarginTop?: number;
   subcategoryTitleTextMarginLeft?: number;
   subcategoryTitleTextMarginRight?: number;
@@ -140,6 +152,18 @@ export interface DataElement extends BaseElement {
   // Menu description properties (when showMenuDescription is true)
   showMenuDescriptionTextColor?: string;
   showMenuDescriptionTextFontSize?: number;
+  showMenuDescriptionTextFontWeight?:
+    | "normal"
+    | "bold"
+    | "100"
+    | "200"
+    | "300"
+    | "400"
+    | "500"
+    | "600"
+    | "700"
+    | "800"
+    | "900";
   showMenuDescriptionTextMarginTop?: number;
   showMenuDescriptionTextMarginLeft?: number;
   showMenuDescriptionTextMarginRight?: number;
