@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
-import { fetchMenuItemByCategoryId } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
 
@@ -35,9 +34,10 @@ export function CanvasArea() {
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
 
   // Function to draw menu items list for menuitem data type
-  const drawMenuItemsList = async (ctx: CanvasRenderingContext2D, element: any, x: number, y: number, canvas: any) => {
+  const drawMenuItemsList = (ctx: CanvasRenderingContext2D, element: any, x: number, y: number, canvas: any) => {
     try {
-      const menuItems = await fetchMenuItemByCategoryId({ categoryId: element.subcategoryData.id });
+      // Use menu items from subcategory data that's already stored in the element
+      const menuItems = element.subcategoryData?.menuItems || [];
 
       if (menuItems && menuItems.length > 0) {
         ctx.fillStyle = element.textColor || "#333";
@@ -440,17 +440,19 @@ export function CanvasArea() {
     } else if (element.dataType === "menuitem" && element.subcategoryData) {
       // Draw menu items list instead of simple text
       drawMenuItemsList(ctx, element, x, y, canvas);
-      return; // Early return since we've already drawn the content
+      // Don't return early - we still need to draw selection borders
+      displayText = ""; // Set empty to avoid drawing default text
     } else if (element.dataType === "menuitem") {
       displayText = "Select category and subcategory";
     } else {
       displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
     }
 
-    // Position text at top-left with some padding
-    const padding = 10 * canvas.zoom;
-
-    ctx.fillText(displayText, x + padding, y + padding);
+    // Position text at top-left with some padding (only if we have displayText)
+    if (displayText) {
+      const padding = 10 * canvas.zoom;
+      ctx.fillText(displayText, x + padding, y + padding);
+    }
 
     // Draw selection border and resize handles if selected
     if (isSelected) {

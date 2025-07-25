@@ -55,6 +55,7 @@ export interface Category {
 
 export interface MenuData {
   categories: Category[];
+  menuItems: MenuItem[]; // Flattened array of all menu items
   isLoading: boolean;
   error: string | null;
   isLoaded: boolean;

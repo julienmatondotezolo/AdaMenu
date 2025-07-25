@@ -102,15 +102,16 @@ export function DataPanel() {
           if (selectedDataElement.subcategoryData) {
             setSelectedSubCategory(selectedDataElement.subcategoryData.id);
             setSelectedSubCategoryData(selectedDataElement.subcategoryData);
-            // Set the parent category of the subcategory
-            if (selectedDataElement.subcategoryData.parentCategory) {
-              setSelectedCategory(selectedDataElement.subcategoryData.parentCategory.id);
-              const parentCategory = categories?.find(
-                (cat: any) => cat.id === selectedDataElement.subcategoryData.parentCategory.id,
-              );
-
-              setSelectedCategoryData(parentCategory || null);
-              setAvailableSubCategories(parentCategory?.subCategories || []);
+            
+            // Find the parent category by searching through all categories
+            const parentCategory = categories?.find((cat: any) => 
+              cat.subCategories.some((subcat: any) => subcat.id === selectedDataElement.subcategoryData.id)
+            );
+            
+            if (parentCategory) {
+              setSelectedCategory(parentCategory.id);
+              setSelectedCategoryData(parentCategory);
+              setAvailableSubCategories(parentCategory.subCategories || []);
             }
           }
         }
@@ -309,43 +310,38 @@ export function DataPanel() {
         </div>
 
         {/* Category Selection */}
-        <div>
-          <Label className="text-sm font-medium">Category</Label>
-          <select
-            value={selectedCategory}
-            onChange={(e) => {
-              const categoryId = e.target.value;
+        {selectedDataType !== "menuitem" && (
+          <div>
+            <Label className="text-sm font-medium">Category</Label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => {
+                const categoryId = e.target.value;
 
-              setSelectedCategory(categoryId);
-              // Find and store the full category data
-              const categoryData = categories?.find((cat: any) => cat.id === categoryId);
+                setSelectedCategory(categoryId);
+                // Find and store the full category data
+                const categoryData = categories?.find((cat: any) => cat.id === categoryId);
 
-              setSelectedCategoryData(categoryData || null);
+                setSelectedCategoryData(categoryData || null);
 
-              // If dataType is subcategory, populate available subcategories
-              if (selectedDataType === "subcategory") {
-                setAvailableSubCategories(categoryData?.subCategories || []);
-                setSelectedSubCategory(""); // Reset subcategory selection
-                setSelectedSubCategoryData(null);
-              }
-
-              // If dataType is menuitem, populate available subcategories and reset menu item
-              if (selectedDataType === "menuitem") {
-                setAvailableSubCategories(categoryData?.subCategories || []);
-                setSelectedSubCategory(""); // Reset subcategory selection
-                setSelectedSubCategoryData(null);
-              }
-            }}
-            className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-          >
-            <option value="">Select Category</option>
-            {categories?.map((category: any) => (
-              <option key={category.id} value={category.id}>
-                {category.names?.en || category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+                // If dataType is subcategory, populate available subcategories
+                if (selectedDataType === "subcategory") {
+                  setAvailableSubCategories(categoryData?.subCategories || []);
+                  setSelectedSubCategory(""); // Reset subcategory selection
+                  setSelectedSubCategoryData(null);
+                }
+              }}
+              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Select Category</option>
+              {categories?.map((category: any) => (
+                <option key={category.id} value={category.id}>
+                  {category.names?.en || category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         {/* Subcategory Selection (only if subcategory is selected) */}
         {selectedDataType === "subcategory" && (
@@ -430,8 +426,6 @@ export function DataPanel() {
                 ))}
               </select>
             </div>
-
-
           </>
         )}
 

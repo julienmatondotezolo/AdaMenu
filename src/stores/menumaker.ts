@@ -154,6 +154,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     // Menu data state
     menuData: {
       categories: [],
+      menuItems: [],
       isLoading: false,
       error: null,
       isLoaded: false,
@@ -1373,39 +1374,65 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   ctx.setLineDash([]);
                 }
 
-                                 // Draw data content
-                 ctx.fillStyle = dataElement.textColor || "#333";
-                 const fontSize = dataElement.fontSize || 64;
+                // Draw data content
+                ctx.fillStyle = dataElement.textColor || "#333";
+                const fontSize = dataElement.fontSize || 64;
 
-                 ctx.font = `${fontSize}px Arial`;
-                 ctx.textAlign = "left";
-                 ctx.textBaseline = "top";
+                ctx.font = `${fontSize}px Arial`;
+                ctx.textAlign = "left";
+                ctx.textBaseline = "top";
 
-                 let displayText = "";
+                if (dataElement.dataType === "category" && dataElement.categoryData) {
+                  // Show the actual category name
+                  const displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Select category";
+                  const padding = 10;
+                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
+                } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
+                  // Show the actual subcategory name
+                  const displayText = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Select subcategory";
+                  const padding = 10;
+                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
+                } else if (dataElement.dataType === "menuitem" && dataElement.subcategoryData) {
+                  // Draw menu items list for menu item data elements
+                  const menuItems = dataElement.subcategoryData.menuItems || [];
+                  const padding = 10;
+                  const lineHeight = fontSize * 1.2;
+                  let currentY = dataElement.y + padding;
 
-                 if (dataElement.dataType === "category" && dataElement.categoryData) {
-                   // Show the actual category name
-                   displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Select category";
-                 } else if (dataElement.dataType === "category" && dataElement.dataId) {
-                   displayText = "Select category";
-                 } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
-                   // Show the actual subcategory name
-                   displayText = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Select subcategory";
-                 } else if (dataElement.dataType === "subcategory" && dataElement.dataId) {
-                   displayText = "Select subcategory";
-                 } else if (dataElement.dataType === "menuitem" && dataElement.menuItemData) {
-                   // Show the actual menu item name
-                   displayText = dataElement.menuItemData.names?.en || dataElement.menuItemData.name || "Select menu item";
-                 } else if (dataElement.dataType === "menuitem" && dataElement.dataId) {
-                   displayText = "Select menu item";
-                 } else {
-                   displayText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
-                 }
+                  // Draw subcategory title
+                  ctx.font = `bold ${fontSize * 1.2}px Arial`;
+                  const subcategoryTitle = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Menu Items";
+                  ctx.fillText(subcategoryTitle, dataElement.x + padding, currentY);
+                  currentY += lineHeight * 1.5;
 
-                 // Position text at top-left with some padding
-                 const padding = 10;
+                  // Draw menu items
+                  ctx.font = `${fontSize}px Arial`;
+                  menuItems.forEach((menuItem: any) => {
+                    if (currentY < dataElement.y + dataElement.height - padding) {
+                      const itemName = menuItem.names?.en || menuItem.name || "Unnamed Item";
+                      const price = menuItem.price ? `€${menuItem.price.toFixed(2)}` : "";
+                      const itemText = price ? `${itemName} - ${price}` : itemName;
 
-                 ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
+                      ctx.fillText(itemText, dataElement.x + padding, currentY);
+                      currentY += lineHeight;
+                    }
+                  });
+                } else {
+                  // Default display for other cases
+                  let displayText = "";
+                  if (dataElement.dataType === "category" && dataElement.dataId) {
+                    displayText = "Select category";
+                  } else if (dataElement.dataType === "subcategory" && dataElement.dataId) {
+                    displayText = "Select subcategory";
+                  } else if (dataElement.dataType === "menuitem" && dataElement.dataId) {
+                    displayText = "Select menu item";
+                  } else {
+                    displayText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
+                  }
+
+                  const padding = 10;
+                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
+                }
               }
 
               ctx.restore();
@@ -1433,7 +1460,30 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
     // Actions for menu data management
     setMenuData: (categories: Category[]) => {
-      set({ menuData: { ...get().menuData, categories, isLoaded: true } });
+      // Flatten all menu items from all subcategories
+      const allMenuItems: any[] = [];
+      categories.forEach(category => {
+        category.subCategories.forEach(subcategory => {
+          subcategory.menuItems.forEach(menuItem => {
+            allMenuItems.push({
+              ...menuItem,
+              categoryId: category.id,
+              categoryName: category.names,
+              subcategoryId: subcategory.id,
+              subcategoryName: subcategory.names
+            });
+          });
+        });
+      });
+
+      set({ 
+        menuData: { 
+          ...get().menuData, 
+          categories, 
+          menuItems: allMenuItems,
+          isLoaded: true 
+        } 
+      });
     },
     setMenuLoading: (isLoading: boolean) => {
       set({ menuData: { ...get().menuData, isLoading } });
@@ -1442,7 +1492,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       set({ menuData: { ...get().menuData, error } });
     },
     clearMenuData: () => {
-      set({ menuData: { categories: [], isLoading: false, error: null, isLoaded: false } });
+      set({ menuData: { categories: [], menuItems: [], isLoading: false, error: null, isLoaded: false } });
     },
   })),
 );

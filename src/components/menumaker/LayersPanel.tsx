@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { Copy, Eye, EyeOff, Lock, Plus, Trash2, Unlock } from "lucide-react";
+import { Copy, Database, Eye, EyeOff, Image, Lock, Plus, Trash2, Type, Unlock } from "lucide-react";
 import React from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
@@ -79,6 +79,34 @@ export function LayersPanel() {
     if (editorState.selectedLayerId && currentPage.layers.length > 1) {
       deleteLayer(currentPageId!, editorState.selectedLayerId);
     }
+  };
+
+  // Helper function to get data element display information
+  const getDataElementInfo = (element: any) => {
+    if (element.type !== "data") return null;
+
+    let dataType = "";
+    let value = "";
+
+    switch (element.dataType) {
+      case "category":
+        dataType = "Category";
+        value = element.categoryData?.names?.en || element.categoryData?.name || "Select category";
+        break;
+      case "subcategory":
+        dataType = "Subcategory";
+        value = element.subcategoryData?.names?.en || element.subcategoryData?.name || "Select subcategory";
+        break;
+      case "menuitem":
+        dataType = "Menu Item";
+        value = element.subcategoryData?.names?.en || element.subcategoryData?.name || "Select subcategory";
+        break;
+      default:
+        dataType = "Data";
+        value = "Unknown";
+    }
+
+    return { dataType, value };
   };
 
   return (
@@ -177,10 +205,32 @@ export function LayersPanel() {
                       title="Click to select element"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="capitalize">
-                          {element.type}{" "}
-                          {element.type === "text" && element.content ? `"${element.content.slice(0, 20)}..."` : ""}
-                        </span>
+                        <div className="flex items-center space-x-1">
+                          {element.type === "data" && (
+                            <Database className="w-3 h-3 text-blue-600" />
+                          )}
+                          {element.type === "text" && (
+                            <Type className="w-3 h-3 text-green-600" />
+                          )}
+                          {element.type === "image" && (
+                            <Image className="w-3 h-3 text-purple-600" />
+                          )}
+                          <span className="capitalize">
+                            {element.type === "data" ? (() => {
+                              const dataInfo = getDataElementInfo(element);
+                              return dataInfo ? `Data "${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
+                            })() : element.type === "text" ? (
+                              <>
+                                Text{" "}
+                                {element.content ? `"${element.content.slice(0, 20)}..."` : ""}
+                              </>
+                            ) : element.type === "image" ? (
+                              "Image"
+                            ) : (
+                              element.type
+                            )}
+                          </span>
+                        </div>
                         <span className="text-gray-400">
                           {Math.round(element.x)}, {Math.round(element.y)}
                         </span>

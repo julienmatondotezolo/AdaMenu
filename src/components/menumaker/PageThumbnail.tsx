@@ -8,6 +8,85 @@ interface PageThumbnailProps {
   height: number;
 }
 
+// Function to draw menu items list for menuitem data type in thumbnail
+const drawMenuItemsListThumbnail = (ctx: CanvasRenderingContext2D, element: any, x: number, y: number, elementWidth: number, elementHeight: number, scale: number) => {
+  try {
+    // Use menu items from subcategory data that's already stored in the element
+    const menuItems = element.subcategoryData?.menuItems || [];
+
+    if (menuItems && menuItems.length > 0) {
+      ctx.fillStyle = element.textColor || "#333";
+      const fontSize = Math.max((element.fontSize || 12) * scale * 0.3, 2); // Smaller font for thumbnails
+
+      ctx.font = `${fontSize}px Arial`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "top";
+
+      const padding = Math.max(2 * scale, 1);
+      const lineHeight = fontSize * 1.2;
+      let currentY = y + padding;
+
+      // Draw subcategory title if there's space
+      if (elementHeight > fontSize * 2) {
+        ctx.font = `bold ${Math.max(fontSize * 1.2, 3)}px Arial`;
+        const subcategoryTitle = element.subcategoryData.names?.en || element.subcategoryData.name || "Menu Items";
+        
+        // Truncate title if too long
+        const maxTitleWidth = elementWidth - (padding * 2);
+        let displayTitle = subcategoryTitle;
+        if (ctx.measureText(displayTitle).width > maxTitleWidth) {
+          displayTitle = subcategoryTitle.substring(0, Math.floor(maxTitleWidth / fontSize)) + "...";
+        }
+
+        ctx.fillText(displayTitle, x + padding, currentY);
+        currentY += lineHeight * 1.5;
+      }
+
+      // Draw menu items
+      ctx.font = `${fontSize}px Arial`;
+      let itemsDrawn = 0;
+      const maxItems = Math.floor((elementHeight - currentY + y - padding) / lineHeight);
+
+      menuItems.forEach((menuItem: any, index: number) => {
+        if (itemsDrawn < maxItems && currentY < y + elementHeight - padding) {
+          const itemName = menuItem.names?.en || menuItem.name || "Item";
+          const price = menuItem.price ? `€${menuItem.price.toFixed(2)}` : "";
+          
+          // Truncate item name if too long
+          const maxItemWidth = elementWidth - (padding * 2);
+          let displayText = price ? `${itemName} - ${price}` : itemName;
+          if (ctx.measureText(displayText).width > maxItemWidth) {
+            const truncatedName = itemName.substring(0, Math.floor(maxItemWidth / (fontSize * 0.6))) + "...";
+            displayText = price ? `${truncatedName} - ${price}` : truncatedName;
+          }
+
+          ctx.fillText(displayText, x + padding, currentY);
+          currentY += lineHeight;
+          itemsDrawn++;
+        }
+      });
+
+      // If there are more items, show indicator
+      if (menuItems.length > maxItems && maxItems > 0) {
+        ctx.fillText("...", x + padding, Math.min(currentY, y + elementHeight - padding - fontSize));
+      }
+    } else {
+      // No menu items available
+      ctx.fillStyle = element.textColor || "#333";
+      ctx.font = `${Math.max((element.fontSize || 12) * scale * 0.3, 2)}px Arial`;
+      ctx.textAlign = "center";
+      ctx.fillText("No items", x + elementWidth / 2, y + elementHeight / 2);
+    }
+  } catch (error) {
+    console.warn("Error drawing menu items in thumbnail:", error);
+    // Fallback to simple text
+    ctx.fillStyle = "#333";
+    ctx.font = `${Math.max((element.fontSize || 12) * scale * 0.3, 2)}px Arial`;
+    ctx.textAlign = "center";
+    ctx.fillText("MENU", x + elementWidth / 2, y + elementHeight / 2);
+  }
+};
+
 export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -131,12 +210,32 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
 
             // Draw data type text if element is large enough
             if (elementWidth > 15 && elementHeight > 8) {
-              ctx.fillStyle = "#333";
-              ctx.font = `${Math.min(elementHeight * 0.2, 6)}px Arial`;
-              ctx.textAlign = "center";
-              const dataTypeText = dataElement.dataType ? dataElement.dataType.substring(0, 4).toUpperCase() : "DATA";
-
-              ctx.fillText(dataTypeText, x + elementWidth / 2, y + elementHeight / 2);
+              // Handle different data types
+              if (dataElement.dataType === "menuitem" && dataElement.subcategoryData) {
+                // Draw menu items list for menu item data elements
+                drawMenuItemsListThumbnail(ctx, dataElement, x, y, elementWidth, elementHeight, scale);
+              } else if (dataElement.dataType === "category" && dataElement.categoryData) {
+                // Show category name
+                ctx.fillStyle = dataElement.textColor || "#333";
+                ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                ctx.textAlign = "center";
+                const categoryName = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Category";
+                ctx.fillText(categoryName, x + elementWidth / 2, y + elementHeight / 2);
+              } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
+                // Show subcategory name
+                ctx.fillStyle = dataElement.textColor || "#333";
+                ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                ctx.textAlign = "center";
+                const subcategoryName = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Subcategory";
+                ctx.fillText(subcategoryName, x + elementWidth / 2, y + elementHeight / 2);
+              } else {
+                // Default data type text for other cases
+                ctx.fillStyle = "#333";
+                ctx.font = `${Math.min(elementHeight * 0.2, 6)}px Arial`;
+                ctx.textAlign = "center";
+                const dataTypeText = dataElement.dataType ? dataElement.dataType.substring(0, 4).toUpperCase() : "DATA";
+                ctx.fillText(dataTypeText, x + elementWidth / 2, y + elementHeight / 2);
+              }
             }
           }
 
