@@ -129,6 +129,22 @@ export interface DataElement extends BaseElement {
   showMenuDescription?: boolean; // Toggle to show/hide menu description
   showCurrencySign?: boolean; // Toggle to show/hide € sign
   menuLayout?: "left" | "justified"; // Layout: "left" (current) or "justified" (text left, price right)
+  // Subcategory title properties (when showSubcategoryTitle is true)
+  subcategoryTitleTextColor?: string;
+  subcategoryTitleTextFontSize?: number;
+  subcategoryTitleTextMarginTop?: number;
+  subcategoryTitleTextMarginLeft?: number;
+  subcategoryTitleTextMarginRight?: number;
+  subcategoryTitleTextMarginBottom?: number;
+  subcategoryTitleLanguage?: "en" | "fr" | "it" | "nl";
+  // Menu description properties (when showMenuDescription is true)
+  showMenuDescriptionTextColor?: string;
+  showMenuDescriptionTextFontSize?: number;
+  showMenuDescriptionTextMarginTop?: number;
+  showMenuDescriptionTextMarginLeft?: number;
+  showMenuDescriptionTextMarginRight?: number;
+  showMenuDescriptionTextMarginBottom?: number;
+  showMenuDescriptionLanguage?: "en" | "fr" | "it" | "nl";
 }
 
 // Union type for all elements

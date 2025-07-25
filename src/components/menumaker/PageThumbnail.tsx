@@ -143,7 +143,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                   width: elementWidth,
                   height: elementHeight,
                   scale,
-                  isThumbnail: true
+                  isThumbnail: true,
                 });
               } else if (dataElement.dataType === "category" && dataElement.categoryData) {
                 // Show category name
@@ -151,13 +151,16 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
                 ctx.textAlign = "center";
                 const categoryName = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Category";
+
                 ctx.fillText(categoryName, x + elementWidth / 2, y + elementHeight / 2);
               } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
                 // Show subcategory name
                 ctx.fillStyle = dataElement.textColor || "#333";
                 ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
                 ctx.textAlign = "center";
-                const subcategoryName = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Subcategory";
+                const subcategoryName =
+                  dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Subcategory";
+
                 ctx.fillText(subcategoryName, x + elementWidth / 2, y + elementHeight / 2);
               } else {
                 // Default data type text for other cases
@@ -165,6 +168,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 ctx.font = `${Math.min(elementHeight * 0.2, 6)}px Arial`;
                 ctx.textAlign = "center";
                 const dataTypeText = dataElement.dataType ? dataElement.dataType.substring(0, 4).toUpperCase() : "DATA";
+
                 ctx.fillText(dataTypeText, x + elementWidth / 2, y + elementHeight / 2);
               }
             }

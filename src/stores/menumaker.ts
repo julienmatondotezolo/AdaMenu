@@ -4,9 +4,9 @@
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
-import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, Tool } from "../types/menumaker";
-import { MenuData, Category } from "../types/adamenudata";
 import { drawMenuItemsList } from "../components/menumaker/utils/drawMenuItemsList";
+import { Category, MenuData } from "../types/adamenudata";
+import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, Tool } from "../types/menumaker";
 
 interface MenuMakerStore {
   // Project state
@@ -266,10 +266,11 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         const projects = projectKeys.map(key => {
           try {
             const projectData = JSON.parse(localStorage.getItem(key) || '{}');
+
             return {
               key,
               updatedAt: projectData.updatedAt || projectData.createdAt || '1970-01-01T00:00:00.000Z',
-              size: new Blob([localStorage.getItem(key) || '']).size
+              size: new Blob([localStorage.getItem(key) || '']).size,
             };
           } catch {
             return { key, updatedAt: '1970-01-01T00:00:00.000Z', size: 0 };
@@ -1387,11 +1388,13 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   // Show the actual category name
                   const displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Select category";
                   const padding = 10;
+
                   ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
                 } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
                   // Show the actual subcategory name
                   const displayText = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Select subcategory";
                   const padding = 10;
+
                   ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
                 } else if (dataElement.dataType === "menuitem" && dataElement.subcategoryData) {
                   // Draw menu items list for menu item data elements using the utility function
@@ -1403,11 +1406,12 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                     width: dataElement.width,
                     height: dataElement.height,
                     scale: 1,
-                    isThumbnail: false
+                    isThumbnail: false,
                   });
                 } else {
                   // Default display for other cases
                   let displayText = "";
+
                   if (dataElement.dataType === "category" && dataElement.dataId) {
                     displayText = "Select category";
                   } else if (dataElement.dataType === "subcategory" && dataElement.dataId) {
@@ -1419,6 +1423,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   }
 
                   const padding = 10;
+
                   ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
                 }
               }
@@ -1450,6 +1455,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     setMenuData: (categories: Category[]) => {
       // Flatten all menu items from all subcategories
       const allMenuItems: any[] = [];
+
       categories.forEach(category => {
         category.subCategories.forEach(subcategory => {
           subcategory.menuItems.forEach(menuItem => {
@@ -1458,7 +1464,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
               categoryId: category.id,
               categoryName: category.names,
               subcategoryId: subcategory.id,
-              subcategoryName: subcategory.names
+              subcategoryName: subcategory.names,
             });
           });
         });
@@ -1469,8 +1475,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           ...get().menuData, 
           categories, 
           menuItems: allMenuItems,
-          isLoaded: true 
-        } 
+          isLoaded: true, 
+        }, 
       });
     },
     setMenuLoading: (isLoading: boolean) => {

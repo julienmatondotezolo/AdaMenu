@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
-import { MenuItem } from "@/types/adamenudata";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
@@ -252,13 +251,13 @@ export function CanvasArea() {
       ctx.strokeStyle = "#0066cc";
       ctx.lineWidth = 2;
       ctx.globalAlpha = 1;
-      
+
       // Calculate bounding box that properly wraps the text
       const selectionPadding = 2;
       const selectionX = x - selectionPadding;
       const selectionY = y - selectionPadding;
-      const selectionWidth = textWidth + (selectionPadding * 2);
-      const selectionHeight = textHeight + (selectionPadding * 2);
+      const selectionWidth = textWidth + selectionPadding * 2;
+      const selectionHeight = textHeight + selectionPadding * 2;
 
       // Draw selection border
       ctx.setLineDash([4, 4]);
@@ -386,7 +385,7 @@ export function CanvasArea() {
         width,
         height,
         scale: canvas.zoom,
-        isThumbnail: false
+        isThumbnail: false,
       });
       // Don't return early - we still need to draw selection borders
       displayText = ""; // Set empty to avoid drawing default text
@@ -399,6 +398,7 @@ export function CanvasArea() {
     // Position text at top-left with some padding (only if we have displayText)
     if (displayText) {
       const padding = 10 * canvas.zoom;
+
       ctx.fillText(displayText, x + padding, y + padding);
     }
 
@@ -593,15 +593,19 @@ export function CanvasArea() {
     // For text elements, calculate dimensions based on actual text size
     if (element.type === "text") {
       const canvasElement = canvasRef.current;
+
       if (canvasElement) {
         const ctx = canvasElement.getContext("2d");
+
         if (ctx) {
           const fontSize = (element as any).fontSize * canvas.zoom;
+
           ctx.font = `${(element as any).fontStyle} ${fontSize}px ${(element as any).fontFamily}`;
           const textMetrics = ctx.measureText((element as any).content);
           const selectionPadding = 2;
-          width = textMetrics.width + (selectionPadding * 2);
-          height = fontSize + (selectionPadding * 2);
+
+          width = textMetrics.width + selectionPadding * 2;
+          height = fontSize + selectionPadding * 2;
         } else {
           // Fallback if context not available
           width = element.width * canvas.zoom;
@@ -616,6 +620,7 @@ export function CanvasArea() {
       // For non-text elements, use normal dimensions
       const elementWidth = tempDim ? tempDim.width : element.width;
       const elementHeight = tempDim ? tempDim.height : element.height;
+
       width = elementWidth * canvas.zoom;
       height = elementHeight * canvas.zoom;
     }
@@ -697,8 +702,8 @@ export function CanvasArea() {
     const selectionPadding = 2;
     const hoverX = x - selectionPadding;
     const hoverY = y - selectionPadding;
-    const hoverWidth = textWidth + (selectionPadding * 2);
-    const hoverHeight = textHeight + (selectionPadding * 2);
+    const hoverWidth = textWidth + selectionPadding * 2;
+    const hoverHeight = textHeight + selectionPadding * 2;
 
     // Draw hover bounding box
     ctx.strokeStyle = "#ff6b35";
@@ -743,26 +748,24 @@ export function CanvasArea() {
 
         if (canvasElement) {
           const ctx = canvasElement.getContext("2d");
+
           if (ctx) {
             // Measure actual text dimensions
             ctx.font = `${element.fontStyle} ${element.fontSize}px ${element.fontFamily}`;
             const textMetrics = ctx.measureText(element.content);
             const selectionPadding = 2;
-            textWidth = textMetrics.width + (selectionPadding * 2);
-            textHeight = element.fontSize + (selectionPadding * 2);
+
+            textWidth = textMetrics.width + selectionPadding * 2;
+            textHeight = element.fontSize + selectionPadding * 2;
           } else {
             // Fallback to rough approximation
             textHeight = element.fontSize || 16;
-            textWidth = element.content
-              ? element.content.length * (element.fontSize || 16) * 0.6
-              : element.width || 0;
+            textWidth = element.content ? element.content.length * (element.fontSize || 16) * 0.6 : element.width || 0;
           }
         } else {
           // Fallback to rough approximation
           textHeight = element.fontSize || 16;
-          textWidth = element.content
-            ? element.content.length * (element.fontSize || 16) * 0.6
-            : element.width || 0;
+          textWidth = element.content ? element.content.length * (element.fontSize || 16) * 0.6 : element.width || 0;
         }
 
         // Adjust for selection padding positioning (matching the bounding box)

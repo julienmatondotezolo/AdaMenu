@@ -59,4 +59,4 @@ export interface MenuData {
   isLoading: boolean;
   error: string | null;
   isLoaded: boolean;
-} 
+}

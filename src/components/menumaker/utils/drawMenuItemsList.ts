@@ -20,7 +20,7 @@ export const drawMenuItemsList = ({
   width,
   height,
   scale = 1,
-  isThumbnail = false
+  isThumbnail = false,
 }: DrawMenuItemsListOptions) => {
   try {
     // Use menu items from subcategory data that's already stored in the element
@@ -41,22 +41,54 @@ export const drawMenuItemsList = ({
 
       // Draw subcategory title (if enabled)
       const showTitle = element.showSubcategoryTitle !== false; // Default to true
+
       if (showTitle && height > fontSize * 2) {
-        ctx.font = `bold ${Math.max(fontSize * 1.2, isThumbnail ? 3 : fontSize)}px Arial`;
-        const subcategoryTitle = element.subcategoryData.names?.en || element.subcategoryData.name || "Menu Items";
-        
+        // Use custom subcategory title properties if available
+        const titleColor = element.subcategoryTitleTextColor || element.textColor || "#333";
+        const titleFontSize = isThumbnail
+          ? Math.max((element.subcategoryTitleTextFontSize || fontSize * 1.2) * scale * 0.3, 3)
+          : (element.subcategoryTitleTextFontSize || fontSize * 1.2) * scale;
+
+        // Apply margins (scaled)
+        const titleMarginTop = isThumbnail ? 0 : (element.subcategoryTitleTextMarginTop || 0) * scale;
+        const titleMarginLeft = isThumbnail
+          ? Math.max(2 * scale, 1)
+          : element.subcategoryTitleTextMarginLeft || padding;
+        const titleMarginBottom = isThumbnail
+          ? Math.max(2 * scale, 1)
+          : (element.subcategoryTitleTextMarginBottom || 10) * scale;
+
+        ctx.fillStyle = titleColor;
+        ctx.font = `bold ${titleFontSize}px Arial`;
+
+        // Get title text in specified language
+        const titleLanguage = element.subcategoryTitleLanguage || "en";
+        let subcategoryTitle = "Menu Items";
+
+        if (element.subcategoryData) {
+          if (element.subcategoryData.names && element.subcategoryData.names[titleLanguage]) {
+            subcategoryTitle = element.subcategoryData.names[titleLanguage];
+          } else {
+            subcategoryTitle = element.subcategoryData.names?.en || element.subcategoryData.name || "Menu Items";
+          }
+        }
+
+        // Adjust currentY position with top margin
+        currentY = y + padding + titleMarginTop;
+
         if (isThumbnail) {
           // Truncate title if too long for thumbnail
-          const maxTitleWidth = width - (padding * 2);
+          const maxTitleWidth = width - titleMarginLeft * 2;
           let displayTitle = subcategoryTitle;
+
           if (ctx.measureText(displayTitle).width > maxTitleWidth) {
-            displayTitle = subcategoryTitle.substring(0, Math.floor(maxTitleWidth / fontSize)) + "...";
+            displayTitle = subcategoryTitle.substring(0, Math.floor(maxTitleWidth / titleFontSize)) + "...";
           }
-          ctx.fillText(displayTitle, x + padding, currentY);
+          ctx.fillText(displayTitle, x + titleMarginLeft, currentY);
         } else {
-          ctx.fillText(subcategoryTitle, x + padding, currentY);
+          ctx.fillText(subcategoryTitle, x + titleMarginLeft, currentY);
         }
-        currentY += lineHeight * 1.5;
+        currentY += titleFontSize + titleMarginBottom;
       }
 
       // Draw menu items
@@ -68,73 +100,143 @@ export const drawMenuItemsList = ({
       const showDescription = element.showMenuDescription === true; // Default to false
       const showCurrency = element.showCurrencySign !== false; // Default to true
 
-      menuItems.forEach((menuItem: MenuItem, index: number) => {
+      menuItems.forEach((menuItem: MenuItem) => {
         if ((!isThumbnail || itemsDrawn < maxItems) && currentY < y + height - padding) {
           const itemName = menuItem.names?.en || "Unnamed Item";
-          const description = showDescription ? (menuItem.descriptions?.en || "") : "";
-          const price = menuItem.price ? (showCurrency ? `€${menuItem.price.toFixed(2)}` : menuItem.price.toFixed(2)) : "";
+          const description = showDescription ? menuItem.descriptions?.en || "" : "";
+          const price = menuItem.price
+            ? showCurrency
+              ? `€${menuItem.price.toFixed(2)}`
+              : menuItem.price.toFixed(2)
+            : "";
 
           if (layout === "justified" && !isThumbnail) {
             // Justified layout: text on left, price on right
             const rightPadding = padding;
-            const availableWidth = width - padding - rightPadding;
-            
+
             // Draw item name on the left
             ctx.textAlign = "left";
             ctx.fillText(itemName, x + padding, currentY);
-            
+
             // Draw price on the right
             if (price) {
               ctx.textAlign = "right";
               ctx.fillText(price, x + width - rightPadding, currentY);
             }
-            
+
             currentY += lineHeight;
-            
+
             // Draw description if enabled (left aligned, smaller font)
             if (description && showDescription) {
-              const descriptionFontSize = fontSize * 0.8;
-              ctx.font = `${descriptionFontSize}px Arial`;
-              ctx.textAlign = "left";
-              ctx.fillStyle = (element.textColor || "#333") + "80"; // Semi-transparent
-              ctx.fillText(description, x + padding, currentY);
-              ctx.fillStyle = element.textColor || "#333"; // Reset color
-              ctx.font = `${fontSize}px Arial`; // Reset font
-              currentY += descriptionFontSize * 1.1;
+              // Use custom description properties if available
+              const descriptionColor = element.showMenuDescriptionTextColor || element.textColor + "80" || "#66666680";
+              const descriptionFontSize = isThumbnail
+                ? Math.max((element.showMenuDescriptionTextFontSize || fontSize * 0.8) * scale * 0.3, 2)
+                : (element.showMenuDescriptionTextFontSize || fontSize * 0.8) * scale;
+
+              // Apply margins (scaled)
+              const descMarginTop = isThumbnail ? 0 : (element.showMenuDescriptionTextMarginTop || 2) * scale;
+              const descMarginLeft = isThumbnail
+                ? Math.max(2 * scale, 1)
+                : (element.showMenuDescriptionTextMarginLeft || 10) * scale;
+              const descMarginBottom = isThumbnail ? 0 : (element.showMenuDescriptionTextMarginBottom || 5) * scale;
+
+              // Get description text in specified language
+              const descLanguage = element.showMenuDescriptionLanguage || "en";
+              let descriptionText = "";
+
+              if (menuItem.descriptions) {
+                if (descLanguage === "en" && menuItem.descriptions.en) {
+                  descriptionText = menuItem.descriptions.en;
+                } else if (descLanguage === "fr" && menuItem.descriptions.fr) {
+                  descriptionText = menuItem.descriptions.fr;
+                } else if (descLanguage === "it" && menuItem.descriptions.it) {
+                  descriptionText = menuItem.descriptions.it;
+                } else if (descLanguage === "nl" && menuItem.descriptions.nl) {
+                  descriptionText = menuItem.descriptions.nl;
+                } else {
+                  descriptionText = menuItem.descriptions.en || "";
+                }
+              }
+
+              if (descriptionText) {
+                ctx.font = `${descriptionFontSize}px Arial`;
+                ctx.textAlign = "left";
+                ctx.fillStyle = descriptionColor;
+
+                currentY += descMarginTop;
+                ctx.fillText(descriptionText, x + descMarginLeft, currentY);
+                ctx.fillStyle = element.textColor || "#333"; // Reset color
+                ctx.font = `${fontSize}px Arial`; // Reset font
+                currentY += descriptionFontSize + descMarginBottom;
+              }
             }
           } else {
             // Left layout: all text on the left (current behavior)
             ctx.textAlign = "left";
-            
+
             let itemText = itemName;
+
             if (price) {
               itemText = `${itemName} - ${price}`;
             }
-            
+
             if (isThumbnail) {
               // Truncate item text if too long for thumbnail
-              const maxItemWidth = width - (padding * 2);
+              const maxItemWidth = width - padding * 2;
+
               if (ctx.measureText(itemText).width > maxItemWidth) {
                 const truncatedName = itemName.substring(0, Math.floor(maxItemWidth / (fontSize * 0.6))) + "...";
+
                 itemText = price ? `${truncatedName} - ${price}` : truncatedName;
               }
             }
 
             ctx.fillText(itemText, x + padding, currentY);
             currentY += lineHeight;
-            
+
             // Draw description if enabled (smaller font, slightly indented)
             if (description && showDescription && !isThumbnail) {
-              const descriptionFontSize = fontSize * 0.8;
-              ctx.font = `${descriptionFontSize}px Arial`;
-              ctx.fillStyle = (element.textColor || "#333") + "80"; // Semi-transparent
-              ctx.fillText(description, x + padding + 10, currentY);
-              ctx.fillStyle = element.textColor || "#333"; // Reset color
-              ctx.font = `${fontSize}px Arial`; // Reset font
-              currentY += descriptionFontSize * 1.1;
+              // Use custom description properties if available
+              const descriptionColor = element.showMenuDescriptionTextColor || element.textColor + "80" || "#66666680";
+              const descriptionFontSize = (element.showMenuDescriptionTextFontSize || fontSize * 0.8) * scale;
+
+              // Apply margins (scaled)
+              const descMarginTop = (element.showMenuDescriptionTextMarginTop || 2) * scale;
+              const descMarginLeft = (element.showMenuDescriptionTextMarginLeft || 10) * scale;
+              const descMarginBottom = (element.showMenuDescriptionTextMarginBottom || 5) * scale;
+
+              // Get description text in specified language
+              const descLanguage = element.showMenuDescriptionLanguage || "en";
+              let descriptionText = "";
+
+              if (menuItem.descriptions) {
+                if (descLanguage === "en" && menuItem.descriptions.en) {
+                  descriptionText = menuItem.descriptions.en;
+                } else if (descLanguage === "fr" && menuItem.descriptions.fr) {
+                  descriptionText = menuItem.descriptions.fr;
+                } else if (descLanguage === "it" && menuItem.descriptions.it) {
+                  descriptionText = menuItem.descriptions.it;
+                } else if (descLanguage === "nl" && menuItem.descriptions.nl) {
+                  descriptionText = menuItem.descriptions.nl;
+                } else {
+                  descriptionText = menuItem.descriptions.en || "";
+                }
+              }
+
+              if (descriptionText) {
+                ctx.font = `${descriptionFontSize}px Arial`;
+                ctx.fillStyle = descriptionColor;
+
+                currentY += descMarginTop;
+                ctx.fillText(descriptionText, x + padding + descMarginLeft, currentY);
+                ctx.fillStyle = element.textColor || "#333"; // Reset color
+                ctx.font = `${fontSize}px Arial`; // Reset font
+                currentY += descriptionFontSize + descMarginBottom;
+              }
             }
           }
-          
+
           itemsDrawn++;
         }
       });
@@ -159,4 +261,4 @@ export const drawMenuItemsList = ({
     ctx.textAlign = "center";
     ctx.fillText(isThumbnail ? "MENU" : "Error loading menu items", x + width / 2, y + height / 2);
   }
-}; 
+};
