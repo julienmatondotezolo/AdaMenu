@@ -14,6 +14,7 @@ interface MenuMakerStore {
   currentPageId: string | null;
   editorState: EditorState;
   isExportingPDF: boolean;
+  isSaving: boolean;
 
   // Menu data state
   menuData: MenuData;
@@ -151,6 +152,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     currentPageId: null,
     editorState: createDefaultEditorState(),
     isExportingPDF: false,
+    isSaving: false,
 
     // Menu data state
     menuData: {
@@ -214,6 +216,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       const { project } = get();
 
       if (project) {
+        // Set saving state to true
+        set({ isSaving: true });
+
         const updatedProject = {
           ...project,
           updatedAt: new Date().toISOString(),
@@ -221,7 +226,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
         try {
           localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-          set({ project: updatedProject });
+          set({ project: updatedProject, isSaving: false });
         } catch (error) {
           if (error instanceof DOMException && error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded. Attempting to clean up old projects...');
@@ -231,15 +236,17 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             
             try {
               localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-              set({ project: updatedProject });
-              console.info('Project saved successfully after cleanup.');
+              set({ project: updatedProject, isSaving: false });
+              console.warn('Project saved successfully after cleanup.');
             } catch (retryError) {
               console.error('Failed to save project even after cleanup:', retryError);
               alert('Storage full! Please delete some old projects to continue saving.');
+              set({ isSaving: false });
             }
           } else {
             console.error('Failed to save project:', error);
             alert('Failed to save project. Please try again.');
+            set({ isSaving: false });
           }
         }
       }
@@ -285,10 +292,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         
         projectsToRemove.forEach(project => {
           localStorage.removeItem(project.key);
-          console.info(`Removed old project: ${project.key}`);
+          console.warn(`Removed old project: ${project.key}`);
         });
 
-        console.info(`Cleaned up ${projectsToRemove.length} old projects to free storage space.`);
+        console.warn(`Cleaned up ${projectsToRemove.length} old projects to free storage space.`);
       } catch (error) {
         console.error('Failed to cleanup old projects:', error);
       }

@@ -1,4 +1,4 @@
-import { Check, Download, Edit2, Loader2, Save, X } from "lucide-react";
+import { Check, Clock, Download, Edit2, Loader2, Save, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
@@ -10,10 +10,16 @@ interface ToolbarProps {
 }
 
 export function TopNavBar({ onNewProject }: ToolbarProps) {
-  const { project, saveProject, exportToPDF, isExportingPDF, updateProjectName } = useMenuMakerStore();
+  const { project, saveProject, exportToPDF, isExportingPDF, isSaving, updateProjectName } = useMenuMakerStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
+
+  const formatSavedDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   const handleStartRename = () => {
     if (project) {
@@ -72,18 +78,19 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
                 </Button>
               </div>
             ) : (
-              <div className="flex items-center gap-2 group">
-                <span className="font-medium text-gray-900" title={project.name}>
-                  {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleStartRename}
-                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Edit2 className="w-3 h-3" />
-                </Button>
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900" title={project.name}>
+                    {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
+                  </span>
+                  <Button variant="ghost" size="sm" onClick={handleStartRename} className="h-6 w-6 p-0">
+                    <Edit2 className="w-3 h-3" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <Clock className="w-3 h-3" />
+                  <span>Saved: {formatSavedDate(project.updatedAt)}</span>
+                </div>
               </div>
             )}
           </>
@@ -94,9 +101,9 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
       <div className="flex items-center space-x-2">
         <div className="w-px h-6 bg-gray-300 mx-2" />
 
-        <Button variant="outline" size="sm" onClick={saveProject}>
-          <Save className="w-4 h-4 mr-1" />
-          Save
+        <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
+          {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
+          {isSaving ? "Saving menu..." : "Save"}
         </Button>
         <Button variant="outline" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
           {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
