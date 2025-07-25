@@ -121,6 +121,7 @@ export interface DataElement extends BaseElement {
   subcategoryData?: any; // Store the full subcategory data
   menuItemData?: any; // Store the full menu item data
   backgroundColor: string;
+  backgroundOpacity?: number;
   borderColor: string;
   borderSize: number;
   borderType: "solid" | "dashed" | "dotted";
@@ -144,7 +145,15 @@ export interface DataElement extends BaseElement {
   // Subcategory title properties (when showSubcategoryTitle is true)
   subcategoryTitleTextColor?: string;
   subcategoryTitleTextFontSize?: number;
+  subcategoryTitleTextFontFamily?: string;
   subcategoryTitleTextFontWeight?: FontWeight;
+  showDivider?: boolean;
+  dividerColor?: string;
+  dividerSize?: number;
+  dividerWidth?: "full" | "title" | "custom";
+  dividerCustomWidth?: number;
+  dividerSpaceTop?: number;
+  dividerSpaceBottom?: number;
   subcategoryTitleTextMarginTop?: number;
   subcategoryTitleTextMarginLeft?: number;
   subcategoryTitleTextMarginRight?: number;

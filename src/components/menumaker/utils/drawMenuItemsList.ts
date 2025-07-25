@@ -122,12 +122,13 @@ export const drawMenuItemsList = ({
           : element.subcategoryTitleTextMarginLeft || padding;
         const titleMarginBottom = isThumbnail
           ? Math.max(2 * scale, 1)
-          : (element.subcategoryTitleTextMarginBottom || 10) * scale;
+          : (element.subcategoryTitleTextMarginBottom || 0) * scale;
 
         ctx.fillStyle = titleColor;
         const titleFontWeight = element.subcategoryTitleTextFontWeight || "bold";
+        const titleFontFamily = getFontFamily(element.subcategoryTitleTextFontFamily || "Arial, sans-serif");
 
-        ctx.font = `${titleFontWeight} ${titleFontSize}px "Arial"`;
+        ctx.font = `${titleFontWeight} ${titleFontSize}px "${titleFontFamily}"`;
 
         // Get title text in specified language
         const titleLanguage = element.subcategoryTitleLanguage || "en";
@@ -161,6 +162,42 @@ export const drawMenuItemsList = ({
         ctx.fillStyle = element.textColor || "#333";
 
         currentY += titleFontSize + titleMarginBottom;
+
+        // Draw divider if enabled
+        if (element.showDivider && !isThumbnail) {
+          const dividerColor = element.dividerColor || "#000000";
+          const dividerSize = element.dividerSize || 1;
+          const dividerWidth = element.dividerWidth || "full";
+          const dividerCustomWidth = element.dividerCustomWidth || 100;
+          const dividerSpaceTop = (element.dividerSpaceTop || 0) * scale;
+          const dividerSpaceBottom = (element.dividerSpaceBottom || 0) * scale;
+
+          currentY += dividerSpaceTop;
+
+          // Calculate divider width based on setting
+          let actualDividerWidth = width;
+          let dividerX = x;
+
+          if (dividerWidth === "title") {
+            // Use title width
+            const titleWidth = ctx.measureText(subcategoryTitle).width;
+
+            actualDividerWidth = titleWidth;
+            dividerX = x + titleMarginLeft;
+          } else if (dividerWidth === "custom") {
+            // Use custom percentage of container width
+            actualDividerWidth = (width * dividerCustomWidth) / 100;
+            dividerX = x + (width - actualDividerWidth) / 2; // Center the divider
+          }
+
+          // Draw the divider line
+          ctx.fillStyle = dividerColor;
+          ctx.fillRect(dividerX, currentY, actualDividerWidth, dividerSize * scale);
+
+          // Reset color and add bottom spacing
+          ctx.fillStyle = element.textColor || "#333";
+          currentY += dividerSpaceBottom;
+        }
       }
 
       // Draw menu items

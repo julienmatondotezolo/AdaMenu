@@ -69,9 +69,17 @@ export function DataPanel() {
   // Subcategory title properties
   const [subcategoryTitleTextColor, setSubcategoryTitleTextColor] = useState("#000000");
   const [subcategoryTitleTextFontSize, setSubcategoryTitleTextFontSize] = useState(64);
+  const [subcategoryTitleTextFontFamily, setSubcategoryTitleTextFontFamily] = useState("Arial, sans-serif");
   const [subcategoryTitleTextFontWeight, setSubcategoryTitleTextFontWeight] = useState<
     "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
   >("bold");
+  const [showDivider, setShowDivider] = useState(false);
+  const [dividerColor, setDividerColor] = useState("#000000");
+  const [dividerSize, setDividerSize] = useState(1);
+  const [dividerWidth, setDividerWidth] = useState<"full" | "title" | "custom">("full");
+  const [dividerCustomWidth, setDividerCustomWidth] = useState(100);
+  const [dividerSpaceTop, setDividerSpaceTop] = useState(0);
+  const [dividerSpaceBottom, setDividerSpaceBottom] = useState(50);
   const [subcategoryTitleTextMarginTop, setSubcategoryTitleTextMarginTop] = useState(0);
   const [subcategoryTitleTextMarginLeft, setSubcategoryTitleTextMarginLeft] = useState(0);
   const [subcategoryTitleTextMarginRight, setSubcategoryTitleTextMarginRight] = useState(0);
@@ -121,6 +129,7 @@ export function DataPanel() {
       setElementWidth(Math.round(selectedDataElement.width || 200));
       setElementHeight(Math.round(selectedDataElement.height || 100));
       setBackgroundColor(selectedDataElement.backgroundColor || "#ffffff");
+      setBackgroundOpacity(selectedDataElement.backgroundOpacity || 1);
       setBorderColor(selectedDataElement.borderColor || "#000000");
       setBorderSize(selectedDataElement.borderSize || 0);
       setBorderType(selectedDataElement.borderType || "solid");
@@ -146,11 +155,19 @@ export function DataPanel() {
       // Subcategory title properties
       setSubcategoryTitleTextColor(selectedDataElement.subcategoryTitleTextColor || "#000000");
       setSubcategoryTitleTextFontSize(selectedDataElement.subcategoryTitleTextFontSize || 58);
+      setSubcategoryTitleTextFontFamily(selectedDataElement.subcategoryTitleTextFontFamily || "Arial, sans-serif");
       setSubcategoryTitleTextFontWeight(selectedDataElement.subcategoryTitleTextFontWeight || "bold");
+      setShowDivider(selectedDataElement.showDivider || false);
+      setDividerColor(selectedDataElement.dividerColor || "#000000");
+      setDividerSize(selectedDataElement.dividerSize || 1);
+      setDividerWidth(selectedDataElement.dividerWidth || "full");
+      setDividerCustomWidth(selectedDataElement.dividerCustomWidth || 100);
+      setDividerSpaceTop(selectedDataElement.dividerSpaceTop || 0);
+      setDividerSpaceBottom(selectedDataElement.dividerSpaceBottom || 0);
       setSubcategoryTitleTextMarginTop(selectedDataElement.subcategoryTitleTextMarginTop || 0);
       setSubcategoryTitleTextMarginLeft(selectedDataElement.subcategoryTitleTextMarginLeft || 0);
       setSubcategoryTitleTextMarginRight(selectedDataElement.subcategoryTitleTextMarginRight || 0);
-      setSubcategoryTitleTextMarginBottom(selectedDataElement.subcategoryTitleTextMarginBottom || 50);
+      setSubcategoryTitleTextMarginBottom(selectedDataElement.subcategoryTitleTextMarginBottom || 0);
       setSubcategoryTitleLanguage(selectedDataElement.subcategoryTitleLanguage || "en");
 
       // Menu description properties
@@ -163,7 +180,7 @@ export function DataPanel() {
       setShowMenuDescriptionTextMarginTop(selectedDataElement.showMenuDescriptionTextMarginTop || 2);
       setShowMenuDescriptionTextMarginLeft(selectedDataElement.showMenuDescriptionTextMarginLeft || 0);
       setShowMenuDescriptionTextMarginRight(selectedDataElement.showMenuDescriptionTextMarginRight || 0);
-      setShowMenuDescriptionTextMarginBottom(selectedDataElement.showMenuDescriptionTextMarginBottom || 50);
+      setShowMenuDescriptionTextMarginBottom(selectedDataElement.showMenuDescriptionTextMarginBottom || 0);
       setShowMenuDescriptionLanguage(selectedDataElement.showMenuDescriptionLanguage || "en");
       setShowMenuDescriptionLineBreakChars(selectedDataElement.showMenuDescriptionLineBreakChars || 50);
 
@@ -255,7 +272,15 @@ export function DataPanel() {
     menuLayout,
     subcategoryTitleTextColor,
     subcategoryTitleTextFontSize,
+    subcategoryTitleTextFontFamily,
     subcategoryTitleTextFontWeight,
+    showDivider,
+    dividerColor,
+    dividerSize,
+    dividerWidth,
+    dividerCustomWidth,
+    dividerSpaceTop,
+    dividerSpaceBottom,
     subcategoryTitleTextMarginTop,
     subcategoryTitleTextMarginLeft,
     subcategoryTitleTextMarginRight,
@@ -335,8 +360,20 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
       subcategoryTitleTextFontSize:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontSize : undefined,
+      subcategoryTitleTextFontFamily:
+        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontFamily : undefined,
       subcategoryTitleTextFontWeight:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontWeight : undefined,
+      showDivider: selectedDataType === "menuitem" && showSubcategoryTitle ? showDivider : undefined,
+      dividerColor: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerColor : undefined,
+      dividerSize: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSize : undefined,
+      dividerWidth: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerWidth : undefined,
+      dividerCustomWidth:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerCustomWidth : undefined,
+      dividerSpaceTop:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceTop : undefined,
+      dividerSpaceBottom:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceBottom : undefined,
       subcategoryTitleTextMarginTop:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginTop : undefined,
       subcategoryTitleTextMarginLeft:
@@ -422,6 +459,7 @@ export function DataPanel() {
       dataType: selectedDataType,
       dataId: dataId,
       backgroundColor,
+      backgroundOpacity,
       borderColor,
       borderSize,
       borderType,
@@ -454,8 +492,20 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
       subcategoryTitleTextFontSize:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontSize : undefined,
+      subcategoryTitleTextFontFamily:
+        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontFamily : undefined,
       subcategoryTitleTextFontWeight:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontWeight : undefined,
+      showDivider: selectedDataType === "menuitem" && showSubcategoryTitle ? showDivider : undefined,
+      dividerColor: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerColor : undefined,
+      dividerSize: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSize : undefined,
+      dividerWidth: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerWidth : undefined,
+      dividerCustomWidth:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerCustomWidth : undefined,
+      dividerSpaceTop:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceTop : undefined,
+      dividerSpaceBottom:
+        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceBottom : undefined,
       subcategoryTitleTextMarginTop:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginTop : undefined,
       subcategoryTitleTextMarginLeft:
@@ -836,9 +886,6 @@ export function DataPanel() {
 
             {/* Menu Item Price */}
             <div className="border-b pb-4 mb-4">
-              {/* Menu Item Price */}
-              <h5 className="font-medium text-gray-800 mb-3">Menu Item Price</h5>
-
               {/* Show Price Toggle */}
               <div className="mb-3 flex items-center justify-between">
                 <Label className="text-sm font-medium">Show Price</Label>
@@ -855,6 +902,8 @@ export function DataPanel() {
 
               {showPrice && (
                 <div className="space-y-3">
+                  {/* Menu Item Price */}
+                  <h5 className="font-medium text-gray-800 mb-3">Menu Item Price</h5>
                   {/* Show Currency Sign Toggle */}
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium">Show € Sign</Label>
@@ -982,6 +1031,21 @@ export function DataPanel() {
               <div className="border-b pb-4 mb-4">
                 <h5 className="font-medium text-gray-800 mb-3">Subcategory Title</h5>
 
+                {/* Subcategory Title Language */}
+                <div className="mb-3">
+                  <Label className="text-sm font-medium">Title Language</Label>
+                  <select
+                    value={subcategoryTitleLanguage}
+                    onChange={(e) => setSubcategoryTitleLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="it">Italiano</option>
+                    <option value="nl">Nederlands</option>
+                  </select>
+                </div>
+
                 {/* Subcategory Title Color */}
                 <div className="mb-3">
                   <Label className="text-sm font-medium">Title Color</Label>
@@ -1023,6 +1087,28 @@ export function DataPanel() {
                   <div className="text-xs text-gray-500 text-right">{subcategoryTitleTextFontSize}px</div>
                 </div>
 
+                {/* Subcategory Title Font Family */}
+                <div className="mb-3">
+                  <Label className="text-sm font-medium">Title Font Family</Label>
+                  <select
+                    value={subcategoryTitleTextFontFamily}
+                    onChange={(e) => setSubcategoryTitleTextFontFamily(e.target.value)}
+                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  >
+                    <option value="Poppins, sans-serif">Poppins</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Helvetica, sans-serif">Helvetica</option>
+                    <option value="Times New Roman, serif">Times New Roman</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Verdana, sans-serif">Verdana</option>
+                    <option value="Tahoma, sans-serif">Tahoma</option>
+                    <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                    <option value="Impact, sans-serif">Impact</option>
+                    <option value="Comic Sans MS, cursive">Comic Sans MS</option>
+                    <option value="Courier New, monospace">Courier New</option>
+                  </select>
+                </div>
+
                 {/* Subcategory Title Font Weight */}
                 <div className="mb-3">
                   <Label className="text-sm font-medium">Title Font Weight</Label>
@@ -1059,6 +1145,119 @@ export function DataPanel() {
                     <option value="900">900 - Black</option>
                   </select>
                 </div>
+
+                {/* Show Divider Toggle */}
+                <div className="mb-3 flex items-center justify-between">
+                  <Label className="text-sm font-medium">Show Divider</Label>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={showDivider}
+                      onChange={(e) => setShowDivider(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                {/* Divider Properties - only show when showDivider is true */}
+                {showDivider && (
+                  <div className="mb-4 space-y-3 pl-4 border-l-2 border-gray-200">
+                    <h6 className="font-medium text-gray-700 text-sm">Divider Settings</h6>
+
+                    {/* Divider Color */}
+                    <div>
+                      <Label className="text-sm font-medium">Divider Color</Label>
+                      <div className="mt-1 flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={dividerColor}
+                          onChange={(e) => setDividerColor(e.target.value)}
+                          className="h-8 w-16 rounded border border-gray-300"
+                        />
+                        <input
+                          type="text"
+                          value={dividerColor}
+                          onChange={(e) => setDividerColor(e.target.value)}
+                          className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Divider Size */}
+                    <div>
+                      <Label className="text-sm font-medium">Divider Size</Label>
+                      <input
+                        type="range"
+                        min="1"
+                        max="10"
+                        value={dividerSize}
+                        onChange={(e) => setDividerSize(Number(e.target.value))}
+                        className="w-full mt-1"
+                      />
+                      <div className="text-xs text-gray-500 text-right">{dividerSize}px</div>
+                    </div>
+
+                    {/* Divider Width */}
+                    <div>
+                      <Label className="text-sm font-medium">Divider Width</Label>
+                      <select
+                        value={dividerWidth}
+                        onChange={(e) => setDividerWidth(e.target.value as "full" | "title" | "custom")}
+                        className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      >
+                        <option value="full">Full Width</option>
+                        <option value="title">Title Width</option>
+                        <option value="custom">Custom Width</option>
+                      </select>
+                    </div>
+
+                    {/* Custom Width - only show when dividerWidth is custom */}
+                    {dividerWidth === "custom" && (
+                      <div>
+                        <Label className="text-sm font-medium">Custom Width (%)</Label>
+                        <input
+                          type="range"
+                          min="10"
+                          max="100"
+                          value={dividerCustomWidth}
+                          onChange={(e) => setDividerCustomWidth(Number(e.target.value))}
+                          className="w-full mt-1"
+                        />
+                        <div className="text-xs text-gray-500 text-right">{dividerCustomWidth}%</div>
+                      </div>
+                    )}
+
+                    {/* Divider Spacing */}
+                    <div>
+                      <Label className="text-sm font-medium">Divider Spacing</Label>
+                      <div className="grid grid-cols-2 gap-2 mt-1">
+                        <div>
+                          <Label className="text-xs text-gray-600">Top</Label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="200"
+                            value={dividerSpaceTop}
+                            onChange={(e) => setDividerSpaceTop(Number(e.target.value))}
+                            className="w-full p-1 text-xs border border-gray-300 rounded"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-gray-600">Bottom</Label>
+                          <input
+                            type="number"
+                            min="0"
+                            max="200"
+                            value={dividerSpaceBottom}
+                            onChange={(e) => setDividerSpaceBottom(Number(e.target.value))}
+                            className="w-full p-1 text-xs border border-gray-300 rounded"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Subcategory Title Margins */}
                 <div className="mb-3">
@@ -1109,21 +1308,6 @@ export function DataPanel() {
                       />
                     </div>
                   </div>
-                </div>
-
-                {/* Subcategory Title Language */}
-                <div className="mb-3">
-                  <Label className="text-sm font-medium">Title Language</Label>
-                  <select
-                    value={subcategoryTitleLanguage}
-                    onChange={(e) => setSubcategoryTitleLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                  >
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                    <option value="it">Italiano</option>
-                    <option value="nl">Nederlands</option>
-                  </select>
                 </div>
               </div>
             )}
