@@ -5,7 +5,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { Button } from "../ui/button";
 
 export function BackgroundPanel() {
-  const { project, currentPageId, updatePageBackground } = useMenuMakerStore();
+  const { project, currentPageId, updatePageBackground, saveProject } = useMenuMakerStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -44,7 +44,18 @@ export function BackgroundPanel() {
   };
 
   const handleRemoveImage = () => {
-    updatePageBackground(currentPageId, undefined, undefined);
+    updatePageBackground(currentPageId, undefined, "");
+    saveProject();
+  };
+
+  const handleOpacityChange = (opacity: number) => {
+    // Update state immediately for real-time visual feedback
+    updatePageBackground(currentPageId, undefined, undefined, opacity);
+  };
+
+  const handleOpacityChangeComplete = () => {
+    // Save project and update thumbnails when dragging stops
+    saveProject();
   };
 
   const handleImageClick = () => {
@@ -102,7 +113,7 @@ export function BackgroundPanel() {
         <h4 className="text-sm font-medium text-gray-900 mb-3">Background Image</h4>
 
         {/* Current Background Image */}
-        {currentPage.backgroundImage ? (
+        {currentPage.backgroundImage && currentPage.backgroundImage.trim() !== "" ? (
           <div className="mb-3">
             <button
               className="relative w-full group"
@@ -151,15 +162,38 @@ export function BackgroundPanel() {
         {/* Upload Button (Alternative) */}
         <Button variant="outline" size="sm" onClick={handleImageClick} className="w-full mt-2">
           <Upload className="w-4 h-4 mr-2" />
-          {currentPage.backgroundImage ? "Change Image" : "Upload Image"}
+          {currentPage.backgroundImage && currentPage.backgroundImage.trim() !== "" ? "Change Image" : "Upload Image"}
         </Button>
       </div>
 
       {/* Image Settings */}
-      {currentPage.backgroundImage && (
+      {currentPage.backgroundImage && currentPage.backgroundImage.trim() !== "" && (
         <div>
           <h4 className="text-sm font-medium text-gray-900 mb-3">Image Settings</h4>
           <div className="space-y-2">
+            <div>
+              <label htmlFor="bg-opacity" className="text-xs text-gray-600 mb-1 block">
+                Background Opacity
+              </label>
+              <div className="flex items-center space-x-2">
+                <input
+                  id="bg-opacity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={currentPage.backgroundImageOpacity ?? 1}
+                  onChange={(e) => handleOpacityChange(parseFloat(e.target.value))}
+                  onMouseUp={handleOpacityChangeComplete}
+                  onTouchEnd={handleOpacityChangeComplete}
+                  onKeyUp={handleOpacityChangeComplete}
+                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                />
+                <span className="text-xs text-gray-600 w-10 text-right">
+                  {Math.round((currentPage.backgroundImageOpacity ?? 1) * 100)}%
+                </span>
+              </div>
+            </div>
             <div>
               <label htmlFor="bg-size" className="text-xs text-gray-600 mb-1 block">
                 Background Size

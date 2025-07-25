@@ -262,7 +262,10 @@ export function CanvasArea() {
 
       if (cachedImage && cachedImage.complete) {
         // Image is loaded and ready to draw
+        ctx.save();
+        ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
         ctx.drawImage(cachedImage, pageOffset.x, pageOffset.y, pageWidth, pageHeight);
+        ctx.restore();
       } else if (!cachedImage) {
         // Load the image and cache it
         const img = new Image();

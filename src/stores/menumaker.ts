@@ -42,7 +42,7 @@ interface MenuMakerStore {
   setCurrentPage: (pageId: string) => void;
   updatePageName: (pageId: string, name: string) => void;
   updatePageFormat: (pageId: string, format: string, customWidth?: number, customHeight?: number) => void;
-  updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string) => void;
+  updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number) => void;
 
   // Actions for layer management
   addLayer: (pageId: string, name: string) => void;
@@ -505,7 +505,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       }
     },
 
-    updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string) => {
+    updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number) => {
       const { project } = get();
 
       if (project) {
@@ -513,8 +513,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           page.id === pageId
             ? {
               ...page,
-              backgroundColor: backgroundColor ?? page.backgroundColor,
-              backgroundImage: backgroundImage ?? page.backgroundImage,
+              backgroundColor: backgroundColor !== undefined ? backgroundColor : page.backgroundColor,
+              backgroundImage: backgroundImage !== undefined ? (backgroundImage || undefined) : page.backgroundImage,
+              backgroundImageOpacity: backgroundImageOpacity !== undefined ? backgroundImageOpacity : page.backgroundImageOpacity ?? 1,
             }
             : page,
         );
@@ -1304,7 +1305,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                 img.onerror = reject;
                 img.src = page.backgroundImage!;
               });
+              ctx.save();
+              ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
               ctx.drawImage(img, 0, 0, page.format.width, page.format.height);
+              ctx.restore();
             } catch (error) {
               console.warn("Failed to load background image for page", i + 1);
             }

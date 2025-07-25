@@ -41,7 +41,10 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
       const img = new Image();
 
       img.onload = () => {
+        ctx.save();
+        ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
         ctx.drawImage(img, 0, 0, width, height);
+        ctx.restore();
         // Redraw elements after background image loads
         drawElements();
       };

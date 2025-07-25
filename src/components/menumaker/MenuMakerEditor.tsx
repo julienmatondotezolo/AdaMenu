@@ -313,7 +313,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
               {/* Background Content */}
               {!backgroundCollapsed && (
-                <div id="background-content" className="max-h-96 overflow-y-auto">
+                <div id="background-content" className="overflow-y-auto">
                   <BackgroundPanel />
                 </div>
               )}

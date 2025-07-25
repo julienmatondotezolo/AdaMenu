@@ -174,6 +174,7 @@ export interface MenuPage {
   customHeight?: number;
   backgroundColor: string;
   backgroundImage?: string;
+  backgroundImageOpacity?: number; // 0-1, default 1
   layers: Layer[];
   thumbnail?: string; // base64 data URL
 }
