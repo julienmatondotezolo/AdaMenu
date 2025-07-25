@@ -6,6 +6,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, Tool } from "../types/menumaker";
 import { MenuData, Category } from "../types/adamenudata";
+import { drawMenuItemsList } from "../components/menumaker/utils/drawMenuItemsList";
 
 interface MenuMakerStore {
   // Project state
@@ -1393,29 +1394,16 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   const padding = 10;
                   ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
                 } else if (dataElement.dataType === "menuitem" && dataElement.subcategoryData) {
-                  // Draw menu items list for menu item data elements
-                  const menuItems = dataElement.subcategoryData.menuItems || [];
-                  const padding = 10;
-                  const lineHeight = fontSize * 1.2;
-                  let currentY = dataElement.y + padding;
-
-                  // Draw subcategory title
-                  ctx.font = `bold ${fontSize * 1.2}px Arial`;
-                  const subcategoryTitle = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Menu Items";
-                  ctx.fillText(subcategoryTitle, dataElement.x + padding, currentY);
-                  currentY += lineHeight * 1.5;
-
-                  // Draw menu items
-                  ctx.font = `${fontSize}px Arial`;
-                  menuItems.forEach((menuItem: any) => {
-                    if (currentY < dataElement.y + dataElement.height - padding) {
-                      const itemName = menuItem.names?.en || menuItem.name || "Unnamed Item";
-                      const price = menuItem.price ? `€${menuItem.price.toFixed(2)}` : "";
-                      const itemText = price ? `${itemName} - ${price}` : itemName;
-
-                      ctx.fillText(itemText, dataElement.x + padding, currentY);
-                      currentY += lineHeight;
-                    }
+                  // Draw menu items list for menu item data elements using the utility function
+                  drawMenuItemsList({
+                    ctx,
+                    element: dataElement,
+                    x: dataElement.x,
+                    y: dataElement.y,
+                    width: dataElement.width,
+                    height: dataElement.height,
+                    scale: 1,
+                    isThumbnail: false
                   });
                 } else {
                   // Default display for other cases

@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
+import { MenuItem } from "@/types/adamenudata";
+import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
 export function CanvasArea() {
@@ -33,69 +35,6 @@ export function CanvasArea() {
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
 
-  // Function to draw menu items list for menuitem data type
-  const drawMenuItemsList = (ctx: CanvasRenderingContext2D, element: any, x: number, y: number, canvas: any) => {
-    try {
-      // Use menu items from subcategory data that's already stored in the element
-      const menuItems = element.subcategoryData?.menuItems || [];
-
-      if (menuItems && menuItems.length > 0) {
-        ctx.fillStyle = element.textColor || "#333";
-        const fontSize = (element.fontSize || 12) * canvas.zoom;
-
-        ctx.font = `${fontSize}px Arial`;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "top";
-
-        const padding = 10 * canvas.zoom;
-        const lineHeight = fontSize * 1.2;
-        let currentY = y + padding;
-
-        // Draw subcategory title
-        ctx.font = `bold ${fontSize * 1.2}px Arial`;
-        const subcategoryTitle = element.subcategoryData.names?.en || element.subcategoryData.name || "Menu Items";
-
-        ctx.fillText(subcategoryTitle, x + padding, currentY);
-        currentY += lineHeight * 1.5;
-
-        // Draw menu items
-        ctx.font = `${fontSize}px Arial`;
-        menuItems.forEach((menuItem: any) => {
-          if (currentY < y + element.height - padding) {
-            // Check if we're still within the element bounds
-            const itemName = menuItem.names?.en || menuItem.name || "Unnamed Item";
-            const price = menuItem.price ? `€${menuItem.price.toFixed(2)}` : "";
-            const itemText = price ? `${itemName} - ${price}` : itemName;
-
-            ctx.fillText(itemText, x + padding, currentY);
-            currentY += lineHeight;
-          }
-        });
-      } else {
-        // No menu items available
-        ctx.fillStyle = element.textColor || "#333";
-        const fontSize = (element.fontSize || 12) * canvas.zoom;
-
-        ctx.font = `${fontSize}px Arial`;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "top";
-        const padding = 10 * canvas.zoom;
-
-        ctx.fillText("No menu items available", x + padding, y + padding);
-      }
-    } catch (error) {
-      // Error fetching menu items
-      ctx.fillStyle = element.textColor || "#333";
-      const fontSize = (element.fontSize || 12) * canvas.zoom;
-
-      ctx.font = `${fontSize}px Arial`;
-      ctx.textAlign = "left";
-      ctx.textBaseline = "top";
-      const padding = 10 * canvas.zoom;
-
-      ctx.fillText("Error loading menu items", x + padding, y + padding);
-    }
-  };
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -439,7 +378,16 @@ export function CanvasArea() {
       displayText = "Select subcategory";
     } else if (element.dataType === "menuitem" && element.subcategoryData) {
       // Draw menu items list instead of simple text
-      drawMenuItemsList(ctx, element, x, y, canvas);
+      drawMenuItemsList({
+        ctx,
+        element,
+        x,
+        y,
+        width,
+        height,
+        scale: canvas.zoom,
+        isThumbnail: false
+      });
       // Don't return early - we still need to draw selection borders
       displayText = ""; // Set empty to avoid drawing default text
     } else if (element.dataType === "menuitem") {

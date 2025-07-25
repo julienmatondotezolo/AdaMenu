@@ -124,6 +124,11 @@ export interface DataElement extends BaseElement {
   borderRadius: number;
   textColor: string;
   fontSize: number;
+  // Menu item specific properties
+  showSubcategoryTitle?: boolean; // Toggle to show/hide subcategory title
+  showMenuDescription?: boolean; // Toggle to show/hide menu description
+  showCurrencySign?: boolean; // Toggle to show/hide € sign
+  menuLayout?: "left" | "justified"; // Layout: "left" (current) or "justified" (text left, price right)
 }
 
 // Union type for all elements

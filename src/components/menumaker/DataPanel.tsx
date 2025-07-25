@@ -46,6 +46,12 @@ export function DataPanel() {
   const [textColor, setTextColor] = useState("#000000");
   const [fontSize, setFontSize] = useState(12);
 
+  // Menu item specific properties
+  const [showSubcategoryTitle, setShowSubcategoryTitle] = useState(true);
+  const [showMenuDescription, setShowMenuDescription] = useState(false);
+  const [showCurrencySign, setShowCurrencySign] = useState(true);
+  const [menuLayout, setMenuLayout] = useState<"left" | "justified">("left");
+
   // Get selected data element if any
   const selectedDataElement = React.useMemo(() => {
     if (!project || !currentPageId || editorState.selectedElementIds.length !== 1) return null;
@@ -78,6 +84,12 @@ export function DataPanel() {
       setBorderRadius(selectedDataElement.borderRadius || 0);
       setTextColor(selectedDataElement.textColor || "#000000");
       setFontSize(selectedDataElement.fontSize || 64);
+
+      // Menu item specific properties
+      setShowSubcategoryTitle(selectedDataElement.showSubcategoryTitle !== false); // Default to true
+      setShowMenuDescription(selectedDataElement.showMenuDescription === true); // Default to false
+      setShowCurrencySign(selectedDataElement.showCurrencySign !== false); // Default to true
+      setMenuLayout(selectedDataElement.menuLayout || "left"); // Default to left
 
       // Set data selection based on dataId
       if (selectedDataElement.dataId) {
@@ -148,6 +160,10 @@ export function DataPanel() {
     borderRadius,
     textColor,
     fontSize,
+    showSubcategoryTitle,
+    showMenuDescription,
+    showCurrencySign,
+    menuLayout,
   ]);
 
   // Update selected element automatically when properties change
@@ -190,6 +206,11 @@ export function DataPanel() {
       borderRadius,
       textColor,
       fontSize,
+      // Menu item specific properties
+      showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
+      showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
+      showCurrencySign: selectedDataType === "menuitem" ? showCurrencySign : undefined,
+      menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
     };
 
     // Find the layer containing this element
@@ -259,6 +280,11 @@ export function DataPanel() {
           : selectedDataType === "menuitem"
             ? selectedSubCategoryData
             : undefined,
+      // Menu item specific properties
+      showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
+      showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
+      showCurrencySign: selectedDataType === "menuitem" ? showCurrencySign : undefined,
+      menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
     };
 
     // Add to first layer
@@ -427,6 +453,68 @@ export function DataPanel() {
               </select>
             </div>
           </>
+        )}
+
+        {/* Menu Item Properties (only if menuitem is selected) */}
+        {selectedDataType === "menuitem" && (
+          <div className="border-t pt-4">
+            <h4 className="font-medium text-gray-900 mb-3">Menu Item Options</h4>
+            
+            {/* Show Subcategory Title Toggle */}
+            <div className="mb-3 flex items-center justify-between">
+              <Label className="text-sm font-medium">Show Subcategory Title</Label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showSubcategoryTitle}
+                  onChange={(e) => setShowSubcategoryTitle(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {/* Show Menu Description Toggle */}
+            <div className="mb-3 flex items-center justify-between">
+              <Label className="text-sm font-medium">Show Menu Description</Label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showMenuDescription}
+                  onChange={(e) => setShowMenuDescription(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {/* Show Currency Sign Toggle */}
+            <div className="mb-3 flex items-center justify-between">
+              <Label className="text-sm font-medium">Show € Sign</Label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showCurrencySign}
+                  onChange={(e) => setShowCurrencySign(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            {/* Menu Layout Selection */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Layout</Label>
+              <select
+                value={menuLayout}
+                onChange={(e) => setMenuLayout(e.target.value as "left" | "justified")}
+                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="left">Left Aligned (Text and price together)</option>
+                <option value="justified">Justified (Text left, price right)</option>
+              </select>
+            </div>
+          </div>
         )}
 
         {/* Style Properties */}
