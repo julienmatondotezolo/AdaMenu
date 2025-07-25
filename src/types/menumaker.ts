@@ -150,6 +150,7 @@ export interface DataElement extends BaseElement {
   showMenuDescriptionTextMarginRight?: number;
   showMenuDescriptionTextMarginBottom?: number;
   showMenuDescriptionLanguage?: "en" | "fr" | "it" | "nl";
+  showMenuDescriptionLineBreakChars?: number;
 }
 
 // Union type for all elements

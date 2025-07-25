@@ -11,6 +11,42 @@ export interface DrawMenuItemsListOptions {
   isThumbnail?: boolean;
 }
 
+// Helper function to break text into lines based on character count
+const breakTextIntoLines = (text: string, maxCharsPerLine: number): string[] => {
+  if (!text || maxCharsPerLine <= 0) return [text || ""];
+
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let currentLine = "";
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+    if (testLine.length <= maxCharsPerLine) {
+      currentLine = testLine;
+    } else {
+      if (currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        // Word is longer than maxCharsPerLine, break it
+        if (word.length > maxCharsPerLine) {
+          lines.push(word.substring(0, maxCharsPerLine));
+          currentLine = word.substring(maxCharsPerLine);
+        } else {
+          currentLine = word;
+        }
+      }
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines;
+};
+
 // Function to draw menu items list for menuitem data type
 export const drawMenuItemsList = ({
   ctx,
@@ -173,7 +209,19 @@ export const drawMenuItemsList = ({
                 ctx.fillStyle = descriptionColor;
 
                 currentY += descMarginTop;
-                ctx.fillText(descriptionText, x + descMarginLeft, currentY);
+
+                // Break description into lines based on character limit
+                const lineBreakChars = element.showMenuDescriptionLineBreakChars || 50;
+                const descriptionLines = breakTextIntoLines(descriptionText, lineBreakChars);
+
+                // Draw each line of the description
+                descriptionLines.forEach((line, lineIndex) => {
+                  ctx.fillText(line, x + descMarginLeft, currentY);
+                  if (lineIndex < descriptionLines.length - 1) {
+                    currentY += descriptionFontSize * 1.1; // Line spacing
+                  }
+                });
+
                 ctx.fillStyle = element.textColor || "#333"; // Reset color
                 ctx.font = `${fontSize}px Arial`; // Reset font
                 currentY += descriptionFontSize + descMarginBottom;
@@ -239,7 +287,19 @@ export const drawMenuItemsList = ({
                 ctx.fillStyle = descriptionColor;
 
                 currentY += descMarginTop;
-                ctx.fillText(descriptionText, x + padding + descMarginLeft, currentY);
+
+                // Break description into lines based on character limit
+                const lineBreakChars = element.showMenuDescriptionLineBreakChars || 50;
+                const descriptionLines = breakTextIntoLines(descriptionText, lineBreakChars);
+
+                // Draw each line of the description
+                descriptionLines.forEach((line, lineIndex) => {
+                  ctx.fillText(line, x + padding + descMarginLeft, currentY);
+                  if (lineIndex < descriptionLines.length - 1) {
+                    currentY += descriptionFontSize * 1.1; // Line spacing
+                  }
+                });
+
                 ctx.fillStyle = element.textColor || "#333"; // Reset color
                 ctx.font = `${fontSize}px Arial`; // Reset font
                 currentY += descriptionFontSize + descMarginBottom;

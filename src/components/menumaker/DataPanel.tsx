@@ -70,6 +70,7 @@ export function DataPanel() {
   const [showMenuDescriptionTextMarginRight, setShowMenuDescriptionTextMarginRight] = useState(0);
   const [showMenuDescriptionTextMarginBottom, setShowMenuDescriptionTextMarginBottom] = useState(5);
   const [showMenuDescriptionLanguage, setShowMenuDescriptionLanguage] = useState<"en" | "fr" | "it" | "nl">("en");
+  const [showMenuDescriptionLineBreakChars, setShowMenuDescriptionLineBreakChars] = useState(50);
 
   // Get selected data element if any
   const selectedDataElement = React.useMemo(() => {
@@ -132,6 +133,7 @@ export function DataPanel() {
       setShowMenuDescriptionTextMarginRight(selectedDataElement.showMenuDescriptionTextMarginRight || 0);
       setShowMenuDescriptionTextMarginBottom(selectedDataElement.showMenuDescriptionTextMarginBottom || 50);
       setShowMenuDescriptionLanguage(selectedDataElement.showMenuDescriptionLanguage || "en");
+      setShowMenuDescriptionLineBreakChars(selectedDataElement.showMenuDescriptionLineBreakChars || 50);
 
       // Set data selection based on dataId
       if (selectedDataElement.dataId) {
@@ -222,6 +224,7 @@ export function DataPanel() {
     showMenuDescriptionTextMarginRight,
     showMenuDescriptionTextMarginBottom,
     showMenuDescriptionLanguage,
+    showMenuDescriptionLineBreakChars,
   ]);
 
   // Update selected element automatically when properties change
@@ -303,6 +306,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginBottom : undefined,
       showMenuDescriptionLanguage:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLanguage : undefined,
+      showMenuDescriptionLineBreakChars:
+        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLineBreakChars : undefined,
     };
 
     // Find the layer containing this element
@@ -411,6 +416,8 @@ export function DataPanel() {
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginBottom : undefined,
       showMenuDescriptionLanguage:
         selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLanguage : undefined,
+      showMenuDescriptionLineBreakChars:
+        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLineBreakChars : undefined,
     };
 
     // Add to first layer
@@ -916,6 +923,33 @@ export function DataPanel() {
                     <option value="it">Italiano</option>
                     <option value="nl">Nederlands</option>
                   </select>
+                </div>
+
+                {/* Menu Description Line Break Characters */}
+                <div className="mb-3">
+                  <Label className="text-sm font-medium">Line Break After Characters</Label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="200"
+                    value={showMenuDescriptionLineBreakChars}
+                    onChange={(e) => setShowMenuDescriptionLineBreakChars(Number(e.target.value))}
+                    className="w-full mt-1"
+                  />
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="number"
+                      min="10"
+                      max="200"
+                      value={showMenuDescriptionLineBreakChars}
+                      onChange={(e) => setShowMenuDescriptionLineBreakChars(Number(e.target.value))}
+                      className="w-20 p-1 text-xs border border-gray-300 rounded"
+                    />
+                    <span className="text-xs text-gray-500">characters</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Description will break to new line after this many characters
+                  </div>
                 </div>
               </div>
             )}
