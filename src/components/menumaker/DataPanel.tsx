@@ -34,6 +34,7 @@ export function DataPanel() {
 
   // Style properties
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
+  const [backgroundOpacity, setBackgroundOpacity] = useState(1);
   const [borderColor, setBorderColor] = useState("#000000");
   const [borderSize, setBorderSize] = useState(0);
   const [borderType, setBorderType] = useState<"solid" | "dashed" | "dotted">("solid");
@@ -251,6 +252,7 @@ export function DataPanel() {
     elementWidth,
     elementHeight,
     backgroundColor,
+    backgroundOpacity,
     borderColor,
     borderSize,
     borderType,
@@ -335,6 +337,7 @@ export function DataPanel() {
             ? selectedSubCategoryData
             : undefined,
       backgroundColor,
+      backgroundOpacity,
       borderColor,
       borderSize,
       borderType,
@@ -1531,6 +1534,23 @@ export function DataPanel() {
                 onChange={(e) => setBackgroundColor(e.target.value)}
                 className="flex-1 p-1 text-xs border border-gray-300 rounded"
               />
+            </div>
+          </div>
+
+          {/* Background Opacity */}
+          <div className="mb-3">
+            <Label className="text-sm font-medium">Background Opacity</Label>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={backgroundOpacity}
+              onChange={(e) => setBackgroundOpacity(Number(e.target.value))}
+              className="w-full mt-1"
+            />
+            <div className="text-xs text-gray-500 text-right">
+              {Math.round(backgroundOpacity * 100)}% {backgroundOpacity === 0 ? "(Transparent)" : ""}
             </div>
           </div>
 

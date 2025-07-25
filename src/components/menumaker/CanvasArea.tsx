@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
+import { getBackgroundStyle } from "./utils/colorUtils";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
@@ -409,9 +410,13 @@ export function CanvasArea() {
     const width = elementWidth * canvas.zoom;
     const height = elementHeight * canvas.zoom;
 
-    // Draw background
-    ctx.fillStyle = element.backgroundColor || "#ffffff";
-    ctx.fillRect(x, y, width, height);
+    // Draw background with opacity
+    const backgroundStyle = getBackgroundStyle(element.backgroundColor || "#ffffff", element.backgroundOpacity);
+
+    if (backgroundStyle) {
+      ctx.fillStyle = backgroundStyle;
+      ctx.fillRect(x, y, width, height);
+    }
 
     // Draw border
     const borderSize = (element.borderSize || 0) * canvas.zoom;
@@ -1258,13 +1263,6 @@ export function CanvasArea() {
         style={{ display: "block" }}
         tabIndex={0}
       />
-
-      {/* Status bar */}
-      <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-        Tool: {tool} | Format: {currentPage.format.name} ({currentPage.format.printWidth}×
-        {currentPage.format.printHeight}mm) | Zoom: {Math.round(canvas.zoom * 100)}% | Elements:{" "}
-        {currentPage.layers.reduce((total, layer) => total + layer.elements.length, 0)}
-      </div>
     </div>
   );
 }

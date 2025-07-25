@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 
 import { MenuPage } from "../../types/menumaker";
+import { getBackgroundStyle } from "./utils/colorUtils";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 
 interface PageThumbnailProps {
@@ -120,9 +121,13 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
             const elementWidth = dataElement.width * scale;
             const elementHeight = dataElement.height * scale;
 
-            // Draw background
-            ctx.fillStyle = dataElement.backgroundColor || "#ffffff";
-            ctx.fillRect(x, y, elementWidth, elementHeight);
+            // Draw background with opacity
+            const backgroundStyle = getBackgroundStyle(dataElement.backgroundColor || "#ffffff", dataElement.backgroundOpacity);
+            
+            if (backgroundStyle) {
+              ctx.fillStyle = backgroundStyle;
+              ctx.fillRect(x, y, elementWidth, elementHeight);
+            }
 
             // Draw border if large enough
             const borderSize = (dataElement.borderSize || 0) * scale;
