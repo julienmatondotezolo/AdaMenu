@@ -55,7 +55,7 @@ interface MenuMakerStore {
   reorderLayers: (pageId: string, fromIndex: number, toIndex: number) => void;
 
   // Actions for element management
-  addElement: (pageId: string, layerId: string, element: Omit<MenuElement, "id">) => void;
+  addElement: (pageId: string, layerId: string, element: Omit<MenuElement, "id">) => string;
   updateElement: (pageId: string, layerId: string, elementId: string, updates: Partial<MenuElement>) => void;
   deleteElement: (pageId: string, layerId: string, elementId: string) => void;
   duplicateElement: (pageId: string, layerId: string, elementId: string) => void;
@@ -747,7 +747,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       const { project } = get();
 
       if (project) {
-        const newElement = { ...element, id: generateId() } as MenuElement;
+        const newElementId = generateId();
+        const newElement = { ...element, id: newElementId } as MenuElement;
 
         const updatedPages = project.pages.map((page) => {
           if (page.id === pageId) {
@@ -768,7 +769,11 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             updatedAt: new Date().toISOString(),
           },
         });
+
+        return newElementId;
       }
+
+      return "";
     },
 
     updateElement: (pageId: string, layerId: string, elementId: string, updates: Partial<MenuElement>) => {

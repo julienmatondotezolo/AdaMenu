@@ -1420,7 +1420,12 @@ export function CanvasArea() {
       const firstLayer = currentPage.layers[0];
 
       if (firstLayer) {
-        addElement(currentPageId!, firstLayer.id, newText);
+        // Add text element and select it immediately
+        const newElementId = addElement(currentPageId!, firstLayer.id, newText);
+
+        // Select the newly created element and switch to select tool
+        selectElements([newElementId]);
+        setTool("select");
       }
     }
   };

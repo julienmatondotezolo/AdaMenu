@@ -27,7 +27,7 @@ export interface DataConfiguration {
 }
 
 export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection }: DataSelectorModalProps) {
-  const { project, currentPageId, addElement, menuData } = useMenuMakerStore();
+  const { project, currentPageId, addElement, selectElements, setTool, menuData } = useMenuMakerStore();
 
   // Selection state
   const [selectedDataType, setSelectedDataType] = useState<DataConfiguration["dataType"] | null>(null);
@@ -291,10 +291,14 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         menuLayout: config.dataType === "menuitem" ? "left" : undefined,
       };
 
-      // Add to first layer
-      addElement(currentPageId, currentPage.layers[0].id, dataElement);
+      // Add to first layer and select the newly created element
+      const newElementId = addElement(currentPageId, currentPage.layers[0].id, dataElement);
+      
+      // Select the newly created element and switch to select tool
+      selectElements([newElementId]);
+      setTool("select");
     },
-    [currentPageId, project, addElement],
+    [currentPageId, project, addElement, selectElements, setTool],
   );
 
   // Get current step title

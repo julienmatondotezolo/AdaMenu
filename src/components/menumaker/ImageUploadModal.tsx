@@ -15,7 +15,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { project, currentPageId, addElement, setTool } = useMenuMakerStore();
+  const { project, currentPageId, addElement, selectElements, setTool } = useMenuMakerStore();
 
   const handleFileUpload = useCallback(
     async (file: File) => {
@@ -79,10 +79,11 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
               originalHeight: height,
             };
 
-            // Add to first layer
-            addElement(currentPageId, currentPage.layers[0].id, newImageElement);
+            // Add to first layer and select the newly created element
+            const newElementId = addElement(currentPageId, currentPage.layers[0].id, newImageElement);
 
-            // Switch back to select tool
+            // Select the newly created element and switch to select tool
+            selectElements([newElementId]);
             setTool("select");
 
             // Close modal
