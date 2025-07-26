@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
 import { MenuPage } from "../../types/menumaker";
 import { getBackgroundStyle } from "./utils/colorUtils";
@@ -12,7 +12,7 @@ interface PageThumbnailProps {
 
 export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
+  const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -100,7 +100,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
 
             // Draw actual image if available
             if (element.src) {
-              const cachedImage = imageCache.get(element.src);
+              const cachedImage = imageCacheRef.current.get(element.src);
 
               if (cachedImage && cachedImage.complete) {
                 // Image is loaded and ready to draw
@@ -116,8 +116,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 const img = new Image();
 
                 img.onload = () => {
-                  setImageCache((prev) => new Map(prev.set(element.src, img)));
-                  // Trigger a redraw when image loads
+                  imageCacheRef.current.set(element.src, img);
+                  // Manually trigger redraw since we're using ref instead of state
                   drawElements();
                 };
                 img.onerror = () => {
@@ -126,7 +126,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 img.src = element.src;
 
                 // Store the loading image in cache to prevent multiple loads
-                setImageCache((prev) => new Map(prev.set(element.src, img)));
+                imageCacheRef.current.set(element.src, img);
 
                 // Draw placeholder while loading
                 ctx.fillStyle = "#f0f0f0";
@@ -256,7 +256,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
         });
       });
     }
-  }, [page, width, height, imageCache]);
+  }, [page, width, height]);
 
   return (
     <canvas
