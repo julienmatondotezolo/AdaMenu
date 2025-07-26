@@ -312,27 +312,79 @@ export function CanvasArea() {
 
     const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
     const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
     const fontSize = element.fontSize * canvas.zoom;
+    const padding = element.padding * canvas.zoom;
 
     // Set text properties
     ctx.font = `${element.fontStyle} ${fontSize}px ${element.fontFamily}`;
     ctx.fillStyle = element.fill;
-    ctx.textAlign = element.align as any;
     ctx.globalAlpha = element.opacity;
 
-    // Measure text to get actual dimensions
-    const textMetrics = ctx.measureText(element.content);
-    const textWidth = textMetrics.width;
-    const textHeight = fontSize;
+    // Simplified text drawing for debugging
+    const availableWidth = width - padding * 2;
+    const availableHeight = height - padding * 2;
+    const lineHeight = fontSize * element.lineHeight;
 
-    // Calculate text baseline position
-    const textBaseline = y + fontSize * 0.8; // Adjust baseline to be more accurate
+    // Check if we have reasonable values - if not, use fallback rendering
+    if (availableWidth <= 0 || availableHeight <= 0 || fontSize <= 0) {
+      // Fallback: draw text without wrapping constraints
+      ctx.fillText(element.content, x + 5, y + 30);
+      ctx.globalAlpha = 1;
+      return;
+    }
 
-    // Draw text
-    ctx.fillText(element.content, x, textBaseline);
+    // Simple text wrapping
+    const words = element.content.split(" ");
+    const lines: string[] = [];
+    let currentLine = "";
+
+    for (const word of words) {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+      const testWidth = ctx.measureText(testLine).width;
+
+      if (testWidth <= availableWidth || currentLine === "") {
+        currentLine = testLine;
+      } else {
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        currentLine = word;
+      }
+    }
+
+    // Add the last line
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    // Limit lines to what fits in height
+    const maxLines = Math.floor(availableHeight / lineHeight);
+    const finalLines = lines.slice(0, Math.max(1, maxLines)); // Always show at least 1 line
+
+    // Draw text lines
+    ctx.textAlign = element.align as any;
+    ctx.textBaseline = "top";
+
+    finalLines.forEach((line, index) => {
+      const lineY = y + padding + index * lineHeight;
+      let lineX = x + padding;
+
+      // Adjust x position based on text alignment
+      if (element.align === "center") {
+        lineX = x + width / 2;
+      } else if (element.align === "right") {
+        lineX = x + width - padding;
+      }
+
+      ctx.fillText(line, lineX, lineY);
+    });
 
     // Draw selection border and resize handles
     if (isSelected) {
@@ -340,20 +392,13 @@ export function CanvasArea() {
       ctx.lineWidth = 2;
       ctx.globalAlpha = 1;
 
-      // Calculate bounding box that properly wraps the text
-      const selectionPadding = 2;
-      const selectionX = x - selectionPadding;
-      const selectionY = y - selectionPadding;
-      const selectionWidth = textWidth + selectionPadding * 2;
-      const selectionHeight = textHeight + selectionPadding * 2;
-
-      // Draw selection border
+      // Draw selection border using the actual rect dimensions
       ctx.setLineDash([4, 4]);
-      ctx.strokeRect(selectionX, selectionY, selectionWidth, selectionHeight);
+      ctx.strokeRect(x, y, width, height);
       ctx.setLineDash([]);
 
-      // Draw resize handles for text elements
-      drawResizeHandles(ctx, selectionX, selectionY, selectionWidth, selectionHeight);
+      // Draw resize handles using the actual rect dimensions
+      drawResizeHandles(ctx, x, y, width, height);
     }
 
     ctx.globalAlpha = 1;
@@ -680,42 +725,12 @@ export function CanvasArea() {
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
 
-    let width, height;
+    // Use element dimensions for all element types (including text)
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
 
-    // For text elements, calculate dimensions based on actual text size
-    if (element.type === "text") {
-      const canvasElement = canvasRef.current;
-
-      if (canvasElement) {
-        const ctx = canvasElement.getContext("2d");
-
-        if (ctx) {
-          const fontSize = (element as any).fontSize * canvas.zoom;
-
-          ctx.font = `${(element as any).fontStyle} ${fontSize}px ${(element as any).fontFamily}`;
-          const textMetrics = ctx.measureText((element as any).content);
-          const selectionPadding = 2;
-
-          width = textMetrics.width + selectionPadding * 2;
-          height = fontSize + selectionPadding * 2;
-        } else {
-          // Fallback if context not available
-          width = element.width * canvas.zoom;
-          height = element.height * canvas.zoom;
-        }
-      } else {
-        // Fallback if canvas not available
-        width = element.width * canvas.zoom;
-        height = element.height * canvas.zoom;
-      }
-    } else {
-      // For non-text elements, use normal dimensions
-      const elementWidth = tempDim ? tempDim.width : element.width;
-      const elementHeight = tempDim ? tempDim.height : element.height;
-
-      width = elementWidth * canvas.zoom;
-      height = elementHeight * canvas.zoom;
-    }
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
 
     const handleSize = 12;
     const handleRadius = handleSize / 2;
@@ -779,32 +794,19 @@ export function CanvasArea() {
 
     const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : hoveredElement.x;
     const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : hoveredElement.y;
+    const elementWidth = tempDim ? tempDim.width : hoveredElement.width;
+    const elementHeight = tempDim ? tempDim.height : hoveredElement.height;
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
 
-    // Calculate text dimensions
-    const fontSize = (hoveredElement as TextElement).fontSize * canvas.zoom;
-
-    ctx.font = `${(hoveredElement as TextElement).fontStyle} ${fontSize}px ${(hoveredElement as TextElement).fontFamily}`;
-    const textMetrics = ctx.measureText((hoveredElement as TextElement).content);
-    const textWidth = textMetrics.width;
-    const textHeight = fontSize;
-
-    // Calculate proper bounding box position (matching the selection box)
-    const selectionPadding = 2;
-    const hoverX = x - selectionPadding;
-    const hoverY = y - selectionPadding;
-    const hoverWidth =
-      hoveredElement.type === "text" ? textWidth + selectionPadding * 2 : hoveredElement.width * canvas.zoom;
-    const hoverHeight =
-      hoveredElement.type === "text" ? textHeight + selectionPadding * 2 : hoveredElement.height * canvas.zoom;
-
-    // Draw hover bounding box
+    // Draw hover bounding box using element dimensions
     ctx.strokeStyle = "#ff6b35";
     ctx.lineWidth = 2;
     ctx.setLineDash([4, 4]);
-    ctx.strokeRect(hoverX, hoverY, hoverWidth, hoverHeight);
+    ctx.strokeRect(x, y, width, height);
     ctx.setLineDash([]);
   };
 
@@ -832,44 +834,20 @@ export function CanvasArea() {
 
         if (!element.visible || element.type !== "text") continue;
 
-        // Use temporary position if dragging, otherwise use element position
+        // Use temporary position/dimensions if dragging/resizing, otherwise use element values
         const tempPos = tempElementPositions[element.id];
-        const elementX = tempPos ? tempPos.x : element.x;
-        const elementY = tempPos ? tempPos.y : element.y;
+        const tempDim = tempElementDimensions[element.id];
 
-        // Check if click is within text element bounds using proper text measurement
-        const canvasElement = canvasRef.current;
-        let textWidth, textHeight;
+        const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+        const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+        const elementWidth = tempDim ? tempDim.width : element.width;
+        const elementHeight = tempDim ? tempDim.height : element.height;
 
-        if (canvasElement) {
-          const ctx = canvasElement.getContext("2d");
+        // Use element dimensions for text bounds
+        const elementRight = elementX + elementWidth;
+        const elementBottom = elementY + elementHeight;
 
-          if (ctx) {
-            // Measure actual text dimensions
-            ctx.font = `${element.fontStyle} ${element.fontSize}px ${element.fontFamily}`;
-            const textMetrics = ctx.measureText(element.content);
-            const selectionPadding = 2;
-
-            textWidth = textMetrics.width + selectionPadding * 2;
-            textHeight = element.fontSize + selectionPadding * 2;
-          } else {
-            // Fallback to rough approximation
-            textHeight = element.fontSize || 16;
-            textWidth = element.content ? element.content.length * (element.fontSize || 16) * 0.6 : element.width || 0;
-          }
-        } else {
-          // Fallback to rough approximation
-          textHeight = element.fontSize || 16;
-          textWidth = element.content ? element.content.length * (element.fontSize || 16) * 0.6 : element.width || 0;
-        }
-
-        // Adjust for selection padding positioning (matching the bounding box)
-        const adjustedX = elementX;
-        const adjustedY = elementY;
-        const elementRight = adjustedX + textWidth;
-        const elementBottom = adjustedY + textHeight;
-
-        if (pageX >= adjustedX && pageY >= adjustedY && pageX <= elementRight && pageY <= elementBottom) {
+        if (pageX >= elementX && pageY >= elementY && pageX <= elementRight && pageY <= elementBottom) {
           return element.id;
         }
       }
@@ -1018,27 +996,67 @@ export function CanvasArea() {
           let newX = startPos.x;
           let newY = startPos.y;
 
+          // Find the element to check if it's a text element
+          let isTextElement = false;
+          let textElement = null;
+
+          if (currentPage) {
+            for (const layer of currentPage.layers) {
+              const element = layer.elements.find((el) => el.id === elementId);
+
+              if (element && element.type === "text") {
+                isTextElement = true;
+                textElement = element;
+                break;
+              }
+            }
+          }
+
+          // Calculate minimum dimensions for text elements
+          let minWidth = 20;
+          let minHeight = 20;
+
+          if (isTextElement && textElement && canvasRef.current) {
+            const ctx = canvasRef.current.getContext("2d");
+
+            if (ctx) {
+              // Set font to measure character width
+              ctx.font = `${textElement.fontStyle} ${textElement.fontSize}px ${textElement.fontFamily}`;
+
+              // Calculate minimum width for at least 1 character (use "W" as it's typically the widest)
+              const singleCharWidth = ctx.measureText("W").width;
+              const padding = textElement.padding * 2; // padding on both sides
+
+              minWidth = singleCharWidth + padding + 10; // Add some extra margin
+
+              // Calculate minimum height for at least 1 line
+              const lineHeight = textElement.fontSize * textElement.lineHeight;
+
+              minHeight = lineHeight; // Add some extra margin
+            }
+          }
+
           // Apply resize based on handle
           switch (resizeHandle) {
             case "tl": // Top-left
-              newWidth = Math.max(20, startDim.width - deltaX);
-              newHeight = Math.max(20, startDim.height - deltaY);
+              newWidth = Math.max(minWidth, startDim.width - deltaX);
+              newHeight = Math.max(minHeight, startDim.height - deltaY);
               newX = startPos.x + (startDim.width - newWidth);
               newY = startPos.y + (startDim.height - newHeight);
               break;
             case "tr": // Top-right
-              newWidth = Math.max(20, startDim.width + deltaX);
-              newHeight = Math.max(20, startDim.height - deltaY);
+              newWidth = Math.max(minWidth, startDim.width + deltaX);
+              newHeight = Math.max(minHeight, startDim.height - deltaY);
               newY = startPos.y + (startDim.height - newHeight);
               break;
             case "bl": // Bottom-left
-              newWidth = Math.max(20, startDim.width - deltaX);
-              newHeight = Math.max(20, startDim.height + deltaY);
+              newWidth = Math.max(minWidth, startDim.width - deltaX);
+              newHeight = Math.max(minHeight, startDim.height + deltaY);
               newX = startPos.x + (startDim.width - newWidth);
               break;
             case "br": // Bottom-right
-              newWidth = Math.max(20, startDim.width + deltaX);
-              newHeight = Math.max(20, startDim.height + deltaY);
+              newWidth = Math.max(minWidth, startDim.width + deltaX);
+              newHeight = Math.max(minHeight, startDim.height + deltaY);
               break;
           }
 
@@ -1205,8 +1223,8 @@ export function CanvasArea() {
         type: "text",
         x: relativeX,
         y: relativeY,
-        width: 200,
-        height: 80,
+        width: 373,
+        height: 68,
         rotation: 0,
         scaleX: 1,
         scaleY: 1,
