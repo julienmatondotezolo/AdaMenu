@@ -46,6 +46,7 @@ export function CanvasArea() {
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
 
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
+  const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
   const { canvas, tool } = editorState;
@@ -242,6 +243,7 @@ export function CanvasArea() {
     tool,
     hoveredElementId,
     backgroundImageCache,
+    imageElementCache,
     tempElementPositions,
     tempElementDimensions,
   ]);
@@ -420,9 +422,60 @@ export function CanvasArea() {
     const width = elementWidth * canvas.zoom;
     const height = elementHeight * canvas.zoom;
 
-    // Draw placeholder
-    ctx.fillStyle = "#f0f0f0";
-    ctx.fillRect(x, y, width, height);
+    // Draw image if available
+    if (element.src) {
+      const cachedImage = imageElementCache.get(element.src);
+
+      if (cachedImage && cachedImage.complete) {
+        // Image is loaded and ready to draw
+        ctx.save();
+        ctx.globalAlpha = element.opacity ?? 1;
+
+        // Draw the image scaled to fit the element dimensions
+        ctx.drawImage(cachedImage, x, y, width, height);
+
+        ctx.restore();
+      } else if (!cachedImage) {
+        // Load the image and cache it
+        const img = new Image();
+
+        img.onload = () => {
+          setImageElementCache((prev) => new Map(prev.set(element.src, img)));
+          // Trigger a full canvas redraw when image loads
+        };
+        img.onerror = () => {
+          console.warn("Failed to load image element:", element.src);
+        };
+        img.src = element.src;
+
+        // Store the loading image in cache to prevent multiple loads
+        setImageElementCache((prev) => new Map(prev.set(element.src, img)));
+
+        // Draw placeholder while loading
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(x, y, width, height);
+        ctx.fillStyle = "#666";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Loading...", x + width / 2, y + height / 2);
+      } else {
+        // Image is loading, show placeholder
+        ctx.fillStyle = "#f0f0f0";
+        ctx.fillRect(x, y, width, height);
+        ctx.fillStyle = "#666";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Loading...", x + width / 2, y + height / 2);
+      }
+    } else {
+      // No src, draw placeholder
+      ctx.fillStyle = "#f0f0f0";
+      ctx.fillRect(x, y, width, height);
+      ctx.fillStyle = "#666";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("No Image", x + width / 2, y + height / 2);
+    }
 
     // Draw border
     ctx.strokeStyle = isSelected ? "#0066cc" : "#ccc";
@@ -433,12 +486,6 @@ export function CanvasArea() {
     if (isSelected) {
       drawResizeHandles(ctx, x, y, width, height);
     }
-
-    // Draw "Image" text
-    ctx.fillStyle = "#666";
-    ctx.font = "14px Arial";
-    ctx.textAlign = "center";
-    ctx.fillText("Image", x + width / 2, y + height / 2);
   };
 
   const drawDataElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {

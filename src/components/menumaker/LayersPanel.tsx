@@ -215,12 +215,16 @@ export function LayersPanel() {
                               (() => {
                                 const dataInfo = getDataElementInfo(element);
 
-                                return dataInfo ? `Data "${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
+                                return dataInfo ? `"${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
                               })()
                             ) : element.type === "text" ? (
-                              <>Text {element.content ? `"${element.content.slice(0, 20)}..."` : ""}</>
+                              <>
+                                {element.content
+                                  ? `${element.content.length > 20 ? element.content.slice(0, 20) + "..." : element.content}`
+                                  : ""}
+                              </>
                             ) : element.type === "image" ? (
-                              "Image"
+                              element.fileName
                             ) : (
                               element.type
                             )}

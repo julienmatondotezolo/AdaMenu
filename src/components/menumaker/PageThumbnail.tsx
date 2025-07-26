@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { MenuPage } from "../../types/menumaker";
 import { getBackgroundStyle } from "./utils/colorUtils";
@@ -12,6 +12,7 @@ interface PageThumbnailProps {
 
 export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [imageCache, setImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -91,27 +92,93 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
               ctx.fillRect(x, y, Math.max(textWidth, 2), Math.max(fontSize, 1));
             }
           } else if (element.type === "image") {
-            // Draw image element placeholder
+            // Draw image element
             const x = element.x * scale;
             const y = element.y * scale;
             const elementWidth = element.width * scale;
             const elementHeight = element.height * scale;
 
-            // Draw placeholder background
-            ctx.fillStyle = "#f0f0f0";
-            ctx.fillRect(x, y, elementWidth, elementHeight);
+            // Draw actual image if available
+            if (element.src) {
+              const cachedImage = imageCache.get(element.src);
 
-            // Draw border
-            ctx.strokeStyle = "#ccc";
-            ctx.lineWidth = 0.5;
-            ctx.strokeRect(x, y, elementWidth, elementHeight);
+              if (cachedImage && cachedImage.complete) {
+                // Image is loaded and ready to draw
+                ctx.save();
+                ctx.globalAlpha = (element.opacity ?? 1) * layer.opacity;
 
-            // Only draw "Image" text if element is large enough
-            if (elementWidth > 20 && elementHeight > 10) {
-              ctx.fillStyle = "#666";
-              ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
-              ctx.textAlign = "center";
-              ctx.fillText("Img", x + elementWidth / 2, y + elementHeight / 2);
+                // Draw the image scaled to fit the element dimensions
+                ctx.drawImage(cachedImage, x, y, elementWidth, elementHeight);
+
+                ctx.restore();
+              } else if (!cachedImage) {
+                // Load the image and cache it
+                const img = new Image();
+
+                img.onload = () => {
+                  setImageCache((prev) => new Map(prev.set(element.src, img)));
+                  // Trigger a redraw when image loads
+                  drawElements();
+                };
+                img.onerror = () => {
+                  console.warn("Failed to load image for thumbnail:", element.src);
+                };
+                img.src = element.src;
+
+                // Store the loading image in cache to prevent multiple loads
+                setImageCache((prev) => new Map(prev.set(element.src, img)));
+
+                // Draw placeholder while loading
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(x, y, elementWidth, elementHeight);
+
+                // Draw border
+                ctx.strokeStyle = "#ccc";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+                // Only draw loading text if element is large enough
+                if (elementWidth > 20 && elementHeight > 10) {
+                  ctx.fillStyle = "#666";
+                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                  ctx.textAlign = "center";
+                  ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
+                }
+              } else {
+                // Image is loading, show placeholder
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(x, y, elementWidth, elementHeight);
+
+                // Draw border
+                ctx.strokeStyle = "#ccc";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+                // Only draw loading text if element is large enough
+                if (elementWidth > 20 && elementHeight > 10) {
+                  ctx.fillStyle = "#666";
+                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                  ctx.textAlign = "center";
+                  ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
+                }
+              }
+            } else {
+              // No src, draw placeholder
+              ctx.fillStyle = "#f0f0f0";
+              ctx.fillRect(x, y, elementWidth, elementHeight);
+
+              // Draw border
+              ctx.strokeStyle = "#ccc";
+              ctx.lineWidth = 0.5;
+              ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+              // Only draw "No Image" text if element is large enough
+              if (elementWidth > 20 && elementHeight > 10) {
+                ctx.fillStyle = "#666";
+                ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                ctx.textAlign = "center";
+                ctx.fillText("Img", x + elementWidth / 2, y + elementHeight / 2);
+              }
             }
           } else if (element.type === "data") {
             // Draw data element
@@ -189,7 +256,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
         });
       });
     }
-  }, [page, width, height]);
+  }, [page, width, height, imageCache]);
 
   return (
     <canvas

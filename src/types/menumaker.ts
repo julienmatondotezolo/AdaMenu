@@ -81,6 +81,7 @@ export interface TextElement extends BaseElement {
 // Image element
 export interface ImageElement extends BaseElement {
   type: "image";
+  fileName: string;
   src: string;
   originalWidth: number;
   originalHeight: number;

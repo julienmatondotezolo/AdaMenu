@@ -1,12 +1,14 @@
 import { Clipboard, Copy, Database, Image, MousePointer, Move, Redo, Type, Undo } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Tool } from "../../types/menumaker";
 import { Button } from "../ui/button";
+import { ImageUploadModal } from "./ImageUploadModal";
 
 export function MainToolbar() {
   const { project, currentPageId, editorState, setTool, addElement, undo, redo, copy, paste } = useMenuMakerStore();
+  const [showImageUpload, setShowImageUpload] = useState(false);
 
   const { tool } = editorState;
 
@@ -19,6 +21,12 @@ export function MainToolbar() {
   ] as const;
 
   const handleToolSelect = (toolId: Tool) => {
+    // If image tool is selected, show upload modal instead of setting tool
+    if (toolId === "image") {
+      setShowImageUpload(true);
+      return;
+    }
+
     setTool(toolId);
 
     // If data tool is selected, add a default data element
@@ -62,47 +70,52 @@ export function MainToolbar() {
   if (!project || !currentPageId) return null;
 
   return (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-lg px-4 py-2">
-      <div className="flex items-center space-x-3">
-        {/* Undo/Redo Section */}
-        <div className="flex items-center space-x-1">
-          <Button variant="outline" size="sm" onClick={undo} title="Undo">
-            <Undo className="w-4 h-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={redo} title="Redo">
-            <Redo className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="w-px h-6 bg-gray-300" />
-
-        {/* Copy/Paste Section */}
-        <div className="flex items-center space-x-1">
-          <Button variant="outline" size="sm" onClick={copy} title="Copy">
-            <Copy className="w-4 h-4" />
-          </Button>
-          <Button variant="outline" size="sm" onClick={paste} title="Paste">
-            <Clipboard className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="w-px h-6 bg-gray-300" />
-
-        {/* Tools Section */}
-        <div className="flex items-center space-x-1  p-1">
-          {tools.map((toolItem) => (
-            <Button
-              key={toolItem.id}
-              variant={tool === toolItem.id ? "default" : "ghost"}
-              size="sm"
-              onClick={() => handleToolSelect(toolItem.id)}
-              title={toolItem.label}
-            >
-              <toolItem.icon className="w-4 h-4" />
+    <>
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-lg px-4 py-2">
+        <div className="flex items-center space-x-3">
+          {/* Undo/Redo Section */}
+          <div className="flex items-center space-x-1">
+            <Button variant="outline" size="sm" onClick={undo} title="Undo">
+              <Undo className="w-4 h-4" />
             </Button>
-          ))}
+            <Button variant="outline" size="sm" onClick={redo} title="Redo">
+              <Redo className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="w-px h-6 bg-gray-300" />
+
+          {/* Copy/Paste Section */}
+          <div className="flex items-center space-x-1">
+            <Button variant="outline" size="sm" onClick={copy} title="Copy">
+              <Copy className="w-4 h-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={paste} title="Paste">
+              <Clipboard className="w-4 h-4" />
+            </Button>
+          </div>
+
+          <div className="w-px h-6 bg-gray-300" />
+
+          {/* Tools Section */}
+          <div className="flex items-center space-x-1  p-1">
+            {tools.map((toolItem) => (
+              <Button
+                key={toolItem.id}
+                variant={tool === toolItem.id ? "default" : "ghost"}
+                size="sm"
+                onClick={() => handleToolSelect(toolItem.id)}
+                title={toolItem.label}
+              >
+                <toolItem.icon className="w-4 h-4" />
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Image Upload Modal */}
+      <ImageUploadModal isOpen={showImageUpload} onClose={() => setShowImageUpload(false)} />
+    </>
   );
 }
