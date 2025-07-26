@@ -1000,6 +1000,10 @@ export function CanvasArea() {
           });
           setElementStartDimensions(initialDimensions);
           setElementStartPositions(initialPositions);
+
+          // Initialize snap points for guidelines (exclude the element being resized)
+          snapGuidelineManager.initializeSnapPoints(currentPage, [elementId]);
+
           return;
         }
       }
@@ -1249,6 +1253,85 @@ export function CanvasArea() {
           setTempElementDimensions({
             [elementId]: { width: newWidth, height: newHeight, x: newX, y: newY },
           });
+
+          // Calculate snapping during resizing
+          if (currentPage) {
+            // Create snap points for the element being resized based on resize handle
+            const edgeSnapPoints: { x?: number[]; y?: number[] } = {};
+
+            // Determine which edges to snap based on resize handle
+            switch (resizeHandle) {
+              case "tl": // Top-left: snap left edge, top edge
+                edgeSnapPoints.x = [newX]; // left edge
+                edgeSnapPoints.y = [newY]; // top edge
+                break;
+              case "tr": // Top-right: snap right edge, top edge
+                edgeSnapPoints.x = [newX + newWidth]; // right edge
+                edgeSnapPoints.y = [newY]; // top edge
+                break;
+              case "bl": // Bottom-left: snap left edge, bottom edge
+                edgeSnapPoints.x = [newX]; // left edge
+                edgeSnapPoints.y = [newY + newHeight]; // bottom edge
+                break;
+              case "br": // Bottom-right: snap right edge, bottom edge
+                edgeSnapPoints.x = [newX + newWidth]; // right edge
+                edgeSnapPoints.y = [newY + newHeight]; // bottom edge
+                break;
+            }
+
+            // Calculate snap using the edge snap method
+            const snapResult = snapGuidelineManager.calculateEdgeSnap(edgeSnapPoints, canvas.zoom);
+            const { snapOffsetX, snapOffsetY, foundXSnap, foundYSnap, guidelines: activeGuidelines } = snapResult;
+
+            // Apply snap offsets to position and dimensions
+            let snappedX = newX;
+            let snappedY = newY;
+            let snappedWidth = newWidth;
+            let snappedHeight = newHeight;
+
+            if (foundXSnap) {
+              switch (resizeHandle) {
+                case "tl":
+                case "bl":
+                  // Left edge snapped - adjust x and width
+                  snappedX = newX + snapOffsetX;
+                  snappedWidth = newWidth - snapOffsetX;
+                  break;
+                case "tr":
+                case "br":
+                  // Right edge snapped - adjust width only
+                  snappedWidth = newWidth + snapOffsetX;
+                  break;
+              }
+            }
+
+            if (foundYSnap) {
+              switch (resizeHandle) {
+                case "tl":
+                case "tr":
+                  // Top edge snapped - adjust y and height
+                  snappedY = newY + snapOffsetY;
+                  snappedHeight = newHeight - snapOffsetY;
+                  break;
+                case "bl":
+                case "br":
+                  // Bottom edge snapped - adjust height only
+                  snappedHeight = newHeight + snapOffsetY;
+                  break;
+              }
+            }
+
+            setTempElementDimensions({
+              [elementId]: { width: snappedWidth, height: snappedHeight, x: snappedX, y: snappedY },
+            });
+
+            // Set active guidelines
+            setActiveSnapGuidelines(activeGuidelines);
+          } else {
+            setTempElementDimensions({
+              [elementId]: { width: newWidth, height: newHeight, x: newX, y: newY },
+            });
+          }
         }
       } else if (isDragging) {
         // Handle element dragging - update temporary positions only

@@ -156,6 +156,93 @@ export class SnapGuidelineManager {
   }
 
   /**
+   * Calculate snapping for specific edges during resize operations
+   */
+  calculateEdgeSnap(
+    edgePoints: { x?: number[]; y?: number[] },
+    zoom: number,
+  ): {
+    snapOffsetX: number;
+    snapOffsetY: number;
+    foundXSnap: boolean;
+    foundYSnap: boolean;
+    guidelines: ActiveGuideline[];
+  } {
+    const snapDistanceInPageSpace = this.snapDistance / zoom;
+    let snapOffsetX = 0;
+    let snapOffsetY = 0;
+    let foundXSnap = false;
+    let foundYSnap = false;
+    const activeGuidelines: ActiveGuideline[] = [];
+
+    // Check X snapping
+    if (edgePoints.x) {
+      let bestXDistance = Infinity;
+      let bestXValue: number | undefined;
+
+      edgePoints.x.forEach((edgeX) => {
+        this.snapPoints.forEach((snapPoint) => {
+          if (snapPoint.type !== "x") return;
+
+          const distance = Math.abs(edgeX - snapPoint.value);
+
+          if (distance <= snapDistanceInPageSpace && distance < bestXDistance) {
+            bestXDistance = distance;
+            bestXValue = snapPoint.value;
+            snapOffsetX = snapPoint.value - edgeX;
+            foundXSnap = true;
+          }
+        });
+      });
+
+      if (bestXValue !== undefined) {
+        activeGuidelines.push({
+          value: bestXValue,
+          type: "x",
+          elementIds: [],
+        });
+      }
+    }
+
+    // Check Y snapping
+    if (edgePoints.y) {
+      let bestYDistance = Infinity;
+      let bestYValue: number | undefined;
+
+      edgePoints.y.forEach((edgeY) => {
+        this.snapPoints.forEach((snapPoint) => {
+          if (snapPoint.type !== "y") return;
+
+          const distance = Math.abs(edgeY - snapPoint.value);
+
+          if (distance <= snapDistanceInPageSpace && distance < bestYDistance) {
+            bestYDistance = distance;
+            bestYValue = snapPoint.value;
+            snapOffsetY = snapPoint.value - edgeY;
+            foundYSnap = true;
+          }
+        });
+      });
+
+      if (bestYValue !== undefined) {
+        activeGuidelines.push({
+          value: bestYValue,
+          type: "y",
+          elementIds: [],
+        });
+      }
+    }
+
+    return {
+      snapOffsetX,
+      snapOffsetY,
+      foundXSnap,
+      foundYSnap,
+      guidelines: activeGuidelines,
+    };
+  }
+
+  /**
    * Draw guidelines on canvas
    */
   drawGuidelines(
