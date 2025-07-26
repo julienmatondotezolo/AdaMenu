@@ -19,6 +19,7 @@ export function CanvasArea() {
     updateElement,
     setZoom,
     setCanvasOffset,
+    setTool,
   } = useMenuMakerStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -771,6 +772,38 @@ export function CanvasArea() {
     return cursors[handleId] || "default";
   };
 
+  const getCanvasCursor = (): string => {
+    // Handle text tool
+    if (tool === "text") {
+      return "text";
+    }
+
+    // Handle select tool with various states
+    if (tool === "select") {
+      if (isResizing) {
+        return getResizeCursor(resizeHandle);
+      }
+
+      if (isDragging) {
+        return "grabbing";
+      }
+
+      if (hoveredResizeHandle) {
+        return getResizeCursor(hoveredResizeHandle);
+      }
+
+      return "default";
+    }
+
+    // Handle pan tool
+    if (tool === "pan") {
+      return isDragging ? "grabbing" : "grab";
+    }
+
+    // Default cursor for other tools (image, data, etc.)
+    return "crosshair";
+  };
+
   const drawHoverBoundingBox = (ctx: CanvasRenderingContext2D, elementId: string) => {
     if (!currentPage) return;
 
@@ -1176,6 +1209,8 @@ export function CanvasArea() {
         setIsSelecting(false);
       }
     }
+
+    setTool("select");
   };
 
   // Handle canvas click (for non-select tools)
@@ -1274,18 +1309,7 @@ export function CanvasArea() {
         onMouseUp={handleCanvasMouseUp}
         onMouseEnter={handleCanvasMouseEnter}
         onMouseLeave={handleCanvasMouseLeave}
-        className={`cursor-${
-          tool === "select"
-            ? isResizing
-              ? getResizeCursor(resizeHandle)
-              : isDragging
-                ? "grabbing"
-                : hoveredResizeHandle
-                  ? getResizeCursor(hoveredResizeHandle)
-                  : "default"
-            : "crosshair"
-        }`}
-        style={{ display: "block" }}
+        style={{ display: "block", cursor: getCanvasCursor() }}
         tabIndex={0}
       />
     </div>
