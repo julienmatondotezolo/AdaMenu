@@ -226,7 +226,7 @@ export function CanvasArea() {
     }
 
     // Draw hover bounding box for text elements when in text mode
-    if (hoveredElementId && tool === "text") {
+    if (hoveredElementId && !editorState.selectedElementIds.includes(hoveredElementId) && tool === "select") {
       drawHoverBoundingBox(ctx, hoveredElementId);
     }
   }, [
@@ -771,7 +771,7 @@ export function CanvasArea() {
       }
     }
 
-    if (!hoveredElement || hoveredElement.type !== "text") return;
+    if (!hoveredElement) return;
 
     // Use temporary position/dimensions if dragging/resizing, otherwise use element values
     const tempPos = tempElementPositions[hoveredElement.id];
@@ -782,11 +782,12 @@ export function CanvasArea() {
 
     const x = pageOffset.x + elementX * canvas.zoom;
     const y = pageOffset.y + elementY * canvas.zoom;
-    const fontSize = hoveredElement.fontSize * canvas.zoom;
 
     // Calculate text dimensions
-    ctx.font = `${hoveredElement.fontStyle} ${fontSize}px ${hoveredElement.fontFamily}`;
-    const textMetrics = ctx.measureText(hoveredElement.content);
+    const fontSize = (hoveredElement as TextElement).fontSize * canvas.zoom;
+
+    ctx.font = `${(hoveredElement as TextElement).fontStyle} ${fontSize}px ${(hoveredElement as TextElement).fontFamily}`;
+    const textMetrics = ctx.measureText((hoveredElement as TextElement).content);
     const textWidth = textMetrics.width;
     const textHeight = fontSize;
 
@@ -794,8 +795,10 @@ export function CanvasArea() {
     const selectionPadding = 2;
     const hoverX = x - selectionPadding;
     const hoverY = y - selectionPadding;
-    const hoverWidth = textWidth + selectionPadding * 2;
-    const hoverHeight = textHeight + selectionPadding * 2;
+    const hoverWidth =
+      hoveredElement.type === "text" ? textWidth + selectionPadding * 2 : hoveredElement.width * canvas.zoom;
+    const hoverHeight =
+      hoveredElement.type === "text" ? textHeight + selectionPadding * 2 : hoveredElement.height * canvas.zoom;
 
     // Draw hover bounding box
     ctx.strokeStyle = "#ff6b35";
@@ -991,6 +994,15 @@ export function CanvasArea() {
     const mouseY = e.clientY - rect.top;
 
     if (tool === "select") {
+      // Handle hover detection for text elements
+      const hoveredElement = getElementAtPosition(mouseX, mouseY);
+
+      if (hoveredElement) {
+        setHoveredElementId(hoveredElement);
+      } else {
+        setHoveredElementId(null);
+      }
+
       if (isResizing && resizeHandle && editorState.selectedElementIds.length === 1) {
         // Handle element resizing
         const elementId = editorState.selectedElementIds[0];
@@ -1067,11 +1079,6 @@ export function CanvasArea() {
           setHoveredResizeHandle(null);
         }
       }
-    } else if (tool === "text") {
-      // Handle hover detection for text elements
-      const hoveredElement = getTextElementAtPosition(mouseX, mouseY);
-
-      setHoveredElementId(hoveredElement);
     }
   };
 

@@ -122,8 +122,11 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
             const elementHeight = dataElement.height * scale;
 
             // Draw background with opacity
-            const backgroundStyle = getBackgroundStyle(dataElement.backgroundColor || "#ffffff", dataElement.backgroundOpacity);
-            
+            const backgroundStyle = getBackgroundStyle(
+              dataElement.backgroundColor || "#ffffff",
+              dataElement.backgroundOpacity,
+            );
+
             if (backgroundStyle) {
               ctx.fillStyle = backgroundStyle;
               ctx.fillRect(x, y, elementWidth, elementHeight);
