@@ -37,6 +37,9 @@ export type ElementType = "text" | "image" | "background" | "data";
 // Element types
 export type FontWeight = "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
 
+// Data types
+export type DataType = "category" | "subcategory" | "menuitem" | "sidedish" | "sauce" | "allergen";
+
 // Base element interface
 export interface BaseElement {
   id: string;
@@ -116,7 +119,7 @@ export interface BackgroundElement extends BaseElement {
 // Data element
 export interface DataElement extends BaseElement {
   type: "data";
-  dataType: "category" | "subcategory" | "menuitem";
+  dataType: DataType;
   dataId?: string;
   categoryData?: any; // Store the full category data
   subcategoryData?: any; // Store the full subcategory data

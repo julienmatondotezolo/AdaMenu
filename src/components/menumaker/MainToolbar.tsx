@@ -4,11 +4,13 @@ import React, { useState } from "react";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Tool } from "../../types/menumaker";
 import { Button } from "../ui/button";
+import { DataSelectorModal } from "./DataSelectorModal";
 import { ImageUploadModal } from "./ImageUploadModal";
 
 export function MainToolbar() {
-  const { project, currentPageId, editorState, setTool, addElement, undo, redo, copy, paste } = useMenuMakerStore();
+  const { project, currentPageId, editorState, setTool, undo, redo, copy, paste } = useMenuMakerStore();
   const [showImageUpload, setShowImageUpload] = useState(false);
+  const [showDataSelector, setShowDataSelector] = useState(false);
 
   const { tool } = editorState;
 
@@ -27,44 +29,13 @@ export function MainToolbar() {
       return;
     }
 
-    setTool(toolId);
-
-    // If data tool is selected, add a default data element
-    if (toolId === "data" && project && currentPageId) {
-      const currentPage = project.pages.find((page) => page.id === currentPageId);
-
-      if (currentPage && currentPage.layers.length > 0) {
-        // Calculate center position based on page format
-        const centerX = (currentPage.format.width - 1000) / 2;
-        const centerY = (currentPage.format.height - 400) / 2;
-
-        // Create default data element
-        const defaultDataElement = {
-          type: "data" as const,
-          x: Math.max(0, centerX), // Ensure it's not negative
-          y: Math.max(0, centerY), // Ensure it's not negative
-          width: 1000,
-          height: 400,
-          rotation: 0,
-          scaleX: 1,
-          scaleY: 1,
-          zIndex: 1,
-          locked: false,
-          visible: true,
-          opacity: 1,
-          dataType: "" as any, // Empty dataType
-          dataId: "",
-          backgroundColor: "#ffffff", // White background
-          borderColor: "#000000", // Black border
-          borderSize: 1,
-          borderType: "solid" as const,
-          borderRadius: 0,
-        };
-
-        // Add to first layer
-        addElement(currentPageId, currentPage.layers[0].id, defaultDataElement);
-      }
+    // If data tool is selected, show data selector modal instead of setting tool
+    if (toolId === "data") {
+      setShowDataSelector(true);
+      return;
     }
+
+    setTool(toolId);
   };
 
   if (!project || !currentPageId) return null;
@@ -116,6 +87,9 @@ export function MainToolbar() {
 
       {/* Image Upload Modal */}
       <ImageUploadModal isOpen={showImageUpload} onClose={() => setShowImageUpload(false)} />
+
+      {/* Data Selector Modal */}
+      <DataSelectorModal isOpen={showDataSelector} onClose={() => setShowDataSelector(false)} />
     </>
   );
 }
