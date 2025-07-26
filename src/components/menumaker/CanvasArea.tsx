@@ -6,6 +6,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { TextElement } from "../../types/menumaker";
 import { getBackgroundStyle } from "./utils/colorUtils";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
+import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
 export function CanvasArea() {
@@ -45,6 +46,7 @@ export function CanvasArea() {
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
   const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
+  const [activeSnapGuidelines, setActiveSnapGuidelines] = useState<ActiveGuideline[]>([]);
 
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
@@ -246,6 +248,11 @@ export function CanvasArea() {
     if (hoveredElementId && !editorState.selectedElementIds.includes(hoveredElementId) && tool === "select") {
       drawHoverBoundingBox(ctx, hoveredElementId);
     }
+
+    // Draw snap guidelines
+    if (activeSnapGuidelines.length > 0 && currentPage) {
+      snapGuidelineManager.drawGuidelines(ctx, activeSnapGuidelines, pageOffset, currentPage.format, canvas.zoom);
+    }
   }, [
     currentPage,
     canvasSize,
@@ -261,6 +268,7 @@ export function CanvasArea() {
     imageElementCache,
     tempElementPositions,
     tempElementDimensions,
+    activeSnapGuidelines,
   ]);
 
   const drawPageBackground = (ctx: CanvasRenderingContext2D, page: any, canvas: any) => {
@@ -1028,6 +1036,9 @@ export function CanvasArea() {
             });
           });
           setElementStartPositions(initialPositions);
+
+          // Initialize snap points for guidelines (exclude selected elements)
+          snapGuidelineManager.initializeSnapPoints(currentPage, [clickedElementId]);
         } else if (isAlreadySelected && editorState.selectedElementIds.length > 1) {
           // Multiple elements selected, clicked element is one of them - start dragging all
           setIsDragging(true);
@@ -1044,6 +1055,9 @@ export function CanvasArea() {
             });
           });
           setElementStartPositions(initialPositions);
+
+          // Initialize snap points for guidelines (exclude selected elements)
+          snapGuidelineManager.initializeSnapPoints(currentPage, editorState.selectedElementIds);
         } else {
           // Element not selected - select it (replace current selection)
           selectElements([clickedElementId]);
@@ -1054,6 +1068,10 @@ export function CanvasArea() {
         setIsSelecting(true);
         setSelectionStart({ x: mouseX, y: mouseY });
         setSelectionEnd({ x: mouseX, y: mouseY });
+
+        // Clear snap guidelines
+        setActiveSnapGuidelines([]);
+        snapGuidelineManager.clear();
       }
     } else {
       // Handle other tools with click
@@ -1251,6 +1269,69 @@ export function CanvasArea() {
           }
         });
         setTempElementPositions(newTempPositions);
+
+        // Calculate snapping during dragging
+        if (currentPage) {
+          // Prepare dragged elements data for snap calculation
+          const draggedElements = editorState.selectedElementIds
+            .map((elementId) => {
+              const tempPos = newTempPositions[elementId];
+              let element = null;
+
+              // Find the element in the page layers
+              for (const layer of currentPage.layers) {
+                const found = layer.elements.find((el) => el.id === elementId);
+
+                if (found) {
+                  element = found;
+                  break;
+                }
+              }
+
+              if (element && tempPos) {
+                return {
+                  id: elementId,
+                  x: tempPos.x,
+                  y: tempPos.y,
+                  width: element.width,
+                  height: element.height,
+                };
+              }
+              return null;
+            })
+            .filter(Boolean) as Array<{ id: string; x: number; y: number; width: number; height: number }>;
+
+          // Calculate snap result
+          const snapResult = snapGuidelineManager.calculateSnap(draggedElements, canvas.zoom);
+
+          // Apply snapping if available
+          if (snapResult.snappedX !== undefined || snapResult.snappedY !== undefined) {
+            const snappedPositions: Record<string, { x: number; y: number }> = {};
+
+            editorState.selectedElementIds.forEach((elementId, index) => {
+              const startPos = elementStartPositions[elementId];
+
+              if (startPos) {
+                snappedPositions[elementId] = {
+                  x:
+                    snapResult.snappedX !== undefined
+                      ? snapResult.snappedX +
+                        (index > 0 ? startPos.x - elementStartPositions[editorState.selectedElementIds[0]].x : 0)
+                      : newTempPositions[elementId].x,
+                  y:
+                    snapResult.snappedY !== undefined
+                      ? snapResult.snappedY +
+                        (index > 0 ? startPos.y - elementStartPositions[editorState.selectedElementIds[0]].y : 0)
+                      : newTempPositions[elementId].y,
+                };
+              }
+            });
+            setTempElementPositions(snappedPositions);
+          }
+
+          // Set active guidelines
+          setActiveSnapGuidelines(snapResult.guidelines);
+        }
       } else if (isSelecting) {
         // Handle selection box
         setSelectionEnd({ x: mouseX, y: mouseY });
@@ -1311,6 +1392,10 @@ export function CanvasArea() {
         setElementStartDimensions({});
         setElementStartPositions({});
         setTempElementDimensions({});
+
+        // Clear snap guidelines
+        setActiveSnapGuidelines([]);
+        snapGuidelineManager.clear();
       } else if (isDragging) {
         // Commit temporary positions to store on mouse up
         Object.entries(tempElementPositions).forEach(([elementId, position]) => {
@@ -1330,6 +1415,10 @@ export function CanvasArea() {
         setIsDragging(false);
         setElementStartPositions({});
         setTempElementPositions({});
+
+        // Clear snap guidelines
+        setActiveSnapGuidelines([]);
+        snapGuidelineManager.clear();
       } else if (isSelecting) {
         // Only update selection if we actually dragged (selection box has some size)
         const dragDistance = Math.abs(selectionEnd.x - selectionStart.x) + Math.abs(selectionEnd.y - selectionStart.y);
