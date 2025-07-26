@@ -1,36 +1,19 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import { Database } from "lucide-react";
+import { Database, Edit3 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { Button } from "../ui/button";
 import { Label } from "../ui/label";
+import { type DataConfiguration, DataSelectorModal } from "./DataSelectorModal";
 
 export function DataPanel() {
-  const { currentPageId, project, addElement, updateElement, editorState, menuData } = useMenuMakerStore();
+  const { currentPageId, project, updateElement, editorState } = useMenuMakerStore();
+
+  // Data selector modal state
+  const [showDataSelector, setShowDataSelector] = useState(false);
 
   // Data type selection
   const [selectedDataType, setSelectedDataType] = useState<"category" | "subcategory" | "menuitem">("category");
-
-  // Selection states
-  const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedCategoryData, setSelectedCategoryData] = useState<any>(null);
-  const [selectedSubCategory, setSelectedSubCategory] = useState<string>("");
-  const [selectedSubCategoryData, setSelectedSubCategoryData] = useState<any>(null);
-  const [availableSubCategories, setAvailableSubCategories] = useState<any[]>([]);
-
-  // Get categories from store (sorted by order)
-  const categories = menuData.categories?.sort((a: any, b: any) => a.order - b.order) || [];
-
-  // Update subcategory data when selection changes
-  useEffect(() => {
-    if (selectedSubCategory && selectedDataType === "menuitem") {
-      // Find and store the full subcategory data from available subcategories
-      const subcategoryData = availableSubCategories.find((subcat: any) => subcat.id === selectedSubCategory);
-
-      setSelectedSubCategoryData(subcategoryData || null);
-    }
-  }, [selectedSubCategory, selectedDataType, availableSubCategories]);
 
   // Style properties
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
@@ -117,6 +100,61 @@ export function DataPanel() {
 
   const isEditingMode = !!selectedDataElement;
 
+  // Get display text for the data selection button
+  const getDataSelectionText = () => {
+    if (!selectedDataElement) {
+      return "Select Data Type";
+    }
+
+    const { dataType, categoryData, subcategoryData } = selectedDataElement;
+
+    switch (dataType) {
+      case "category":
+        return `Category: ${categoryData?.names?.en || categoryData?.name || "Category"}`;
+      case "subcategory":
+        return `Subcategory: ${subcategoryData?.names?.en || subcategoryData?.name || "Unknown"}`;
+      case "menuitem": {
+        const subcategoryName = subcategoryData?.names?.en || subcategoryData?.name || "Unknown Subcategory";
+
+        return `${subcategoryName} menu items`;
+      }
+      case "sidedish":
+        return "Side Dishes";
+      case "sauce":
+        return "Sauces & Supplements";
+      case "allergen":
+        return "Allergen Information";
+      default:
+        return "Select Data Type";
+    }
+  };
+
+  // Handle data selection from modal
+  const handleDataSelection = (dataConfig: DataConfiguration) => {
+    if (!isEditingMode || !selectedDataElement || !currentPageId || !project) return;
+
+    const currentPage = project.pages.find((page) => page.id === currentPageId);
+
+    if (!currentPage) return;
+
+    const updatedElement = {
+      ...selectedDataElement,
+      dataType: dataConfig.dataType,
+      dataId: dataConfig.subcategoryId || dataConfig.categoryId || "",
+      categoryData: dataConfig.categoryData,
+      subcategoryData: dataConfig.subcategoryData,
+    };
+
+    // Find the layer containing this element
+    const layer = currentPage.layers.find((layer) =>
+      layer.elements.some((element) => element.id === selectedDataElement.id),
+    );
+
+    if (layer) {
+      updateElement(currentPageId, layer.id, selectedDataElement.id, updatedElement);
+    }
+  };
+
   // Populate form when editing an existing element (prevent infinite loops)
   const [isPopulatingForm, setIsPopulatingForm] = useState(false);
 
@@ -185,44 +223,6 @@ export function DataPanel() {
       setShowMenuDescriptionLanguage(selectedDataElement.showMenuDescriptionLanguage || "en");
       setShowMenuDescriptionLineBreakChars(selectedDataElement.showMenuDescriptionLineBreakChars || 50);
 
-      // Set data selection based on dataId
-      if (selectedDataElement.dataId) {
-        if (selectedDataElement.dataType === "category") {
-          setSelectedCategory(selectedDataElement.dataId);
-          setSelectedCategoryData(selectedDataElement.categoryData || null);
-        } else if (selectedDataElement.dataType === "subcategory") {
-          setSelectedSubCategory(selectedDataElement.dataId);
-          setSelectedSubCategoryData(selectedDataElement.subcategoryData || null);
-          // If subcategory is selected, also populate the parent category for the dropdown
-          if (selectedDataElement.subcategoryData?.parentCategoryId) {
-            setSelectedCategory(selectedDataElement.subcategoryData.parentCategoryId);
-            const parentCategory = categories?.find(
-              (cat: any) => cat.id === selectedDataElement.subcategoryData.parentCategoryId,
-            );
-
-            setSelectedCategoryData(parentCategory || null);
-            setAvailableSubCategories(parentCategory?.subCategories || []);
-          }
-        } else if (selectedDataElement.dataType === "menuitem") {
-          // If menu item element is selected, populate the category and subcategory from stored data
-          if (selectedDataElement.subcategoryData) {
-            setSelectedSubCategory(selectedDataElement.subcategoryData.id);
-            setSelectedSubCategoryData(selectedDataElement.subcategoryData);
-
-            // Find the parent category by searching through all categories
-            const parentCategory = categories?.find((cat: any) =>
-              cat.subCategories.some((subcat: any) => subcat.id === selectedDataElement.subcategoryData.id),
-            );
-
-            if (parentCategory) {
-              setSelectedCategory(parentCategory.id);
-              setSelectedCategoryData(parentCategory);
-              setAvailableSubCategories(parentCategory.subCategories || []);
-            }
-          }
-        }
-      }
-
       // Reset flag after a brief delay
       setTimeout(() => setIsPopulatingForm(false), 50);
     } else if (!selectedDataElement) {
@@ -243,10 +243,6 @@ export function DataPanel() {
   }, [
     isEditingMode,
     selectedDataType,
-    selectedCategory,
-    selectedCategoryData,
-    selectedSubCategory,
-    selectedSubCategoryData,
     elementX,
     elementY,
     elementWidth,
@@ -307,35 +303,13 @@ export function DataPanel() {
 
     if (!currentPage) return;
 
-    let dataId = "";
-
-    switch (selectedDataType) {
-      case "category":
-        dataId = selectedCategory;
-        break;
-      case "subcategory":
-        dataId = selectedSubCategory;
-        break;
-      case "menuitem":
-        dataId = selectedSubCategory; // For menu items, use subcategory ID
-        break;
-    }
-
     const updatedElement = {
       ...selectedDataElement,
       x: elementX,
       y: elementY,
       width: elementWidth,
       height: elementHeight,
-      dataType: selectedDataType,
-      dataId: dataId,
-      categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
-      subcategoryData:
-        selectedDataType === "subcategory"
-          ? selectedSubCategoryData
-          : selectedDataType === "menuitem"
-            ? selectedSubCategoryData
-            : undefined,
+      // Keep existing data selection - changes happen via modal
       backgroundColor,
       backgroundOpacity,
       borderColor,
@@ -418,270 +392,32 @@ export function DataPanel() {
     }
   };
 
-  const handleAddOrUpdateDataElement = () => {
-    if (!currentPageId || !project) return;
-
-    const currentPage = project.pages.find((page) => page.id === currentPageId);
-
-    if (!currentPage || currentPage.layers.length === 0) return;
-
-    let dataId = "";
-
-    switch (selectedDataType) {
-      case "category":
-        dataId = selectedCategory;
-        break;
-      case "subcategory":
-        dataId = selectedSubCategory;
-        break;
-      case "menuitem":
-        dataId = selectedSubCategory; // For menu items, use subcategory ID
-        break;
-    }
-
-    // Only handle adding new elements (not editing)
-    if (!dataId) {
-      alert(`Please select a ${selectedDataType} first`);
-      return;
-    }
-
-    // Create data element
-    const dataElement = {
-      type: "data" as const,
-      x: elementX,
-      y: elementY,
-      width: elementWidth,
-      height: elementHeight,
-      rotation: 0,
-      scaleX: 1,
-      scaleY: 1,
-      zIndex: 1,
-      locked: false,
-      visible: true,
-      opacity: 1,
-      dataType: selectedDataType,
-      dataId: dataId,
-      backgroundColor,
-      backgroundOpacity,
-      borderColor,
-      borderSize,
-      borderType,
-      borderRadius,
-      textColor,
-      fontSize,
-      fontFamily,
-      fontWeight,
-      lineSpacing,
-      itemNameLanguage,
-      categoryData: selectedDataType === "category" ? selectedCategoryData : undefined,
-      subcategoryData:
-        selectedDataType === "subcategory"
-          ? selectedSubCategoryData
-          : selectedDataType === "menuitem"
-            ? selectedSubCategoryData
-            : undefined,
-      // Menu item specific properties
-      showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
-      showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
-      showPrice: selectedDataType === "menuitem" ? showPrice : undefined,
-      showCurrencySign: selectedDataType === "menuitem" ? showCurrencySign : undefined,
-      priceColor: selectedDataType === "menuitem" ? priceColor : undefined,
-      priceFontFamily: selectedDataType === "menuitem" ? priceFontFamily : undefined,
-      priceFontWeight: selectedDataType === "menuitem" ? priceFontWeight : undefined,
-      priceSeparator: selectedDataType === "menuitem" ? priceSeparator : undefined,
-      menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
-      // Subcategory title properties
-      subcategoryTitleTextColor:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
-      subcategoryTitleTextFontSize:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontSize : undefined,
-      subcategoryTitleTextFontFamily:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontFamily : undefined,
-      subcategoryTitleTextFontWeight:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextFontWeight : undefined,
-      showDivider: selectedDataType === "menuitem" && showSubcategoryTitle ? showDivider : undefined,
-      dividerColor: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerColor : undefined,
-      dividerSize: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSize : undefined,
-      dividerWidth: selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerWidth : undefined,
-      dividerCustomWidth:
-        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerCustomWidth : undefined,
-      dividerSpaceTop:
-        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceTop : undefined,
-      dividerSpaceBottom:
-        selectedDataType === "menuitem" && showSubcategoryTitle && showDivider ? dividerSpaceBottom : undefined,
-      subcategoryTitleTextMarginTop:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginTop : undefined,
-      subcategoryTitleTextMarginLeft:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginLeft : undefined,
-      subcategoryTitleTextMarginRight:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginRight : undefined,
-      subcategoryTitleTextMarginBottom:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextMarginBottom : undefined,
-      subcategoryTitleLanguage:
-        selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleLanguage : undefined,
-      // Menu description properties
-      showMenuDescriptionTextColor:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextColor : undefined,
-      showMenuDescriptionTextFontSize:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontSize : undefined,
-      showMenuDescriptionTextFontWeight:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextFontWeight : undefined,
-      showMenuDescriptionTextMarginTop:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginTop : undefined,
-      showMenuDescriptionTextMarginLeft:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginLeft : undefined,
-      showMenuDescriptionTextMarginRight:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginRight : undefined,
-      showMenuDescriptionTextMarginBottom:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionTextMarginBottom : undefined,
-      showMenuDescriptionLanguage:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLanguage : undefined,
-      showMenuDescriptionLineBreakChars:
-        selectedDataType === "menuitem" && showMenuDescription ? showMenuDescriptionLineBreakChars : undefined,
-    };
-
-    // Add to first layer
-    addElement(currentPageId, currentPage.layers[0].id, dataElement);
-  };
-
   if (!project || !currentPageId) return null;
 
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* Data Type Selection */}
+        {/* Data Selector Button */}
         <div>
-          <Label className="text-sm font-medium">Data Type</Label>
-          <select
-            value={selectedDataType}
-            onChange={(e) => setSelectedDataType(e.target.value as "category" | "subcategory" | "menuitem")}
-            className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+          <Label className="text-sm font-medium mb-3 block">Data Selection</Label>
+          <button
+            onClick={() => setShowDataSelector(true)}
+            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all group"
           >
-            <option value="category">Category</option>
-            <option value="subcategory">Subcategory</option>
-            <option value="menuitem">Menu Item</option>
-          </select>
+            <div className="flex items-center justify-center space-x-3">
+              <div className="w-10 h-10 bg-gray-100 group-hover:bg-blue-100 rounded-lg flex items-center justify-center">
+                <Database className="w-5 h-5 text-gray-500 group-hover:text-blue-600" />
+              </div>
+              <div className="text-left flex-1">
+                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 text-sm">
+                  {getDataSelectionText()}
+                </h3>
+                <p className="text-xs text-gray-500">Click to change data source</p>
+              </div>
+              <Edit3 className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+            </div>
+          </button>
         </div>
-
-        {/* Category Selection */}
-        {selectedDataType !== "menuitem" && (
-          <div>
-            <Label className="text-sm font-medium">Category</Label>
-            <select
-              value={selectedCategory}
-              onChange={(e) => {
-                const categoryId = e.target.value;
-
-                setSelectedCategory(categoryId);
-                // Find and store the full category data
-                const categoryData = categories?.find((cat: any) => cat.id === categoryId);
-
-                setSelectedCategoryData(categoryData || null);
-
-                // If dataType is subcategory, populate available subcategories
-                if (selectedDataType === "subcategory") {
-                  setAvailableSubCategories(categoryData?.subCategories || []);
-                  setSelectedSubCategory(""); // Reset subcategory selection
-                  setSelectedSubCategoryData(null);
-                }
-              }}
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-            >
-              <option value="">Select Category</option>
-              {categories?.map((category: any) => (
-                <option key={category.id} value={category.id}>
-                  {category.names?.en || category.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Subcategory Selection (only if subcategory is selected) */}
-        {selectedDataType === "subcategory" && (
-          <div>
-            <Label className="text-sm font-medium">Subcategory</Label>
-            <select
-              value={selectedSubCategory}
-              onChange={(e) => {
-                const subcategoryId = e.target.value;
-
-                setSelectedSubCategory(subcategoryId);
-                // Find and store the full subcategory data
-                const subcategoryData = availableSubCategories.find((subcat: any) => subcat.id === subcategoryId);
-
-                setSelectedSubCategoryData(subcategoryData || null);
-              }}
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-              disabled={!selectedCategory}
-            >
-              <option value="">Select Subcategory</option>
-              {availableSubCategories.map((subcategory: any) => (
-                <option key={subcategory.id} value={subcategory.id}>
-                  {subcategory.names?.en || subcategory.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Menu Item Selection (only if menuitem is selected) */}
-        {selectedDataType === "menuitem" && (
-          <>
-            <div>
-              <Label className="text-sm font-medium">Category</Label>
-              <select
-                value={selectedCategory}
-                onChange={(e) => {
-                  const categoryId = e.target.value;
-
-                  setSelectedCategory(categoryId);
-                  // Find and store the full category data
-                  const categoryData = categories?.find((cat: any) => cat.id === categoryId);
-
-                  setSelectedCategoryData(categoryData || null);
-                  // Populate available subcategories and reset selections
-                  setAvailableSubCategories(categoryData?.subCategories || []);
-                  setSelectedSubCategory(""); // Reset subcategory selection
-                  setSelectedSubCategoryData(null);
-                }}
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-              >
-                <option value="">Select Category</option>
-                {categories?.map((category: any) => (
-                  <option key={category.id} value={category.id}>
-                    {category.names?.en || category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Subcategory</Label>
-              <select
-                value={selectedSubCategory}
-                onChange={(e) => {
-                  const subcategoryId = e.target.value;
-
-                  setSelectedSubCategory(subcategoryId);
-                  // Find and store the full subcategory data
-                  const subcategoryData = availableSubCategories.find((subcat: any) => subcat.id === subcategoryId);
-
-                  setSelectedSubCategoryData(subcategoryData || null);
-                }}
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
-                disabled={!selectedCategory}
-              >
-                <option value="">Select Subcategory</option>
-                {availableSubCategories.map((subcategory: any) => (
-                  <option key={subcategory.id} value={subcategory.id}>
-                    {subcategory.names?.en || subcategory.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </>
-        )}
 
         {/* Position & Size Section */}
         <div className="border-t pt-4">
@@ -1615,15 +1351,21 @@ export function DataPanel() {
             <div className="text-xs text-gray-500 text-right">{borderRadius}px</div>
           </div>
         </div>
-
-        {/* Add Button - only show when not editing */}
-        {!isEditingMode && (
-          <Button onClick={handleAddOrUpdateDataElement} className="w-full">
-            <Database className="w-4 h-4 mr-2" />
-            Add Data Element
-          </Button>
-        )}
       </div>
+
+      {/* Data Selector Modal */}
+      {isEditingMode && (
+        <DataSelectorModal
+          isOpen={showDataSelector}
+          onClose={() => setShowDataSelector(false)}
+          onConfirm={handleDataSelection}
+          initialSelection={{
+            dataType: selectedDataElement?.dataType,
+            categoryId: selectedDataElement?.categoryData?.id,
+            subcategoryId: selectedDataElement?.subcategoryData?.id,
+          }}
+        />
+      )}
     </div>
   );
 }
