@@ -287,7 +287,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         priceColor: config.dataType === "menuitem" ? "#000000" : undefined,
         priceFontFamily: config.dataType === "menuitem" ? "Arial, sans-serif" : undefined,
         priceFontWeight: config.dataType === "menuitem" ? "normal" : undefined,
-        priceSeparator: config.dataType === "menuitem" ? "." : undefined,
+        priceSeparator: config.dataType === "menuitem" ? "," : undefined,
         menuLayout: config.dataType === "menuitem" ? "left" : undefined,
       };
 

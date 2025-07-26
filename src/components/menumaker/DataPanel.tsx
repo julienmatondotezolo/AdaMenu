@@ -124,7 +124,7 @@ export function DataPanel() {
     if (selectedDataElement && !isPopulatingForm) {
       setIsPopulatingForm(true);
 
-      setSelectedDataType(selectedDataElement.dataType || "category");
+      setSelectedDataType(selectedDataElement.dataType as "menuitem" | "category" | "subcategory");
       setElementX(Math.round(selectedDataElement.x || 50));
       setElementY(Math.round(selectedDataElement.y || 50));
       setElementWidth(Math.round(selectedDataElement.width || 200));
