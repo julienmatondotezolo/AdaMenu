@@ -482,14 +482,49 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
                       selectedSubcategory === subcategory.id ? "border-blue-500 bg-blue-50" : "border-gray-200"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">
-                          {subcategory.names?.en || subcategory.name}
-                        </h3>
-                        {subcategory.description && <p className="text-sm text-gray-500">{subcategory.description}</p>}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">
+                            {subcategory.names?.en || subcategory.name}
+                          </h3>
+                          {subcategory.description && <p className="text-sm text-gray-500">{subcategory.description}</p>}
+                          {selectedDataType === "menuitem" && subcategory.menuItems?.length > 0 && (
+                            <p className="text-xs text-blue-600 mt-1">
+                              {subcategory.menuItems.length} menu item{subcategory.menuItems.length !== 1 ? 's' : ''}
+                            </p>
+                          )}
+                        </div>
+                        {selectedSubcategory === subcategory.id && <Check className="w-5 h-5 text-blue-600" />}
                       </div>
-                      {selectedSubcategory === subcategory.id && <Check className="w-5 h-5 text-blue-600" />}
+                      
+                      {/* Show menu items preview when this subcategory is selected and dataType is menuitem */}
+                      {selectedDataType === "menuitem" && 
+                       selectedSubcategory === subcategory.id && 
+                       subcategory.menuItems?.length > 0 && (
+                        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <h4 className="text-sm font-medium text-blue-900 mb-2">Menu Items Preview:</h4>
+                          <div className="space-y-1 max-h-32 overflow-y-auto">
+                            {subcategory.menuItems.slice(0, 5).map((item: any, index: number) => (
+                              <div key={item.id || index} className="flex items-center justify-between text-xs">
+                                <span className="text-gray-700 truncate flex-1">
+                                  {item.names?.en || item.name}
+                                </span>
+                                {item.price && (
+                                  <span className="text-blue-600 font-medium ml-2">
+                                    €{item.price.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {subcategory.menuItems.length > 5 && (
+                              <div className="text-xs text-gray-500 italic">
+                                ...and {subcategory.menuItems.length - 5} more items
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </button>
                 ))
