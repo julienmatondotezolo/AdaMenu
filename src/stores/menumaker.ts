@@ -1300,6 +1300,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             try {
               const img = new Image();
 
+              img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
               await new Promise<void>((resolve, reject) => {
                 img.onload = () => resolve();
                 img.onerror = reject;
@@ -1334,6 +1336,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                 // Draw image element (if src is available)
                 try {
                   const img = new Image();
+                  
+                  img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
 
                   await new Promise<void>((resolve, reject) => {
                     img.onload = () => resolve();

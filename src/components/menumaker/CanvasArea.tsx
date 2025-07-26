@@ -289,6 +289,8 @@ export function CanvasArea() {
         // Load the image and cache it
         const img = new Image();
 
+        img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
         img.onload = () => {
           setBackgroundImageCache((prev) => new Map(prev.set(page.backgroundImage, img)));
           // Trigger a full canvas redraw when image loads
@@ -453,6 +455,8 @@ export function CanvasArea() {
       } else if (!cachedImage) {
         // Load the image and cache it
         const img = new Image();
+
+        img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
 
         img.onload = () => {
           setImageElementCache((prev) => new Map(prev.set(element.src, img)));

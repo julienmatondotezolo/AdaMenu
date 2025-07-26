@@ -42,6 +42,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
     if (page.backgroundImage) {
       const img = new Image();
 
+      img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
       img.onload = () => {
         ctx.save();
         ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
@@ -114,6 +116,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
               } else if (!cachedImage) {
                 // Load the image and cache it
                 const img = new Image();
+
+                img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
 
                 img.onload = () => {
                   imageCacheRef.current.set(element.src, img);
