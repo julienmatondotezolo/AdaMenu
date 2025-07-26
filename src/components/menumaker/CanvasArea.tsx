@@ -44,6 +44,7 @@ export function CanvasArea() {
   >({});
   const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
+  const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
 
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
@@ -90,9 +91,14 @@ export function CanvasArea() {
     return () => window.removeEventListener("resize", updateSize);
   }, [currentPage, canvas.zoom, canvas.offsetX, canvas.offsetY]);
 
-  // Handle keyboard shortcuts
+  // Handle keyboard shortcuts and shift key detection
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Track shift key state
+      if (e.key === "Shift") {
+        setIsShiftPressed(true);
+      }
+
       // Only handle if canvas area is hovered and elements are selected
       if (!isCanvasHovered || editorState.selectedElementIds.length === 0 || !currentPage) return;
 
@@ -117,12 +123,21 @@ export function CanvasArea() {
       }
     };
 
-    // Add event listener
+    const handleKeyUp = (e: KeyboardEvent) => {
+      // Track shift key state
+      if (e.key === "Shift") {
+        setIsShiftPressed(false);
+      }
+    };
+
+    // Add event listeners
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
 
     // Cleanup
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
   }, [isCanvasHovered, editorState.selectedElementIds, currentPage, currentPageId, deleteElement, selectElements]);
 
@@ -1076,17 +1091,25 @@ export function CanvasArea() {
           let newX = startPos.x;
           let newY = startPos.y;
 
-          // Find the element to check if it's a text element
+          // Find the element to check type and constraints
           let isTextElement = false;
+          let isImageElement = false;
           let textElement = null;
+          let aspectRatio = null;
 
           if (currentPage) {
             for (const layer of currentPage.layers) {
               const element = layer.elements.find((el) => el.id === elementId);
 
-              if (element && element.type === "text") {
-                isTextElement = true;
-                textElement = element;
+              if (element) {
+                if (element.type === "text") {
+                  isTextElement = true;
+                  textElement = element;
+                } else if (element.type === "image") {
+                  isImageElement = true;
+                  // Calculate aspect ratio from original dimensions
+                  aspectRatio = element.originalWidth / element.originalHeight;
+                }
                 break;
               }
             }
@@ -1116,27 +1139,88 @@ export function CanvasArea() {
             }
           }
 
+          // For image elements, set reasonable minimum dimensions
+          if (isImageElement) {
+            minWidth = 10; // Minimum image width
+            minHeight = 10; // Minimum image height
+          }
+
           // Apply resize based on handle
           switch (resizeHandle) {
             case "tl": // Top-left
               newWidth = Math.max(minWidth, startDim.width - deltaX);
               newHeight = Math.max(minHeight, startDim.height - deltaY);
+
+              // Apply aspect ratio for images if shift is not pressed
+              if (isImageElement && aspectRatio && !isShiftPressed) {
+                // Maintain aspect ratio - use the dimension that changed less
+                const widthRatio = newWidth / startDim.width;
+                const heightRatio = newHeight / startDim.height;
+
+                if (Math.abs(1 - widthRatio) < Math.abs(1 - heightRatio)) {
+                  // Width changed less, adjust height based on width
+                  newHeight = Math.max(minHeight, newWidth / aspectRatio);
+                } else {
+                  // Height changed less, adjust width based on height
+                  newWidth = Math.max(minWidth, newHeight * aspectRatio);
+                }
+              }
+
               newX = startPos.x + (startDim.width - newWidth);
               newY = startPos.y + (startDim.height - newHeight);
               break;
             case "tr": // Top-right
               newWidth = Math.max(minWidth, startDim.width + deltaX);
               newHeight = Math.max(minHeight, startDim.height - deltaY);
+
+              // Apply aspect ratio for images if shift is not pressed
+              if (isImageElement && aspectRatio && !isShiftPressed) {
+                const widthRatio = newWidth / startDim.width;
+                const heightRatio = newHeight / startDim.height;
+
+                if (Math.abs(1 - widthRatio) < Math.abs(1 - heightRatio)) {
+                  newHeight = Math.max(minHeight, newWidth / aspectRatio);
+                } else {
+                  newWidth = Math.max(minWidth, newHeight * aspectRatio);
+                }
+              }
+
               newY = startPos.y + (startDim.height - newHeight);
               break;
             case "bl": // Bottom-left
               newWidth = Math.max(minWidth, startDim.width - deltaX);
               newHeight = Math.max(minHeight, startDim.height + deltaY);
+
+              // Apply aspect ratio for images if shift is not pressed
+              if (isImageElement && aspectRatio && !isShiftPressed) {
+                const widthRatio = newWidth / startDim.width;
+                const heightRatio = newHeight / startDim.height;
+
+                if (Math.abs(1 - widthRatio) < Math.abs(1 - heightRatio)) {
+                  newHeight = Math.max(minHeight, newWidth / aspectRatio);
+                } else {
+                  newWidth = Math.max(minWidth, newHeight * aspectRatio);
+                }
+              }
+
               newX = startPos.x + (startDim.width - newWidth);
               break;
             case "br": // Bottom-right
               newWidth = Math.max(minWidth, startDim.width + deltaX);
               newHeight = Math.max(minHeight, startDim.height + deltaY);
+
+              // Apply aspect ratio for images if shift is not pressed
+              if (isImageElement && aspectRatio && !isShiftPressed) {
+                const widthRatio = newWidth / startDim.width;
+                const heightRatio = newHeight / startDim.height;
+
+                if (Math.abs(1 - widthRatio) < Math.abs(1 - heightRatio)) {
+                  newHeight = Math.max(minHeight, newWidth / aspectRatio);
+                } else {
+                  newWidth = Math.max(minWidth, newHeight * aspectRatio);
+                }
+              }
+
               break;
           }
 
