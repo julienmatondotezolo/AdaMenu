@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
-import { Copy, Database, Eye, EyeOff, Image, Lock, Plus, Trash2, Type, Unlock } from "lucide-react";
+import { Circle, Copy, Database, Eye, EyeOff, Image, Lock, Plus, Square, Trash2, Triangle, Type, Unlock } from "lucide-react";
 import React from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
@@ -210,6 +210,16 @@ export function LayersPanel() {
                           {element.type === "data" && <Database className="w-3 h-3 text-blue-600" />}
                           {element.type === "text" && <Type className="w-3 h-3 text-green-600" />}
                           {element.type === "image" && <Image className="w-3 h-3 text-purple-600" />}
+                          {element.type === "shape" && (() => {
+                            const shapeElement = element as any;
+                            const IconComponent = shapeElement.shapeType === "rectangle" ? Square :
+                                               shapeElement.shapeType === "circle" ? Circle :
+                                               shapeElement.shapeType === "triangle" ? Triangle : Square;
+                            return <IconComponent 
+                              className="w-3 h-3" 
+                              style={{ color: shapeElement.fill || "#3B82F6" }} 
+                            />;
+                          })()}
                           <span className="capitalize">
                             {element.type === "data" ? (
                               (() => {
@@ -225,6 +235,8 @@ export function LayersPanel() {
                               </>
                             ) : element.type === "image" ? (
                               element.fileName
+                            ) : element.type === "shape" ? (
+                              (element as any).shapeType
                             ) : (
                               element.type
                             )}
