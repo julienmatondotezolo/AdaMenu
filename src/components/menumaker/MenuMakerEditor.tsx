@@ -11,6 +11,7 @@ import { ExportLoader } from "./ExportLoader";
 import { LayersPanel } from "./LayersPanel";
 import { MainToolbar } from "./MainToolbar";
 import { PropertiesPanel } from "./PropertiesPanel";
+import { ShapePanel } from "./ShapePanel";
 import { ThumbnailsPanel } from "./ThumbnailsPanel";
 import { TopNavBar } from "./TopNavBar";
 
@@ -26,6 +27,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const [layersCollapsed, setLayersCollapsed] = useState(false);
   const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
+  const [shapePropertiesCollapsed, setShapePropertiesCollapsed] = useState(false);
 
   // Ref to track if menu has been fetched to prevent multiple calls
   const menuFetched = useRef(false);
@@ -131,6 +133,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   // Check if any selected element is a data element
   const hasSelectedDataElement = selectedElements.some((element) => element.type === "data");
 
+  // Check if any selected element is a shape element  
+  const hasSelectedShapeElement = selectedElements.some((element) => element.type === "shape");
+
   if (!currentPage) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -206,7 +211,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && (
+            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && !hasSelectedShapeElement && (
               <div>
                 {/* Properties Header */}
                 <div
@@ -242,6 +247,43 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
               </div>
             )}
 
+            {/* Shape Properties Panel */}
+            {hasSelectedShapeElement && editorState.ui.propertiesPanelOpen && (
+              <div className="border-b border-gray-300">
+                {/* Shape Properties Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setShapePropertiesCollapsed(!shapePropertiesCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setShapePropertiesCollapsed(!shapePropertiesCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!shapePropertiesCollapsed}
+                  aria-controls="shape-properties-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Shape Properties</h3>
+                  <div className="flex items-center">
+                    {shapePropertiesCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Shape Properties Content */}
+                {!shapePropertiesCollapsed && (
+                  <div id="shape-properties-content" className="overflow-y-auto">
+                    <ShapePanel />
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Data Panel - shown when data tool is selected OR when data element is selected */}
             {(editorState.tool === "data" || hasSelectedDataElement) && (
               <div className="border-b border-gray-300">
@@ -262,7 +304,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                       aria-expanded={!propertiesCollapsed}
                       aria-controls="data-properties-content"
                     >
-                      <h3 className="font-semibold text-gray-900">Data Properties</h3>
+                      <h3 className="font-semibold text-gray-900">Properties</h3>
                       <div className="flex items-center">
                         {propertiesCollapsed ? (
                           <ChevronRight className="w-4 h-4 text-gray-500" />

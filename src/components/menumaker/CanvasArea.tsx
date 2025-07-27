@@ -276,8 +276,8 @@ export function CanvasArea() {
         locked: false,
         visible: true,
         opacity: 0.25,
-        fill: "#3B82F6", // Blue fill
-        stroke: "#1E40AF", // Darker blue stroke
+        fill: "#f63c3c", // Red fill
+        stroke: "#AF1E1EFF", // Darker red stroke
         strokeWidth: 2,
         radius: 0,
       };
@@ -1351,8 +1351,8 @@ export function CanvasArea() {
           locked: false,
           visible: true,
           opacity: 1,
-          fill: "#3B82F6", // Blue fill
-          stroke: "#1E40AF", // Darker blue stroke
+          fill: "#f63c3c", // Red fill
+          stroke: "#AF1E1EFF", // Darker red stroke
           strokeWidth: 2,
           radius: 0, // Default radius for rounded corners
         };

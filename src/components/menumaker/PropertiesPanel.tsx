@@ -13,7 +13,7 @@ export function PropertiesPanel() {
   const selectedElements =
     currentPage?.layers
       .flatMap((layer) => layer.elements)
-      .filter((element) => editorState.selectedElementIds.includes(element.id)) || [];
+      .filter((element) => editorState.selectedElementIds.includes(element.id) && element.type !== "shape") || [];
 
   if (!currentPage) return null;
 
