@@ -9,12 +9,12 @@ interface PreviewModeProps {
 }
 
 export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps) {
-  const { generatePreviewImages, project, currentPageId } = useMenuMakerStore();
+  const { generatePreviewImages, project, currentPageId, menuData } = useMenuMakerStore();
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Generate preview images when component mounts
+  // Generate preview images when component mounts or menu data changes
   useEffect(() => {
     setIsGeneratingPreview(true);
     setPreviewImages([]); // Clear any existing images
@@ -33,7 +33,7 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
     };
 
     generateImages();
-  }, [generatePreviewImages]);
+  }, [generatePreviewImages, menuData]);
 
   // Scroll to current page when preview images are loaded
   useEffect(() => {
