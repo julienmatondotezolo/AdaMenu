@@ -212,8 +212,6 @@ export const drawMenuItemsList = ({
 
       // Apply start index if specified (for menu items data type)
       const startIndex = element.startIndex || 0;
-
-      console.log("element.startIndex:", element.startIndex);
       const itemsToDisplay = menuItems.slice(startIndex);
 
       itemsToDisplay.forEach((menuItem: MenuItem) => {

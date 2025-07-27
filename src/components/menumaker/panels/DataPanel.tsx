@@ -251,6 +251,13 @@ export function DataPanel() {
     }
   }, [selectedDataElement]);
 
+  // Immediate update for startIndex (no debouncing for instant feedback)
+  useEffect(() => {
+    if (isEditingMode && selectedDataElement && !isPopulatingForm) {
+      updateSelectedElement();
+    }
+  }, [startIndex]);
+
   // Update element automatically when properties change (only in editing mode)
   useEffect(() => {
     if (isEditingMode && selectedDataElement) {
@@ -320,6 +327,7 @@ export function DataPanel() {
     showMenuDescriptionTextMarginBottom,
     showMenuDescriptionLanguage,
     showMenuDescriptionLineBreakChars,
+    // Removed startIndex from here since it has its own immediate effect above
   ]);
 
   // Update selected element automatically when properties change
