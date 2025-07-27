@@ -11,13 +11,19 @@ export function ExportLoader() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-center gap-3 z-50 min-w-[280px]">
-      <div className="flex-shrink-0">
-        <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-      </div>
-      <div className="flex-1">
-        <p className="text-sm font-medium text-gray-900">Generating your Menu</p>
-        <p className="text-xs text-gray-600 truncate">&quot;{project.name}&quot;</p>
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-8 flex flex-col items-center gap-6 max-w-md mx-4">
+        <div className="flex items-center justify-center">
+          <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">Generating your Menu</h3>
+          <p className="text-gray-600 text-sm">Please wait while we create your PDF...</p>
+          <p className="text-blue-600 font-medium text-sm mt-2 truncate">&quot;{project.name}&quot;</p>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: "75%" }}></div>
+        </div>
       </div>
     </div>
   );
