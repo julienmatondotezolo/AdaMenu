@@ -176,8 +176,10 @@ export function LayersPanel() {
     setDropPosition(null);
   };
 
-  const handleElementClick = (elementId: string, e: React.MouseEvent) => {
+  const handleElementClick = (elementId: string, layerLocked: boolean, e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (layerLocked) return;
 
     if (e.ctrlKey || e.metaKey) {
       // Multi-select mode
@@ -367,9 +369,15 @@ export function LayersPanel() {
                             ? "bg-blue-100 text-blue-900"
                             : "text-gray-600 hover:bg-gray-100"
                         }`}
-                        onClick={(e) => handleElementClick(element.id, e)}
-                        onMouseEnter={() => setHoveredElement(element.id)}
-                        onMouseLeave={() => setHoveredElement(null)}
+                        onClick={(e) => handleElementClick(element.id, layer.locked, e)}
+                        onMouseEnter={() => {
+                          if (layer.locked) return;
+                          setHoveredElement(element.id);
+                        }}
+                        onMouseLeave={() => {
+                          if (layer.locked) return;
+                          setHoveredElement(null);
+                        }}
                         title="Click to select element"
                       >
                         <div className="flex items-center justify-between">
