@@ -1,16 +1,19 @@
-import { Clipboard, Copy, Database, Image, MousePointer, Move, Redo, Type, Undo } from "lucide-react";
-import React, { useState } from "react";
+import { Clipboard, Copy, Database, Image, MousePointer, Redo, Shapes, Type, Undo } from "lucide-react";
+import React, { useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Tool } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { DataSelectorModal } from "./DataSelectorModal";
 import { ImageUploadModal } from "./ImageUploadModal";
+import { ShapeSelectorDropdown } from "./ShapeSelectorDropdown";
 
 export function MainToolbar() {
   const { project, currentPageId, editorState, setTool, undo, redo, copy, paste } = useMenuMakerStore();
   const [showImageUpload, setShowImageUpload] = useState(false);
   const [showDataSelector, setShowDataSelector] = useState(false);
+  const [showShapeSelector, setShowShapeSelector] = useState(false);
+  const shapeButtonRef = useRef<HTMLButtonElement>(null);
 
   const { tool } = editorState;
 
@@ -19,7 +22,7 @@ export function MainToolbar() {
     { id: "text", icon: Type, label: "Add Text" },
     { id: "image", icon: Image, label: "Add Image" },
     { id: "data", icon: Database, label: "Add Data" },
-    { id: "pan", icon: Move, label: "Pan" },
+    { id: "shape", icon: Shapes, label: "Add Shape" },
   ] as const;
 
   const handleToolSelect = (toolId: Tool) => {
@@ -32,6 +35,12 @@ export function MainToolbar() {
     // If data tool is selected, show data selector modal instead of setting tool
     if (toolId === "data") {
       setShowDataSelector(true);
+      return;
+    }
+
+    // If shape tool is selected, show shape selector modal instead of setting tool
+    if (toolId === "shape") {
+      setShowShapeSelector(true);
       return;
     }
 
@@ -73,6 +82,7 @@ export function MainToolbar() {
             {tools.map((toolItem) => (
               <Button
                 key={toolItem.id}
+                ref={toolItem.id === "shape" ? shapeButtonRef : undefined}
                 variant={tool === toolItem.id ? "default" : "ghost"}
                 size="sm"
                 onClick={() => handleToolSelect(toolItem.id)}
@@ -90,6 +100,13 @@ export function MainToolbar() {
 
       {/* Data Selector Modal */}
       <DataSelectorModal isOpen={showDataSelector} onClose={() => setShowDataSelector(false)} />
+
+      {/* Shape Selector Dropdown */}
+      <ShapeSelectorDropdown
+        isOpen={showShapeSelector}
+        onClose={() => setShowShapeSelector(false)}
+        buttonRef={shapeButtonRef}
+      />
     </>
   );
 }

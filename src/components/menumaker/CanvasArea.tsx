@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { TextElement } from "../../types/menumaker";
+import { ShapeElement, ShapeType, TextElement } from "../../types/menumaker";
 import { getBackgroundStyle } from "./utils/colorUtils";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
 import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";
@@ -328,6 +328,8 @@ export function CanvasArea() {
           drawImageElement(ctx, element, canvas, isSelected);
         } else if (element.type === "data") {
           drawDataElement(ctx, element, canvas, isSelected);
+        } else if (element.type === "shape") {
+          drawShapeElement(ctx, element, canvas, isSelected);
         }
       });
     });
@@ -627,6 +629,94 @@ export function CanvasArea() {
     }
   };
 
+  const drawShapeElement = (ctx: CanvasRenderingContext2D, element: ShapeElement, canvas: any, isSelected: boolean) => {
+    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
+    const tempPos = tempElementPositions[element.id];
+    const tempDim = tempElementDimensions[element.id];
+
+    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+    const elementWidth = tempDim ? tempDim.width : element.width;
+    const elementHeight = tempDim ? tempDim.height : element.height;
+
+    const x = pageOffset.x + elementX * canvas.zoom;
+    const y = pageOffset.y + elementY * canvas.zoom;
+    const width = elementWidth * canvas.zoom;
+    const height = elementHeight * canvas.zoom;
+
+    ctx.save();
+    ctx.globalAlpha = element.opacity;
+
+    // Set fill and stroke styles
+    if (element.fill) {
+      ctx.fillStyle = element.fill;
+    }
+    if (element.stroke) {
+      ctx.strokeStyle = element.stroke;
+      ctx.lineWidth = element.strokeWidth * canvas.zoom;
+    }
+
+    // Draw the shape based on its type
+    switch (element.shapeType) {
+      case "rectangle":
+        if (element.radius > 0) {
+          // Rounded rectangle
+          const radius = element.radius * canvas.zoom;
+
+          ctx.beginPath();
+          ctx.roundRect(x, y, width, height, radius);
+        } else {
+          // Regular rectangle
+          ctx.beginPath();
+          ctx.rect(x, y, width, height);
+        }
+        break;
+
+      case "circle": {
+        // Draw circle/ellipse
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+        const radiusX = width / 2;
+        const radiusY = height / 2;
+
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+        break;
+      }
+
+      case "triangle":
+        // Draw triangle
+        ctx.beginPath();
+        ctx.moveTo(x + width / 2, y); // Top point
+        ctx.lineTo(x, y + height); // Bottom left
+        ctx.lineTo(x + width, y + height); // Bottom right
+        ctx.closePath();
+        break;
+    }
+
+    // Fill and stroke the shape
+    if (element.fill) {
+      ctx.fill();
+    }
+    if (element.stroke && element.strokeWidth > 0) {
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    // Draw selection border and resize handles if selected
+    if (isSelected) {
+      ctx.strokeStyle = "#0066cc";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeRect(x, y, width, height);
+      ctx.setLineDash([]);
+
+      // Draw resize handles
+      drawResizeHandles(ctx, x, y, width, height);
+    }
+  };
+
   const drawSelectionBox = (ctx: CanvasRenderingContext2D) => {
     const startX = Math.min(selectionStart.x, selectionEnd.x);
     const startY = Math.min(selectionStart.y, selectionEnd.y);
@@ -869,9 +959,9 @@ export function CanvasArea() {
       return "default";
     }
 
-    // Handle pan tool
-    if (tool === "pan") {
-      return isDragging ? "grabbing" : "grab";
+    // Handle shape tool
+    if (tool === "shape") {
+      return "crosshair";
     }
 
     // Default cursor for other tools (image, data, etc.)
@@ -1598,6 +1688,46 @@ export function CanvasArea() {
         // Select the newly created element and switch to select tool
         selectElements([newElementId]);
         setTool("select");
+      }
+    } else if (tool === "shape") {
+      // Get the selected shape type from sessionStorage
+      const selectedShapeType = sessionStorage.getItem("selectedShapeType") as ShapeType | null;
+
+      if (selectedShapeType) {
+        // Add new shape element
+        const newShape: Omit<ShapeElement, "id"> = {
+          type: "shape",
+          shapeType: selectedShapeType,
+          x: relativeX,
+          y: relativeY,
+          width: 100,
+          height: 100,
+          rotation: 0,
+          scaleX: 1,
+          scaleY: 1,
+          zIndex: 0,
+          locked: false,
+          visible: true,
+          opacity: 1,
+          fill: "#3B82F6", // Blue fill
+          stroke: "#1E40AF", // Darker blue stroke
+          strokeWidth: 2,
+          radius: 8, // Default radius for rounded corners
+        };
+
+        const firstLayer = currentPage.layers[0];
+
+        if (firstLayer) {
+          // Add shape element and select it immediately
+          const newElementId = addElement(currentPageId!, firstLayer.id, newShape);
+
+          // Select the newly created element and switch to select tool
+          selectElements([newElementId]);
+          setTool("select");
+
+          // Clear the selected shape type from sessionStorage
+          sessionStorage.removeItem("selectedShapeType");
+        }
       }
     }
   };

@@ -32,13 +32,16 @@ export const PAGE_FORMATS: Record<string, PageFormat> = {
 };
 
 // Element types
-export type ElementType = "text" | "image" | "background" | "data";
+export type ElementType = "text" | "image" | "background" | "data" | "shape";
 
 // Element types
 export type FontWeight = "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900";
 
 // Data types
 export type DataType = "category" | "subcategory" | "menuitem" | "sidedish" | "sauce" | "allergen";
+
+// Shape types
+export type ShapeType = "rectangle" | "circle" | "triangle";
 
 // Base element interface
 export interface BaseElement {
@@ -175,8 +178,18 @@ export interface DataElement extends BaseElement {
   showMenuDescriptionLineBreakChars?: number;
 }
 
+// Shape element
+export interface ShapeElement extends BaseElement {
+  type: "shape";
+  shapeType: ShapeType;
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+  radius: number; // For rounded corners on rectangles
+}
+
 // Union type for all elements
-export type MenuElement = TextElement | ImageElement | BackgroundElement | DataElement;
+export type MenuElement = TextElement | ImageElement | BackgroundElement | DataElement | ShapeElement;
 
 // Layer interface
 export interface Layer {
@@ -216,7 +229,7 @@ export interface MenuProject {
 }
 
 // Tool types
-export type Tool = "select" | "text" | "image" | "background" | "data" | "pan" | "zoom";
+export type Tool = "select" | "text" | "image" | "background" | "data" | "shape" | "zoom";
 
 // Editor state
 export interface EditorState {
@@ -309,7 +322,7 @@ export const MENU_PROJECT_SCHEMA = {
                     ],
                     properties: {
                       id: { type: "string" },
-                      type: { enum: ["text", "image", "background", "data"] },
+                      type: { enum: ["text", "image", "background", "data", "shape"] },
                       x: { type: "number" },
                       y: { type: "number" },
                       width: { type: "number" },
@@ -440,6 +453,9 @@ export const MENU_PROJECT_SCHEMA = {
                       showMenuDescriptionTextMarginBottom: { type: "number" },
                       showMenuDescriptionLanguage: { enum: ["en", "fr", "it", "nl"] },
                       showMenuDescriptionLineBreakChars: { type: "number" },
+                      // Shape element properties
+                      shapeType: { enum: ["rectangle", "circle", "triangle"] },
+                      radius: { type: "number" },
                     },
                   },
                 },
