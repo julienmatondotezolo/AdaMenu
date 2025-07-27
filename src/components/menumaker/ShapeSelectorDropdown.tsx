@@ -11,13 +11,12 @@ interface ShapeSelectorDropdownProps {
 }
 
 export function ShapeSelectorDropdown({ isOpen, onClose, buttonRef }: ShapeSelectorDropdownProps) {
-  const { setTool } = useMenuMakerStore();
+  const { setTool, setSelectedShapeType } = useMenuMakerStore();
 
   if (!isOpen) return null;
 
   const handleShapeSelect = (shapeType: ShapeType) => {
-    // Set a temporary shape type in sessionStorage so CanvasArea can pick it up
-    sessionStorage.setItem("selectedShapeType", shapeType);
+    setSelectedShapeType(shapeType);
     setTool("shape");
     onClose();
   };

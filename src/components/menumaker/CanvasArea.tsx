@@ -20,6 +20,8 @@ export function CanvasArea() {
     setZoom,
     setCanvasOffset,
     setTool,
+    selectedShapeType,
+    setSelectedShapeType,
   } = useMenuMakerStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -1267,9 +1269,6 @@ export function CanvasArea() {
         setTool("select");
       }
     } else if (tool === "shape") {
-      // Get the selected shape type from sessionStorage
-      const selectedShapeType = sessionStorage.getItem("selectedShapeType") as ShapeType | null;
-
       if (selectedShapeType) {
         // Add new shape element
         const newShape: Omit<ShapeElement, "id"> = {
@@ -1302,8 +1301,8 @@ export function CanvasArea() {
           selectElements([newElementId]);
           setTool("select");
 
-          // Clear the selected shape type from sessionStorage
-          sessionStorage.removeItem("selectedShapeType");
+          // Clear the selected shape type
+          setSelectedShapeType(null);
         }
       }
     }

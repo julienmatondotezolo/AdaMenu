@@ -6,7 +6,7 @@ import { subscribeWithSelector } from "zustand/middleware";
 
 import { drawMenuItemsList } from "../components/menumaker/utils/drawMenuItemsList";
 import { Category, MenuData } from "../types/adamenudata";
-import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, Tool } from "../types/menumaker";
+import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, ShapeType, Tool } from "../types/menumaker";
 
 interface MenuMakerStore {
   // Project state
@@ -15,6 +15,9 @@ interface MenuMakerStore {
   editorState: EditorState;
   isExportingPDF: boolean;
   isSaving: boolean;
+
+  // Shape selector state
+  selectedShapeType: ShapeType | null;
 
   // Menu data state
   menuData: MenuData;
@@ -67,6 +70,7 @@ interface MenuMakerStore {
   selectElements: (elementIds: string[]) => void;
   selectLayer: (layerId: string | null) => void;
   clearSelection: () => void;
+  setSelectedShapeType: (shapeType: ShapeType | null) => void;
 
   // Actions for canvas manipulation
   setZoom: (zoom: number) => void;
@@ -153,6 +157,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     editorState: createDefaultEditorState(),
     isExportingPDF: false,
     isSaving: false,
+
+    // Shape selector state
+    selectedShapeType: null,
 
     // Menu data state
     menuData: {
@@ -1001,6 +1008,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           selectedLayerId: null,
         },
       });
+    },
+
+    setSelectedShapeType: (shapeType: ShapeType | null) => {
+      set({ selectedShapeType: shapeType });
     },
 
     setZoom: (zoom: number) => {
