@@ -317,7 +317,10 @@ export function LayersPanel() {
               } ${draggedLayerId === layer.id ? "opacity-50" : ""} ${
                 dropTargetLayerId === layer.id ? "border-2 border-blue-500 bg-blue-50" : ""
               }`}
-              onClick={() => handleLayerClick(layer.id)}
+              onClick={() => {
+                if (layer.locked) return;
+                handleLayerClick(layer.id);
+              }}
               draggable
               onDragStart={(e) => handleDragStart(e, layer.id)}
               onDragOver={(e) => {
@@ -347,9 +350,9 @@ export function LayersPanel() {
               onDragEnd={handleDragEnd}
             >
               <div className="p-3">
-                <div className="flex items-center justify-between">
+                <div className={`flex items-center justify-between ${layer.locked ? "cursor-not-allowed" : ""}`}>
                   {/* Drag handle */}
-                  <div className="flex items-center space-x-2">
+                  <div className={`flex items-center space-x-2`}>
                     <div className="drag-handle cursor-grab active:cursor-grabbing">
                       <GripVertical className="w-4 h-4 text-gray-400" />
                     </div>
@@ -370,7 +373,7 @@ export function LayersPanel() {
                     </Button>
 
                     {/* Layer name and info */}
-                    <div className="flex-1 min-w-0">
+                    <div className={`flex-1 min-w-0 ${layer.locked ? "opacity-50" : ""}`}>
                       {editingLayerId === layer.id ? (
                         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           <Input
@@ -413,7 +416,7 @@ export function LayersPanel() {
                             variant="ghost"
                             size="sm"
                             onClick={(e) => handleStartEditLayerName(layer.id, layer.name, e)}
-                            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            className={`h-6 w-6 p-0 opacity-0 transition-opacity ${layer.locked ? "hidden" : "group-hover:opacity-100"}`}
                             title="Edit layer name"
                           >
                             <Edit2 className="w-3 h-3" />
@@ -461,7 +464,7 @@ export function LayersPanel() {
                     {layer.elements.map((element) => (
                       <div
                         key={element.id}
-                        className={`text-xs p-1 rounded transition-colors cursor-pointer ${
+                        className={`text-xs p-1 rounded transition-colors cursor-pointer ${layer.locked ? "opacity-25" : ""} ${
                           editorState.selectedElementIds.includes(element.id)
                             ? "bg-blue-200 text-blue-900 font-semibold"
                             : "text-gray-600 hover:bg-blue-200"
