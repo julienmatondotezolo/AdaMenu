@@ -364,7 +364,7 @@ export function CanvasArea() {
     const selectedElementIds: string[] = [];
 
     currentPage.layers.forEach((layer) => {
-      if (!layer.visible) return;
+      if (!layer.visible || layer.locked) return; // Skip locked layers
 
       layer.elements.forEach((element) => {
         // Use temporary position if dragging, otherwise use element position
@@ -402,6 +402,76 @@ export function CanvasArea() {
       const layer = currentPage.layers[layerIndex];
 
       if (!layer.visible) continue;
+
+      // Check elements from last to first (top-most element)
+      for (let elementIndex = layer.elements.length - 1; elementIndex >= 0; elementIndex--) {
+        const element = layer.elements[elementIndex];
+
+        if (!element.visible) continue;
+
+        // Use temporary position/dimensions if dragging/resizing, otherwise use element values
+        const tempPos = tempElementPositions[element.id];
+        const tempDim = tempElementDimensions[element.id];
+
+        const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
+        const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
+
+        // Check if click is within element bounds
+        let elementWidth = tempDim ? tempDim.width : element.width || 0;
+        let elementHeight = tempDim ? tempDim.height : element.height || 0;
+
+        // For text elements, use a more accurate bounding box calculation
+        if (element.type === "text") {
+          // Use font size for a more accurate text bounds
+          const textHeight = element.fontSize || 16;
+          const textWidth = element.content ? element.content.length * (element.fontSize || 16) * 0.6 : elementWidth;
+
+          elementWidth = Math.max(elementWidth, textWidth);
+          elementHeight = Math.max(elementHeight, textHeight);
+        }
+
+        const elementRight = elementX + elementWidth;
+        const elementBottom = elementY + elementHeight;
+
+        if (pageX >= elementX && pageY >= elementY && pageX <= elementRight && pageY <= elementBottom) {
+          return element.id;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  // Helper function to check if an element is in a locked layer
+  const isElementInLockedLayer = (elementId: string): boolean => {
+    if (!currentPage) return false;
+
+    for (const layer of currentPage.layers) {
+      if (layer.locked && layer.elements.some((el) => el.id === elementId)) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  // Get selectable element at position (excludes elements in locked layers)
+  const getSelectableElementAtPosition = (mouseX: number, mouseY: number): string | null => {
+    if (!currentPage) return null;
+
+    // Convert screen coordinates to page coordinates
+    const pageX = (mouseX - pageOffset.x) / canvas.zoom;
+    const pageY = (mouseY - pageOffset.y) / canvas.zoom;
+
+    // Check if click is within page bounds
+    if (pageX < 0 || pageY < 0 || pageX > currentPage.format.width || pageY > currentPage.format.height) {
+      return null;
+    }
+
+    // Check elements from top layer to bottom (reverse order for top-most selection)
+    for (let layerIndex = currentPage.layers.length - 1; layerIndex >= 0; layerIndex--) {
+      const layer = currentPage.layers[layerIndex];
+
+      if (!layer.visible || layer.locked) continue; // Skip locked layers
 
       // Check elements from last to first (top-most element)
       for (let elementIndex = layer.elements.length - 1; elementIndex >= 0; elementIndex--) {
@@ -536,6 +606,11 @@ export function CanvasArea() {
         return getResizeCursor(hoveredResizeHandle);
       }
 
+      // Check if hovering over an element in a locked layer
+      if (hoveredElementId && isElementInLockedLayer(hoveredElementId)) {
+        return "not-allowed";
+      }
+
       return "default";
     }
 
@@ -564,7 +639,7 @@ export function CanvasArea() {
     for (let layerIndex = currentPage.layers.length - 1; layerIndex >= 0; layerIndex--) {
       const layer = currentPage.layers[layerIndex];
 
-      if (!layer.visible) continue;
+      if (!layer.visible || layer.locked) continue; // Skip locked layers
 
       // Check elements from last to first (top-most element)
       for (let elementIndex = layer.elements.length - 1; elementIndex >= 0; elementIndex--) {
@@ -639,8 +714,8 @@ export function CanvasArea() {
         }
       }
 
-      // Check if clicking on an element
-      const clickedElementId = getElementAtPosition(mouseX, mouseY);
+      // Check if clicking on an element (excluding elements in locked layers)
+      const clickedElementId = getSelectableElementAtPosition(mouseX, mouseY);
 
       if (clickedElementId) {
         // Check if element is already selected
