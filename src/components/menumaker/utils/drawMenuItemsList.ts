@@ -210,7 +210,13 @@ export const drawMenuItemsList = ({
       const showCurrency = element.showCurrencySign !== false; // Default to true
       const priceSeparator = element.priceSeparator || "."; // Default to dot
 
-      menuItems.forEach((menuItem: MenuItem) => {
+      // Apply start index if specified (for menu items data type)
+      const startIndex = element.startIndex || 0;
+
+      console.log("element.startIndex:", element.startIndex);
+      const itemsToDisplay = menuItems.slice(startIndex);
+
+      itemsToDisplay.forEach((menuItem: MenuItem) => {
         if ((!isThumbnail || itemsDrawn < maxItems) && currentY < y + height - padding) {
           // Get item name in specified language
           const itemLanguage = element.itemNameLanguage || "en";

@@ -59,6 +59,7 @@ export function DataPanel() {
   >("normal");
   const [priceSeparator, setPriceSeparator] = useState<"." | ",">(".");
   const [menuLayout, setMenuLayout] = useState<"left" | "justified">("left");
+  const [startIndex, setStartIndex] = useState(0);
 
   // Subcategory title properties
   const [subcategoryTitleTextColor, setSubcategoryTitleTextColor] = useState("#000000");
@@ -153,6 +154,7 @@ export function DataPanel() {
       dataId: dataConfig.subcategoryId || dataConfig.categoryId || "",
       categoryData: dataConfig.categoryData,
       subcategoryData: dataConfig.subcategoryData,
+      startIndex: dataConfig.startIndex,
     };
 
     // Find the layer containing this element
@@ -208,6 +210,7 @@ export function DataPanel() {
       setPriceFontWeight(selectedDataElement.priceFontWeight || "normal");
       setPriceSeparator(selectedDataElement.priceSeparator || ".");
       setMenuLayout(selectedDataElement.menuLayout || "left"); // Default to left
+      setStartIndex(selectedDataElement.startIndex || 0);
 
       // Subcategory title properties
       setSubcategoryTitleTextColor(selectedDataElement.subcategoryTitleTextColor || "#000000");
@@ -367,6 +370,7 @@ export function DataPanel() {
       priceFontWeight: selectedDataType === "menuitem" ? priceFontWeight : undefined,
       priceSeparator: selectedDataType === "menuitem" ? priceSeparator : undefined,
       menuLayout: selectedDataType === "menuitem" ? menuLayout : undefined,
+      startIndex: selectedDataType === "menuitem" ? startIndex : undefined,
       // Subcategory title properties
       subcategoryTitleTextColor:
         selectedDataType === "menuitem" && showSubcategoryTitle ? subcategoryTitleTextColor : undefined,
@@ -784,6 +788,70 @@ export function DataPanel() {
                 />
                 <div className="text-xs text-gray-500 text-right">{lineSpacing.toFixed(1)}x</div>
               </section>
+
+              {/* Start Index Selection */}
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <Label className="text-sm font-medium text-blue-900">Start from Menu Item</Label>
+                <div className="mt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <input
+                        type="range"
+                        min="0"
+                        max={Math.max(0, (selectedDataElement?.subcategoryData?.menuItems?.length || 1) - 1)}
+                        value={startIndex}
+                        onChange={(e) => setStartIndex(Number(e.target.value))}
+                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="1"
+                        max={selectedDataElement?.subcategoryData?.menuItems?.length || 1}
+                        value={startIndex + 1}
+                        onChange={(e) => setStartIndex(Math.max(0, Number(e.target.value) - 1))}
+                        className="w-16 px-2 py-1 text-sm border border-blue-300 rounded-md text-center"
+                      />
+                      <span className="text-sm text-blue-700">
+                        of {selectedDataElement?.subcategoryData?.menuItems?.length || 0}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-blue-600">
+                    <strong>Starting item:</strong>{" "}
+                    {selectedDataElement?.subcategoryData?.menuItems?.[startIndex]?.names?.en ||
+                      selectedDataElement?.subcategoryData?.menuItems?.[startIndex]?.name ||
+                      "N/A"}
+                  </div>
+                  <div className="flex gap-1 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => setStartIndex(0)}
+                      className={`px-2 py-1 text-xs rounded transition-colors ${
+                        startIndex === 0 ? "bg-blue-600 text-white" : "bg-blue-200 text-blue-700 hover:bg-blue-300"
+                      }`}
+                    >
+                      Start
+                    </button>
+                    {(selectedDataElement?.subcategoryData?.menuItems?.length || 0) > 1 && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setStartIndex(Math.floor((selectedDataElement?.subcategoryData?.menuItems?.length || 0) / 2))
+                        }
+                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                          startIndex === Math.floor((selectedDataElement?.subcategoryData?.menuItems?.length || 0) / 2)
+                            ? "bg-blue-600 text-white"
+                            : "bg-blue-200 text-blue-700 hover:bg-blue-300"
+                        }`}
+                      >
+                        Middle
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* Menu Item Price */}

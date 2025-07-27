@@ -127,6 +127,7 @@ export interface DataElement extends BaseElement {
   categoryData?: any; // Store the full category data
   subcategoryData?: any; // Store the full subcategory data
   menuItemData?: any; // Store the full menu item data
+  startIndex?: number; // Starting index for menu items display
   backgroundColor: string;
   backgroundOpacity?: number;
   borderColor: string;
@@ -406,6 +407,7 @@ export const MENU_PROJECT_SCHEMA = {
                       categoryData: { type: "object" },
                       subcategoryData: { type: "object" },
                       menuItemData: { type: "object" },
+                      startIndex: { type: "number" },
                       backgroundOpacity: { type: "number" },
                       borderColor: { type: "string" },
                       borderSize: { type: "number" },
