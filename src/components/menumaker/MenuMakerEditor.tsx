@@ -25,7 +25,7 @@ interface MenuMakerEditorProps {
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer, isPreviewMode, setPreviewMode } =
+  const { project, currentPageId, editorState, saveProject, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer, isPreviewMode, setPreviewMode } =
     useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -35,24 +35,15 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const [shapePropertiesCollapsed, setShapePropertiesCollapsed] = useState(false);
   const [imagePropertiesCollapsed, setImagePropertiesCollapsed] = useState(false);
 
-  // Ref to track if menu has been fetched to prevent multiple calls
-  const menuFetched = useRef(false);
-
-  // Fetch menu data on component mount (only once)
+  // Fetch fresh menu data every time component loads
   useEffect(() => {
     const loadMenuData = async () => {
-      // Only fetch if not already loaded and not currently loading
-      if (menuFetched.current || menuData.isLoaded || menuData.isLoading) return;
-
-      menuFetched.current = true;
+      // Always fetch fresh data on component mount
       setMenuLoading(true);
       setMenuError(null);
 
       try {
         const menuResponse = await fetchCompleteMenu();
-
-        // eslint-disable-next-line no-console
-        console.log('menuResponse:', menuResponse);
 
         if (menuResponse && Array.isArray(menuResponse)) {
           setMenuData(menuResponse);
@@ -68,36 +59,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     };
 
     loadMenuData();
-  }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
+  }, [setMenuData, setMenuLoading, setMenuError]);
 
-  // Refetch menu data when window gains focus (user returns from updating categories)
-  useEffect(() => {
-    const handleWindowFocus = async () => {
-      // Only refetch if menu was already loaded and not currently loading
-      if (!menuData.isLoaded || menuData.isLoading) return;
 
-      setMenuLoading(true);
-      setMenuError(null);
-
-      try {
-        const menuResponse = await fetchCompleteMenu();
-
-        if (menuResponse && Array.isArray(menuResponse)) {
-          setMenuData(menuResponse);
-        } else {
-          setMenuError("Invalid menu data format received");
-        }
-      } catch (error) {
-        console.error("Error refetching menu data:", error);
-        setMenuError(error instanceof Error ? error.message : "Unknown error occurred");
-      } finally {
-        setMenuLoading(false);
-      }
-    };
-
-    window.addEventListener('focus', handleWindowFocus);
-    return () => window.removeEventListener('focus', handleWindowFocus);
-  }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
 
   // Handler for adding a new layer
   const handleAddLayer = () => {
