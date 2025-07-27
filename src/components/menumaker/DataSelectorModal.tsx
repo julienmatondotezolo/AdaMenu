@@ -27,7 +27,7 @@ export interface DataConfiguration {
 }
 
 export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection }: DataSelectorModalProps) {
-  const { project, currentPageId, addElement, selectElements, setTool, menuData } = useMenuMakerStore();
+  const { project, currentPageId, addElement, selectElements, setTool, menuData, editorState } = useMenuMakerStore();
 
   // Selection state
   const [selectedDataType, setSelectedDataType] = useState<DataConfiguration["dataType"] | null>(null);
@@ -241,6 +241,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
       if (!currentPageId || !project) return;
 
       const currentPage = project.pages.find((page) => page.id === currentPageId);
+      const currentLayer = editorState.selectedLayerId;
 
       if (!currentPage || currentPage.layers.length === 0) return;
       // Calculate center position based on page format
@@ -292,13 +293,13 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
       };
 
       // Add to first layer and select the newly created element
-      const newElementId = addElement(currentPageId, currentPage.layers[0].id, dataElement);
+      const newElementId = addElement(currentPageId, currentLayer || currentPage.layers[0].id, dataElement);
       
       // Select the newly created element and switch to select tool
       selectElements([newElementId]);
       setTool("select");
     },
-    [currentPageId, project, addElement, selectElements, setTool],
+    [currentPageId, project, editorState.selectedLayerId, addElement, selectElements, setTool],
   );
 
   // Get current step title

@@ -55,6 +55,7 @@ export function CanvasArea() {
   const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
+  const currentLayer = editorState.selectedLayerId;
   const { canvas, tool } = editorState;
 
   // Clear shape preview when tool changes or selectedShapeType is cleared
@@ -1326,14 +1327,12 @@ export function CanvasArea() {
 
       const firstLayer = currentPage.layers[0];
 
-      if (firstLayer) {
-        // Add text element and select it immediately
-        const newElementId = addElement(currentPageId!, firstLayer.id, newText);
+      // Add text element and select it immediately
+      const newElementId = addElement(currentPageId!, currentLayer || firstLayer.id, newText);
 
-        // Select the newly created element and switch to select tool
-        selectElements([newElementId]);
-        setTool("select");
-      }
+      // Select the newly created element and switch to select tool
+      selectElements([newElementId]);
+      setTool("select");
     } else if (tool === "shape") {
       if (selectedShapeType) {
         // Add new shape element
@@ -1359,17 +1358,15 @@ export function CanvasArea() {
 
         const firstLayer = currentPage.layers[0];
 
-        if (firstLayer) {
-          // Add shape element and select it immediately
-          const newElementId = addElement(currentPageId!, firstLayer.id, newShape);
+        // Add shape element and select it immediately
+        const newElementId = addElement(currentPageId!, currentLayer || firstLayer.id, newShape);
 
-          // Select the newly created element and switch to select tool
-          selectElements([newElementId]);
-          setTool("select");
+        // Select the newly created element and switch to select tool
+        selectElements([newElementId]);
+        setTool("select");
 
-          // Clear the selected shape type
-          setSelectedShapeType(null);
-        }
+        // Clear the selected shape type
+        setSelectedShapeType(null);
       }
     }
   };

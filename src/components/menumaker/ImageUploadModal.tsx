@@ -15,7 +15,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { project, currentPageId, addElement, selectElements, setTool } = useMenuMakerStore();
+  const { project, currentPageId, addElement, selectElements, setTool, editorState } = useMenuMakerStore();
 
   const handleFileUpload = useCallback(
     async (file: File) => {
@@ -54,6 +54,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
         // Create ImageElement
         if (project && currentPageId) {
           const currentPage = project.pages.find((page) => page.id === currentPageId);
+          const currentLayer = editorState.selectedLayerId;
 
           if (currentPage && currentPage.layers.length > 0) {
             // Calculate center position based on page format
@@ -80,7 +81,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
             };
 
             // Add to first layer and select the newly created element
-            const newElementId = addElement(currentPageId, currentPage.layers[0].id, newImageElement);
+            const newElementId = addElement(currentPageId, currentLayer || currentPage.layers[0].id, newImageElement);
 
             // Select the newly created element and switch to select tool
             selectElements([newElementId]);
