@@ -119,6 +119,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     if (currentPage.layers.length <= 1) return;
 
     deleteLayer(currentPageId, editorState.selectedLayerId);
+    selectLayer(null);
   };
 
   // Unselect layer when layers panel is collapsed

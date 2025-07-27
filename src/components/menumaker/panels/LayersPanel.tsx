@@ -37,6 +37,7 @@ export function LayersPanel() {
     selectElements,
     reorderLayers,
     setHoveredElement,
+    moveElement,
   } = useMenuMakerStore();
 
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
@@ -44,6 +45,9 @@ export function LayersPanel() {
   const [collapsedLayers, setCollapsedLayers] = useState<Set<string>>(new Set());
   const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
   const [dropPosition, setDropPosition] = useState<{ layerId: string; position: "above" | "below" } | null>(null);
+  const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
+  const [draggedFromLayerId, setDraggedFromLayerId] = useState<string | null>(null);
+  const [dropTargetLayerId, setDropTargetLayerId] = useState<string | null>(null);
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
 
@@ -101,8 +105,11 @@ export function LayersPanel() {
     setEditingName("");
   };
 
-  // Drag and Drop handlers
+  // Drag and Drop handlers for layers
   const handleDragStart = (e: React.DragEvent, layerId: string) => {
+    // Only start layer drag if we're not already dragging an element
+    if (draggedElementId) return;
+
     setDraggedLayerId(layerId);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", layerId);
@@ -110,6 +117,10 @@ export function LayersPanel() {
 
   const handleDragOver = (e: React.DragEvent, layerId: string) => {
     e.preventDefault();
+
+    // Only handle layer reordering if we're dragging a layer, not an element
+    if (draggedElementId || !draggedLayerId) return;
+
     e.dataTransfer.dropEffect = "move";
 
     if (draggedLayerId === layerId) return;
@@ -126,6 +137,9 @@ export function LayersPanel() {
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
+    // Only handle layer drag leave if we're dragging a layer, not an element
+    if (draggedElementId) return;
+
     // Only clear drop position if we're leaving the layers panel entirely
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const { clientX, clientY } = e;
@@ -138,7 +152,8 @@ export function LayersPanel() {
   const handleDrop = (e: React.DragEvent, targetLayerId: string) => {
     e.preventDefault();
 
-    if (!draggedLayerId || !dropPosition || draggedLayerId === targetLayerId) {
+    // Only handle layer drops if we're dragging a layer, not an element
+    if (draggedElementId || !draggedLayerId || !dropPosition || draggedLayerId === targetLayerId) {
       setDropPosition(null);
       setDraggedLayerId(null);
       return;
@@ -198,6 +213,58 @@ export function LayersPanel() {
     }
   };
 
+  // Element drag and drop handlers
+  const handleElementDragStart = (e: React.DragEvent, elementId: string, layerId: string) => {
+    e.stopPropagation();
+    setDraggedElementId(elementId);
+    setDraggedFromLayerId(layerId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", elementId);
+  };
+
+  const handleElementDragEnd = () => {
+    setDraggedElementId(null);
+    setDraggedFromLayerId(null);
+    setDropTargetLayerId(null);
+  };
+
+  const handleLayerDragOver = (e: React.DragEvent, layerId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Only allow dropping if we're dragging an element and it's not the same layer
+    if (draggedElementId && draggedFromLayerId !== layerId) {
+      e.dataTransfer.dropEffect = "move";
+      setDropTargetLayerId(layerId);
+    }
+  };
+
+  const handleLayerDragLeave = (e: React.DragEvent) => {
+    e.stopPropagation();
+    // Only clear if we're leaving the layer area entirely
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const { clientX, clientY } = e;
+
+    if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
+      setDropTargetLayerId(null);
+    }
+  };
+
+  const handleLayerDrop = (e: React.DragEvent, targetLayerId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedElementId && draggedFromLayerId && currentPageId && draggedFromLayerId !== targetLayerId) {
+      // Move the element to the target layer
+      moveElement(currentPageId, draggedFromLayerId, targetLayerId, draggedElementId);
+    }
+
+    // Clear drag state
+    setDraggedElementId(null);
+    setDraggedFromLayerId(null);
+    setDropTargetLayerId(null);
+  };
+
   // Helper function to get data element display information
   const getDataElementInfo = (element: any) => {
     if (element.type !== "data") return null;
@@ -233,8 +300,8 @@ export function LayersPanel() {
         {/* Render layers in reverse order (top layer first) */}
         {[...currentPage.layers].reverse().map((layer) => (
           <div key={layer.id} className="relative">
-            {/* Drop indicator above */}
-            {dropPosition?.layerId === layer.id && dropPosition.position === "above" && (
+            {/* Drop indicator above - only show when dragging layers, not elements */}
+            {dropPosition?.layerId === layer.id && dropPosition.position === "above" && !draggedElementId && (
               <div className="absolute top-0 left-0 right-0 -mt-1 z-10">
                 <div className="bg-blue-500 h-0.5 mx-3">
                   <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded absolute -top-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
@@ -247,13 +314,36 @@ export function LayersPanel() {
             <div
               className={`group border-b border-gray-100 cursor-pointer transition-colors ${
                 editorState.selectedLayerId === layer.id ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
-              } ${draggedLayerId === layer.id ? "opacity-50" : ""}`}
+              } ${draggedLayerId === layer.id ? "opacity-50" : ""} ${
+                dropTargetLayerId === layer.id ? "border-2 border-blue-500 bg-blue-50" : ""
+              }`}
               onClick={() => handleLayerClick(layer.id)}
               draggable
               onDragStart={(e) => handleDragStart(e, layer.id)}
-              onDragOver={(e) => handleDragOver(e, layer.id)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, layer.id)}
+              onDragOver={(e) => {
+                // Handle layer reordering only if dragging a layer
+                if (!draggedElementId) {
+                  handleDragOver(e, layer.id);
+                }
+                // Handle element drops
+                handleLayerDragOver(e, layer.id);
+              }}
+              onDragLeave={(e) => {
+                // Handle layer drag leave only if dragging a layer
+                if (!draggedElementId) {
+                  handleDragLeave(e);
+                }
+                // Handle element drag leave
+                handleLayerDragLeave(e);
+              }}
+              onDrop={(e) => {
+                // Handle layer drops only if dragging a layer
+                if (!draggedElementId) {
+                  handleDrop(e, layer.id);
+                }
+                // Handle element drops
+                handleLayerDrop(e, layer.id);
+              }}
               onDragEnd={handleDragEnd}
             >
               <div className="p-3">
@@ -358,6 +448,13 @@ export function LayersPanel() {
                   </div>
                 </div>
 
+                {/* Drop indicator when dragging element over this layer */}
+                {dropTargetLayerId === layer.id && draggedElementId && draggedFromLayerId !== layer.id && (
+                  <div className="mx-3 my-2 p-2 border-2 border-dashed border-blue-500 bg-blue-50 rounded text-center text-xs text-blue-700 font-medium">
+                    Drop element here to move to this layer
+                  </div>
+                )}
+
                 {/* Elements list - only show when not collapsed */}
                 {layer.elements.length > 0 && !collapsedLayers.has(layer.id) && (
                   <div className="mt-2 ml-6 space-y-1">
@@ -368,7 +465,8 @@ export function LayersPanel() {
                           editorState.selectedElementIds.includes(element.id)
                             ? "bg-blue-200 text-blue-900 font-semibold"
                             : "text-gray-600 hover:bg-blue-200"
-                        }`}
+                        } ${draggedElementId === element.id ? "opacity-50" : ""}`}
+                        draggable={!layer.locked}
                         onClick={(e) => handleElementClick(element.id, layer.locked, e)}
                         onMouseEnter={() => {
                           if (layer.locked) return;
@@ -378,7 +476,11 @@ export function LayersPanel() {
                           if (layer.locked) return;
                           setHoveredElement(null);
                         }}
-                        title="Click to select element"
+                        onDragStart={(e) => !layer.locked && handleElementDragStart(e, element.id, layer.id)}
+                        onDragEnd={handleElementDragEnd}
+                        title={
+                          layer.locked ? "Element in locked layer" : "Click to select, drag to move to another layer"
+                        }
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-1">
@@ -437,8 +539,8 @@ export function LayersPanel() {
               </div>
             </div>
 
-            {/* Drop indicator below */}
-            {dropPosition?.layerId === layer.id && dropPosition.position === "below" && (
+            {/* Drop indicator below - only show when dragging layers, not elements */}
+            {dropPosition?.layerId === layer.id && dropPosition.position === "below" && !draggedElementId && (
               <div className="absolute bottom-0 left-0 right-0 -mb-1 z-10">
                 <div className="bg-blue-500 h-0.5 mx-3">
                   <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded absolute -bottom-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
