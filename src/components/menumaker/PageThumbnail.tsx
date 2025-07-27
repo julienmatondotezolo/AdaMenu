@@ -289,21 +289,56 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                   scale,
                   isThumbnail: true,
                 });
-              } else if (dataElement.dataType === "category" && dataElement.categoryData) {
+              } else if (dataElement.dataType === "category") {
                 // Show category name
-                ctx.fillStyle = dataElement.textColor || "#333";
-                ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                ctx.fillStyle = dataElement.titleTextColor || dataElement.textColor || "#333";
+                const fontSize = Math.min(elementHeight * 0.3, 8);
+                const fontFamily = dataElement.titleTextFontFamily || "Arial";
+                const fontWeight = dataElement.titleTextFontWeight || "normal";
+
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
                 ctx.textAlign = "center";
-                const categoryName = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Category";
+
+                let categoryName = "Select category";
+
+                if (dataElement.categoryData) {
+                  const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+
+                  categoryName =
+                    dataElement.categoryData.names?.[lang] ||
+                    dataElement.categoryData.names?.en ||
+                    dataElement.categoryData.names?.fr ||
+                    dataElement.categoryData.names?.it ||
+                    dataElement.categoryData.names?.nl ||
+                    dataElement.categoryData.name ||
+                    "Category";
+                }
 
                 ctx.fillText(categoryName, x + elementWidth / 2, y + elementHeight / 2);
-              } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
+              } else if (dataElement.dataType === "subcategory") {
                 // Show subcategory name
-                ctx.fillStyle = dataElement.textColor || "#333";
-                ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                ctx.fillStyle = dataElement.titleTextColor || dataElement.textColor || "#333";
+                const fontSize = Math.min(elementHeight * 0.3, 8);
+                const fontFamily = dataElement.titleTextFontFamily || "Arial";
+                const fontWeight = dataElement.titleTextFontWeight || "normal";
+
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
                 ctx.textAlign = "center";
-                const subcategoryName =
-                  dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Subcategory";
+
+                let subcategoryName = "Select subcategory";
+
+                if (dataElement.subcategoryData) {
+                  const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+
+                  subcategoryName =
+                    dataElement.subcategoryData.names?.[lang] ||
+                    dataElement.subcategoryData.names?.en ||
+                    dataElement.subcategoryData.names?.fr ||
+                    dataElement.subcategoryData.names?.it ||
+                    dataElement.subcategoryData.names?.nl ||
+                    dataElement.subcategoryData.name ||
+                    "Subcategory";
+                }
 
                 ctx.fillText(subcategoryName, x + elementWidth / 2, y + elementHeight / 2);
               } else {

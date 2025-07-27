@@ -94,53 +94,73 @@ export const drawDataElement = ({
   ctx.textAlign = textAlign;
   ctx.textBaseline = "top";
 
-  if (element.dataType === "category" && element.categoryData) {
-    // Show the actual category name in the selected language
-    const lang = element.titleLanguage || element.itemNameLanguage || "en";
+  if (element.dataType === "category") {
+    if (element.categoryData) {
+      // Show the actual category name in the selected language
+      const lang = element.titleLanguage || element.itemNameLanguage || "en";
 
-    displayText = element.categoryData.names?.[lang] || element.categoryData.name || "Select category";
-  } else if (element.dataType === "category" && element.dataId) {
-    displayText = "Select category";
-  } else if (element.dataType === "subcategory" && element.subcategoryData) {
-    // Show the actual subcategory name in the selected language
-    const lang = element.titleLanguage || element.itemNameLanguage || "en";
+      displayText =
+        element.categoryData.names?.[lang] ||
+        element.categoryData.names?.en ||
+        element.categoryData.names?.fr ||
+        element.categoryData.names?.it ||
+        element.categoryData.names?.nl ||
+        element.categoryData.name ||
+        "Category";
+    } else {
+      displayText = "Select category";
+    }
+  } else if (element.dataType === "subcategory") {
+    if (element.subcategoryData) {
+      // Show the actual subcategory name in the selected language
+      const lang = element.titleLanguage || element.itemNameLanguage || "en";
 
-    displayText = element.subcategoryData.names?.[lang] || element.subcategoryData.name || "Select subcategory";
-  } else if (element.dataType === "subcategory" && element.dataId) {
-    displayText = "Select subcategory";
-  } else if (element.dataType === "menuitem" && element.subcategoryData) {
-    // Draw menu items list instead of simple text
-    drawMenuItemsList({
-      ctx,
-      element,
-      x,
-      y,
-      width,
-      height,
-      scale: canvas.zoom,
-      isThumbnail: false,
-    });
-    // Don't return early - we still need to draw selection borders
-    displayText = ""; // Set empty to avoid drawing default text
+      displayText =
+        element.subcategoryData.names?.[lang] ||
+        element.subcategoryData.names?.en ||
+        element.subcategoryData.names?.fr ||
+        element.subcategoryData.names?.it ||
+        element.subcategoryData.names?.nl ||
+        element.subcategoryData.name ||
+        "Subcategory";
+    } else {
+      displayText = "Select subcategory";
+    }
   } else if (element.dataType === "menuitem") {
-    displayText = "Select category and subcategory";
+    if (element.subcategoryData) {
+      // Draw menu items list instead of simple text
+      drawMenuItemsList({
+        ctx,
+        element,
+        x,
+        y,
+        width,
+        height,
+        scale: canvas.zoom,
+        isThumbnail: false,
+      });
+      // Don't return early - we still need to draw selection borders
+      displayText = ""; // Set empty to avoid drawing default text
+    } else {
+      displayText = "Select category and subcategory";
+    }
   } else {
-    displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
+    // Handle other data types (sauce, sidedish, allergen, etc.)
+    displayText = element.dataType ? element.dataType.charAt(0).toUpperCase() + element.dataType.slice(1) : "DATA";
   }
 
   // Position text with alignment and padding (only if we have displayText)
   if (displayText) {
-    const padding = 10 * canvas.zoom;
-    let textX = x + padding;
+    let textX = x;
 
     // Adjust X position based on alignment
     if (textAlign === "center") {
       textX = x + width / 2;
     } else if (textAlign === "right") {
-      textX = x + width - padding;
+      textX = x + width;
     }
 
-    ctx.fillText(displayText, textX, y + padding);
+    ctx.fillText(displayText, textX, y);
   }
 
   // Draw selection border and resize handles if selected

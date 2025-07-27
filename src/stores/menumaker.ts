@@ -1479,16 +1479,25 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                 // Draw data element
                 const dataElement = element as any;
                 
-                // Draw background
+                // Save current globalAlpha
+                const currentAlpha = ctx.globalAlpha;
+                
+                // Draw background with opacity
                 ctx.fillStyle = dataElement.backgroundColor || "#ffffff";
+                ctx.globalAlpha = currentAlpha * (dataElement.backgroundOpacity !== undefined ? dataElement.backgroundOpacity : 1);
                 ctx.fillRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
+                
+                // Restore alpha for border
+                ctx.globalAlpha = currentAlpha;
 
-                // Draw border
+                // Draw border with opacity
                 const borderSize = dataElement.borderSize || 0;
 
                 if (borderSize > 0) {
                   ctx.strokeStyle = dataElement.borderColor || "#000000";
                   ctx.lineWidth = borderSize;
+                  // Apply element opacity to border
+                  ctx.globalAlpha = currentAlpha * (dataElement.opacity !== undefined ? dataElement.opacity : 1);
 
                   // Set border type
                   if (dataElement.borderType === "dashed") {
@@ -1509,56 +1518,98 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   }
                   ctx.setLineDash([]);
                 }
+                
+                // Restore alpha for text content
+                ctx.globalAlpha = currentAlpha;
 
-                // Draw data content
-                ctx.fillStyle = dataElement.textColor || "#333";
-                const fontSize = dataElement.fontSize || 64;
+                // Draw data content with proper styling and language support
+                let displayText = "";
+                let textColor = dataElement.textColor || "#333";
+                let fontSize = dataElement.fontSize || 64;
+                let fontFamily = "Arial";
+                let fontWeight = "normal";
+                let textAlign = "left";
 
-                ctx.font = `${fontSize}px Arial`;
-                ctx.textAlign = "left";
+                // Use title properties for category and subcategory
+                if (dataElement.dataType === "category" || dataElement.dataType === "subcategory") {
+                  textColor = dataElement.titleTextColor || dataElement.textColor || "#333";
+                  fontSize = dataElement.titleTextFontSize || dataElement.fontSize || 48;
+                  fontFamily = dataElement.titleTextFontFamily || "Arial, sans-serif";
+                  fontWeight = dataElement.titleTextFontWeight || "normal";
+                  textAlign = dataElement.titleAlign || "left";
+                }
+
+                ctx.fillStyle = textColor;
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                ctx.textAlign = textAlign as "left" | "center" | "right" | "start" | "end";
                 ctx.textBaseline = "top";
 
-                if (dataElement.dataType === "category" && dataElement.categoryData) {
-                  // Show the actual category name
-                  const displayText = dataElement.categoryData.names?.en || dataElement.categoryData.name || "Select category";
-                  const padding = 10;
-
-                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
-                } else if (dataElement.dataType === "subcategory" && dataElement.subcategoryData) {
-                  // Show the actual subcategory name
-                  const displayText = dataElement.subcategoryData.names?.en || dataElement.subcategoryData.name || "Select subcategory";
-                  const padding = 10;
-
-                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
-                } else if (dataElement.dataType === "menuitem" && dataElement.subcategoryData) {
-                  // Draw menu items list for menu item data elements using the utility function
-                  drawMenuItemsList({
-                    ctx,
-                    element: dataElement,
-                    x: dataElement.x,
-                    y: dataElement.y,
-                    width: dataElement.width,
-                    height: dataElement.height,
-                    scale: 1,
-                    isThumbnail: false,
-                  });
-                } else {
-                  // Default display for other cases
-                  let displayText = "";
-
-                  if (dataElement.dataType === "category" && dataElement.dataId) {
-                    displayText = "Select category";
-                  } else if (dataElement.dataType === "subcategory" && dataElement.dataId) {
-                    displayText = "Select subcategory";
-                  } else if (dataElement.dataType === "menuitem" && dataElement.dataId) {
-                    displayText = "Select menu item";
+                if (dataElement.dataType === "category") {
+                  if (dataElement.categoryData) {
+                    // Show the actual category name with language fallback
+                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+                    
+                    displayText = dataElement.categoryData.names?.[lang] || 
+                                 dataElement.categoryData.names?.en ||
+                                 dataElement.categoryData.names?.fr ||
+                                 dataElement.categoryData.names?.it ||
+                                 dataElement.categoryData.names?.nl ||
+                                 dataElement.categoryData.name || 
+                                 "Category";
                   } else {
-                    displayText = dataElement.dataType ? dataElement.dataType.toUpperCase() : "DATA";
+                    displayText = "Select category";
+                  }
+                } else if (dataElement.dataType === "subcategory") {
+                  if (dataElement.subcategoryData) {
+                    // Show the actual subcategory name with language fallback
+                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+                    
+                    displayText = dataElement.subcategoryData.names?.[lang] ||
+                                 dataElement.subcategoryData.names?.en ||
+                                 dataElement.subcategoryData.names?.fr ||
+                                 dataElement.subcategoryData.names?.it ||
+                                 dataElement.subcategoryData.names?.nl ||
+                                 dataElement.subcategoryData.name || 
+                                 "Subcategory";
+                  } else {
+                    displayText = "Select subcategory";
+                  }
+                } else if (dataElement.dataType === "menuitem") {
+                  if (dataElement.subcategoryData) {
+                    // Draw menu items list for menu item data elements using the utility function
+                    drawMenuItemsList({
+                      ctx,
+                      element: dataElement,
+                      x: dataElement.x,
+                      y: dataElement.y,
+                      width: dataElement.width,
+                      height: dataElement.height,
+                      scale: 1,
+                      isThumbnail: false,
+                    });
+                    // Set empty to avoid drawing default text
+                    displayText = "";
+                  } else {
+                    displayText = "Select category and subcategory";
+                  }
+                } else {
+                  // Handle other data types
+                  displayText = dataElement.dataType ? dataElement.dataType.charAt(0).toUpperCase() + dataElement.dataType.slice(1) : "DATA";
+                }
+
+                // Position text with alignment and padding (only if we have displayText)
+                if (displayText) {
+                  const padding = 10;
+                  let textX = dataElement.x + padding;
+
+                  // Adjust X position based on alignment
+                  if (textAlign === "center") {
+                    textX = dataElement.x + dataElement.width / 2;
+                  } else if (textAlign === "right") {
+                    textX = dataElement.x + dataElement.width - padding;
                   }
 
-                  const padding = 10;
-
-                  ctx.fillText(displayText, dataElement.x + padding, dataElement.y + padding);
+                  ctx.fillText(displayText, textX, dataElement.y + padding);
                 }
               }
 
