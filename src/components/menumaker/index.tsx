@@ -7,5 +7,6 @@ export { MenuMakerEditor } from "./MenuMakerEditor";
 export { PageFormatSelector } from "./PageFormatSelector";
 export { PageThumbnail } from "./PageThumbnail";
 export * from "./panels";
+export { PreviewMode } from "./PreviewMode";
 export { ProjectManager } from "./ProjectManager";
 export { TopNavBar } from "./TopNavBar";

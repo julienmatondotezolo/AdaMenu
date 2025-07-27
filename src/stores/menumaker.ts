@@ -46,6 +46,9 @@ interface MenuMakerStore {
   clearMenuData: () => void;
   refreshDataElements: () => void;
 
+  // Actions for preview rendering
+  generatePreviewImages: () => Promise<string[]>;
+
   // Actions for page management
   addPage: (format?: string) => void;
   deletePage: (pageId: string) => void;
@@ -1879,6 +1882,319 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           isPreviewMode: false,
           layersLockedBeforePreview: {},
         });
+      }
+    },
+
+    // Generate preview images
+    generatePreviewImages: async () => {
+      const { project } = get();
+
+      if (!project) {
+        return [];
+      }
+
+      // Only run on client side
+      if (typeof window === "undefined") {
+        return [];
+      }
+
+      const previewImages: string[] = [];
+
+      try {
+        // Generate preview canvas images for each page
+        for (let i = 0; i < project.pages.length; i++) {
+          const page = project.pages[i];
+
+          // Create a moderate-resolution canvas to render the page
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
+
+          if (!ctx) continue;
+
+          // Set moderate resolution for preview (faster generation)
+          const scaleFactor = 1.5; // Good quality but faster
+
+          canvas.width = page.format.width * scaleFactor;
+          canvas.height = page.format.height * scaleFactor;
+
+          ctx.scale(scaleFactor, scaleFactor);
+
+          // Clear canvas
+          ctx.clearRect(0, 0, page.format.width, page.format.height);
+
+          // Draw page background
+          ctx.fillStyle = page.backgroundColor;
+          ctx.fillRect(0, 0, page.format.width, page.format.height);
+
+          // Draw background image if available
+          if (page.backgroundImage) {
+            try {
+              const img = new Image();
+
+              img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
+              await new Promise<void>((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = reject;
+                img.src = page.backgroundImage!;
+              });
+              ctx.save();
+              ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
+              ctx.drawImage(img, 0, 0, page.format.width, page.format.height);
+              ctx.restore();
+            } catch (error) {
+              console.warn("Failed to load background image for page", i + 1);
+            }
+          }
+
+          // Draw all elements from all layers
+          for (const layer of page.layers) {
+            if (!layer.visible) continue;
+
+            for (const element of layer.elements) {
+              if (!element.visible) continue;
+
+              ctx.save();
+              ctx.globalAlpha = element.opacity * layer.opacity;
+
+              if (element.type === "text") {
+                // Draw text element
+                ctx.font = `${element.fontStyle} ${element.fontSize}px ${element.fontFamily}`;
+                ctx.fillStyle = element.fill;
+                ctx.textAlign = element.align as "left" | "center" | "right" | "start" | "end";
+                ctx.fillText(element.content, element.x, element.y + element.fontSize);
+              } else if (element.type === "image" && (element as any).src) {
+                // Draw image element (if src is available)
+                try {
+                  const img = new Image();
+                  
+                  img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
+                  await new Promise<void>((resolve, reject) => {
+                    img.onload = () => resolve();
+                    img.onerror = reject;
+                    img.src = (element as any).src;
+                  });
+                  ctx.drawImage(img, element.x, element.y, element.width, element.height);
+                } catch (error) {
+                  // Draw placeholder for failed images
+                  ctx.fillStyle = "#f0f0f0";
+                  ctx.fillRect(element.x, element.y, element.width, element.height);
+                  ctx.strokeStyle = "#ccc";
+                  ctx.strokeRect(element.x, element.y, element.width, element.height);
+                  ctx.fillStyle = "#666";
+                  ctx.font = "14px Arial";
+                  ctx.textAlign = "center";
+                  ctx.fillText("Image", element.x + element.width / 2, element.y + element.height / 2);
+                }
+              } else if (element.type === "shape") {
+                // Draw shape element
+                const shapeElement = element as any;
+
+                // Set fill and stroke styles
+                if (shapeElement.fill) {
+                  ctx.fillStyle = shapeElement.fill;
+                }
+                if (shapeElement.stroke) {
+                  ctx.strokeStyle = shapeElement.stroke;
+                  ctx.lineWidth = shapeElement.strokeWidth || 1;
+                }
+
+                // Draw the shape based on its type
+                switch (shapeElement.shapeType) {
+                  case "rectangle":
+                    if (shapeElement.radius > 0) {
+                      // Rounded rectangle
+                      ctx.beginPath();
+                      ctx.roundRect(shapeElement.x, shapeElement.y, shapeElement.width, shapeElement.height, shapeElement.radius);
+                    } else {
+                      // Regular rectangle
+                      ctx.beginPath();
+                      ctx.rect(shapeElement.x, shapeElement.y, shapeElement.width, shapeElement.height);
+                    }
+                    break;
+
+                  case "circle": {
+                    // Draw circle/ellipse
+                    const centerX = shapeElement.x + shapeElement.width / 2;
+                    const centerY = shapeElement.y + shapeElement.height / 2;
+                    const radiusX = shapeElement.width / 2;
+                    const radiusY = shapeElement.height / 2;
+
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                    break;
+                  }
+
+                  case "triangle":
+                    // Draw triangle
+                    ctx.beginPath();
+                    ctx.moveTo(shapeElement.x + shapeElement.width / 2, shapeElement.y); // Top point
+                    ctx.lineTo(shapeElement.x, shapeElement.y + shapeElement.height); // Bottom left
+                    ctx.lineTo(shapeElement.x + shapeElement.width, shapeElement.y + shapeElement.height); // Bottom right
+                    ctx.closePath();
+                    break;
+                }
+
+                // Fill and stroke the shape
+                if (shapeElement.fill) {
+                  ctx.fill();
+                }
+                if (shapeElement.stroke && shapeElement.strokeWidth > 0) {
+                  ctx.stroke();
+                }
+              } else if (element.type === "data") {
+                // Draw data element
+                const dataElement = element as any;
+                
+                // Save current globalAlpha
+                const currentAlpha = ctx.globalAlpha;
+                
+                // Draw background with opacity
+                ctx.fillStyle = dataElement.backgroundColor || "#ffffff";
+                ctx.globalAlpha = currentAlpha * (dataElement.backgroundOpacity !== undefined ? dataElement.backgroundOpacity : 1);
+                ctx.fillRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
+                
+                // Restore alpha for border
+                ctx.globalAlpha = currentAlpha;
+
+                // Draw border with opacity
+                const borderSize = dataElement.borderSize || 0;
+
+                if (borderSize > 0) {
+                  ctx.strokeStyle = dataElement.borderColor || "#000000";
+                  ctx.lineWidth = borderSize;
+                  // Apply element opacity to border
+                  ctx.globalAlpha = currentAlpha * (dataElement.opacity !== undefined ? dataElement.opacity : 1);
+
+                  // Set border type
+                  if (dataElement.borderType === "dashed") {
+                    ctx.setLineDash([5, 5]);
+                  } else if (dataElement.borderType === "dotted") {
+                    ctx.setLineDash([2, 2]);
+                  } else {
+                    ctx.setLineDash([]);
+                  }
+
+                  // Draw border with border radius if specified
+                  if (dataElement.borderRadius > 0) {
+                    ctx.beginPath();
+                    ctx.roundRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height, dataElement.borderRadius);
+                    ctx.stroke();
+                  } else {
+                    ctx.strokeRect(dataElement.x, dataElement.y, dataElement.width, dataElement.height);
+                  }
+                  ctx.setLineDash([]);
+                }
+                
+                // Restore alpha for text content
+                ctx.globalAlpha = currentAlpha;
+
+                // Draw data content with proper styling and language support
+                let displayText = "";
+                let textColor = dataElement.textColor || "#333";
+                let fontSize = dataElement.fontSize || 64;
+                let fontFamily = "Arial";
+                let fontWeight = "normal";
+                let textAlign = "left";
+
+                // Use title properties for category and subcategory
+                if (dataElement.dataType === "category" || dataElement.dataType === "subcategory") {
+                  textColor = dataElement.titleTextColor || dataElement.textColor || "#333";
+                  fontSize = dataElement.titleTextFontSize || dataElement.fontSize || 48;
+                  fontFamily = dataElement.titleTextFontFamily || "Arial, sans-serif";
+                  fontWeight = dataElement.titleTextFontWeight || "normal";
+                  textAlign = dataElement.titleAlign || "left";
+                }
+
+                ctx.fillStyle = textColor;
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                ctx.textAlign = textAlign as "left" | "center" | "right" | "start" | "end";
+                ctx.textBaseline = "top";
+
+                if (dataElement.dataType === "category") {
+                  if (dataElement.categoryData) {
+                    // Show the actual category name with language fallback
+                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+                    
+                    displayText = dataElement.categoryData.names?.[lang] || 
+                                 dataElement.categoryData.names?.en ||
+                                 dataElement.categoryData.names?.fr ||
+                                 dataElement.categoryData.names?.it ||
+                                 dataElement.categoryData.names?.nl ||
+                                 dataElement.categoryData.name || 
+                                 "Category";
+                  } else {
+                    displayText = "Select category";
+                  }
+                } else if (dataElement.dataType === "subcategory") {
+                  if (dataElement.subcategoryData) {
+                    // Show the actual subcategory name with language fallback
+                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+                    
+                    displayText = dataElement.subcategoryData.names?.[lang] ||
+                                 dataElement.subcategoryData.names?.en ||
+                                 dataElement.subcategoryData.names?.fr ||
+                                 dataElement.subcategoryData.names?.it ||
+                                 dataElement.subcategoryData.names?.nl ||
+                                 dataElement.subcategoryData.name || 
+                                 "Subcategory";
+                  } else {
+                    displayText = "Select subcategory";
+                  }
+                } else if (dataElement.dataType === "menuitem") {
+                  if (dataElement.subcategoryData) {
+                    // Draw menu items list for menu item data elements using the utility function
+                    drawMenuItemsList({
+                      ctx,
+                      element: dataElement,
+                      x: dataElement.x,
+                      y: dataElement.y,
+                      width: dataElement.width,
+                      height: dataElement.height,
+                      scale: 1,
+                      isThumbnail: false,
+                    });
+                    // Set empty to avoid drawing default text
+                    displayText = "";
+                  } else {
+                    displayText = "Select category and subcategory";
+                  }
+                } else {
+                  // Handle other data types
+                  displayText = dataElement.dataType ? dataElement.dataType.charAt(0).toUpperCase() + dataElement.dataType.slice(1) : "DATA";
+                }
+
+                // Position text with alignment and padding (only if we have displayText)
+                if (displayText) {
+                  const padding = 10;
+                  let textX = dataElement.x + padding;
+
+                  // Adjust X position based on alignment
+                  if (textAlign === "center") {
+                    textX = dataElement.x + dataElement.width / 2;
+                  } else if (textAlign === "right") {
+                    textX = dataElement.x + dataElement.width - padding;
+                  }
+
+                  ctx.fillText(displayText, textX, dataElement.y + padding);
+                }
+              }
+
+              ctx.restore();
+            }
+          }
+
+          // Convert canvas to image with moderate quality for faster loading
+          const imageData = canvas.toDataURL("image/jpeg", 0.8);
+
+          previewImages.push(imageData);
+        }
+
+        return previewImages;
+      } catch (error) {
+        console.error("Failed to generate preview images:", error);
+        return [];
       }
     },
   })),
