@@ -4,8 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { ShapeElement, ShapeType, TextElement } from "../../types/menumaker";
-import { getBackgroundStyle } from "./utils/colorUtils";
-import { drawMenuItemsList } from "./utils/drawMenuItemsList";
+import { drawElements } from "./drawings";
 import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
@@ -237,7 +236,17 @@ export function CanvasArea() {
     drawPageBackground(ctx, currentPage, canvas);
 
     // Draw elements
-    drawElements(ctx, currentPage, canvas, editorState.selectedElementIds);
+    drawElements({
+      ctx,
+      page: currentPage,
+      canvas,
+      selectedIds: editorState.selectedElementIds,
+      pageOffset,
+      tempElementPositions,
+      tempElementDimensions,
+      imageElementCache,
+      setImageElementCache,
+    });
 
     // Draw selection box if selecting
     if (isSelecting && tool === "select") {
@@ -312,408 +321,6 @@ export function CanvasArea() {
         // Store the loading image in cache to prevent multiple loads
         setBackgroundImageCache((prev) => new Map(prev.set(page.backgroundImage, img)));
       }
-    }
-  };
-
-  const drawElements = (ctx: CanvasRenderingContext2D, page: any, canvas: any, selectedIds: string[]) => {
-    page.layers.forEach((layer: any) => {
-      if (!layer.visible) return;
-
-      layer.elements.forEach((element: any) => {
-        const isSelected = selectedIds.includes(element.id);
-
-        if (element.type === "text") {
-          drawTextElement(ctx, element, canvas, isSelected);
-        } else if (element.type === "image") {
-          drawImageElement(ctx, element, canvas, isSelected);
-        } else if (element.type === "data") {
-          drawDataElement(ctx, element, canvas, isSelected);
-        } else if (element.type === "shape") {
-          drawShapeElement(ctx, element, canvas, isSelected);
-        }
-      });
-    });
-  };
-
-  const drawTextElement = (ctx: CanvasRenderingContext2D, element: TextElement, canvas: any, isSelected: boolean) => {
-    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
-    const tempPos = tempElementPositions[element.id];
-    const tempDim = tempElementDimensions[element.id];
-
-    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
-    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
-    const elementWidth = tempDim ? tempDim.width : element.width;
-    const elementHeight = tempDim ? tempDim.height : element.height;
-
-    const x = pageOffset.x + elementX * canvas.zoom;
-    const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
-    const fontSize = element.fontSize * canvas.zoom;
-    const padding = element.padding * canvas.zoom;
-
-    // Set text properties
-    ctx.font = `${element.fontStyle} ${fontSize}px ${element.fontFamily}`;
-    ctx.fillStyle = element.fill;
-    ctx.globalAlpha = element.opacity;
-
-    // Simplified text drawing for debugging
-    const availableWidth = width - padding * 2;
-    const availableHeight = height - padding * 2;
-    const lineHeight = fontSize * element.lineHeight;
-
-    // Check if we have reasonable values - if not, use fallback rendering
-    if (availableWidth <= 0 || availableHeight <= 0 || fontSize <= 0) {
-      // Fallback: draw text without wrapping constraints
-      ctx.fillText(element.content, x + 5, y + 30);
-      ctx.globalAlpha = 1;
-      return;
-    }
-
-    // Simple text wrapping
-    const words = element.content.split(" ");
-    const lines: string[] = [];
-    let currentLine = "";
-
-    for (const word of words) {
-      const testLine = currentLine ? `${currentLine} ${word}` : word;
-      const testWidth = ctx.measureText(testLine).width;
-
-      if (testWidth <= availableWidth || currentLine === "") {
-        currentLine = testLine;
-      } else {
-        if (currentLine) {
-          lines.push(currentLine);
-        }
-        currentLine = word;
-      }
-    }
-
-    // Add the last line
-    if (currentLine) {
-      lines.push(currentLine);
-    }
-
-    // Limit lines to what fits in height
-    const maxLines = Math.floor(availableHeight / lineHeight);
-    const finalLines = lines.slice(0, Math.max(1, maxLines)); // Always show at least 1 line
-
-    // Draw text lines
-    ctx.textAlign = element.align as any;
-    ctx.textBaseline = "top";
-
-    finalLines.forEach((line, index) => {
-      const lineY = y + padding + index * lineHeight;
-      let lineX = x + padding;
-
-      // Adjust x position based on text alignment
-      if (element.align === "center") {
-        lineX = x + width / 2;
-      } else if (element.align === "right") {
-        lineX = x + width - padding;
-      }
-
-      ctx.fillText(line, lineX, lineY);
-    });
-
-    // Draw selection border and resize handles
-    if (isSelected) {
-      ctx.strokeStyle = "#0066cc";
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 1;
-
-      // Draw selection border using the actual rect dimensions
-      ctx.setLineDash([4, 4]);
-      ctx.strokeRect(x, y, width, height);
-      ctx.setLineDash([]);
-
-      // Draw resize handles using the actual rect dimensions
-      drawResizeHandles(ctx, x, y, width, height);
-    }
-
-    ctx.globalAlpha = 1;
-  };
-
-  const drawImageElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {
-    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
-    const tempPos = tempElementPositions[element.id];
-    const tempDim = tempElementDimensions[element.id];
-
-    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
-    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
-    const elementWidth = tempDim ? tempDim.width : element.width;
-    const elementHeight = tempDim ? tempDim.height : element.height;
-
-    const x = pageOffset.x + elementX * canvas.zoom;
-    const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
-
-    // Draw image if available
-    if (element.src) {
-      const cachedImage = imageElementCache.get(element.src);
-
-      if (cachedImage && cachedImage.complete) {
-        // Image is loaded and ready to draw
-        ctx.save();
-        ctx.globalAlpha = element.opacity ?? 1;
-
-        // Draw the image scaled to fit the element dimensions
-        ctx.drawImage(cachedImage, x, y, width, height);
-
-        ctx.restore();
-      } else if (!cachedImage) {
-        // Load the image and cache it
-        const img = new Image();
-
-        img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
-
-        img.onload = () => {
-          setImageElementCache((prev) => new Map(prev.set(element.src, img)));
-          // Trigger a full canvas redraw when image loads
-        };
-        img.onerror = () => {
-          console.warn("Failed to load image element:", element.src);
-        };
-        img.src = element.src;
-
-        // Store the loading image in cache to prevent multiple loads
-        setImageElementCache((prev) => new Map(prev.set(element.src, img)));
-
-        // Draw placeholder while loading
-        ctx.fillStyle = "#f0f0f0";
-        ctx.fillRect(x, y, width, height);
-        ctx.fillStyle = "#666";
-        ctx.font = "14px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Loading...", x + width / 2, y + height / 2);
-      } else {
-        // Image is loading, show placeholder
-        ctx.fillStyle = "#f0f0f0";
-        ctx.fillRect(x, y, width, height);
-        ctx.fillStyle = "#666";
-        ctx.font = "14px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Loading...", x + width / 2, y + height / 2);
-      }
-    } else {
-      // No src, draw placeholder
-      ctx.fillStyle = "#f0f0f0";
-      ctx.fillRect(x, y, width, height);
-      ctx.fillStyle = "#666";
-      ctx.font = "14px Arial";
-      ctx.textAlign = "center";
-      ctx.fillText("No Image", x + width / 2, y + height / 2);
-    }
-
-    // Draw border
-    ctx.strokeStyle = isSelected ? "#0066cc" : "#ccc";
-    ctx.lineWidth = isSelected ? 2 : 1;
-    ctx.strokeRect(x, y, width, height);
-
-    // Draw resize handles if selected
-    if (isSelected) {
-      drawResizeHandles(ctx, x, y, width, height);
-    }
-  };
-
-  const drawDataElement = (ctx: CanvasRenderingContext2D, element: any, canvas: any, isSelected: boolean) => {
-    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
-    const tempPos = tempElementPositions[element.id];
-    const tempDim = tempElementDimensions[element.id];
-
-    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
-    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
-    const elementWidth = tempDim ? tempDim.width : element.width;
-    const elementHeight = tempDim ? tempDim.height : element.height;
-
-    const x = pageOffset.x + elementX * canvas.zoom;
-    const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
-
-    // Draw background with opacity
-    const backgroundStyle = getBackgroundStyle(element.backgroundColor || "#ffffff", element.backgroundOpacity);
-
-    if (backgroundStyle) {
-      ctx.fillStyle = backgroundStyle;
-      ctx.fillRect(x, y, width, height);
-    }
-
-    // Draw border
-    const borderSize = (element.borderSize || 0) * canvas.zoom;
-
-    if (borderSize > 0) {
-      ctx.strokeStyle = element.borderColor || "#000000";
-      ctx.lineWidth = borderSize;
-
-      // Set border type
-      if (element.borderType === "dashed") {
-        ctx.setLineDash([5 * canvas.zoom, 5 * canvas.zoom]);
-      } else if (element.borderType === "dotted") {
-        ctx.setLineDash([2 * canvas.zoom, 2 * canvas.zoom]);
-      } else {
-        ctx.setLineDash([]);
-      }
-
-      // Draw border with border radius if specified
-      if (element.borderRadius > 0) {
-        const radius = element.borderRadius * canvas.zoom;
-
-        ctx.beginPath();
-        ctx.roundRect(x, y, width, height, radius);
-        ctx.stroke();
-      } else {
-        ctx.strokeRect(x, y, width, height);
-      }
-      ctx.setLineDash([]);
-    }
-
-    // Draw data content
-    ctx.fillStyle = element.textColor || "#333";
-    const fontSize = (element.fontSize || 64) * canvas.zoom;
-
-    ctx.font = `${fontSize}px Arial`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "top";
-
-    let displayText = "";
-
-    if (element.dataType === "category" && element.categoryData) {
-      // Show the actual category name
-      displayText = element.categoryData.names?.en || element.categoryData.name || "Select category";
-    } else if (element.dataType === "category" && element.dataId) {
-      displayText = "Select category";
-    } else if (element.dataType === "subcategory" && element.subcategoryData) {
-      // Show the actual subcategory name
-      displayText = element.subcategoryData.names?.en || element.subcategoryData.name || "Select subcategory";
-    } else if (element.dataType === "subcategory" && element.dataId) {
-      displayText = "Select subcategory";
-    } else if (element.dataType === "menuitem" && element.subcategoryData) {
-      // Draw menu items list instead of simple text
-      drawMenuItemsList({
-        ctx,
-        element,
-        x,
-        y,
-        width,
-        height,
-        scale: canvas.zoom,
-        isThumbnail: false,
-      });
-      // Don't return early - we still need to draw selection borders
-      displayText = ""; // Set empty to avoid drawing default text
-    } else if (element.dataType === "menuitem") {
-      displayText = "Select category and subcategory";
-    } else {
-      displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
-    }
-
-    // Position text at top-left with some padding (only if we have displayText)
-    if (displayText) {
-      const padding = 10 * canvas.zoom;
-
-      ctx.fillText(displayText, x + padding, y + padding);
-    }
-
-    // Draw selection border and resize handles if selected
-    if (isSelected) {
-      ctx.strokeStyle = "#0066cc";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-      ctx.strokeRect(x - 2, y - 2, width + 4, height + 4);
-      ctx.setLineDash([]);
-
-      // Draw resize handles at corners
-      drawResizeHandles(ctx, x, y, width, height);
-    }
-  };
-
-  const drawShapeElement = (ctx: CanvasRenderingContext2D, element: ShapeElement, canvas: any, isSelected: boolean) => {
-    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
-    const tempPos = tempElementPositions[element.id];
-    const tempDim = tempElementDimensions[element.id];
-
-    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : element.x;
-    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : element.y;
-    const elementWidth = tempDim ? tempDim.width : element.width;
-    const elementHeight = tempDim ? tempDim.height : element.height;
-
-    const x = pageOffset.x + elementX * canvas.zoom;
-    const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
-
-    ctx.save();
-    ctx.globalAlpha = element.opacity;
-
-    // Set fill and stroke styles
-    if (element.fill) {
-      ctx.fillStyle = element.fill;
-    }
-    if (element.stroke) {
-      ctx.strokeStyle = element.stroke;
-      ctx.lineWidth = element.strokeWidth * canvas.zoom;
-    }
-
-    // Draw the shape based on its type
-    switch (element.shapeType) {
-      case "rectangle":
-        if (element.radius > 0) {
-          // Rounded rectangle
-          const radius = element.radius * canvas.zoom;
-
-          ctx.beginPath();
-          ctx.roundRect(x, y, width, height, radius);
-        } else {
-          // Regular rectangle
-          ctx.beginPath();
-          ctx.rect(x, y, width, height);
-        }
-        break;
-
-      case "circle": {
-        // Draw circle/ellipse
-        const centerX = x + width / 2;
-        const centerY = y + height / 2;
-        const radiusX = width / 2;
-        const radiusY = height / 2;
-
-        ctx.beginPath();
-        ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-        break;
-      }
-
-      case "triangle":
-        // Draw triangle
-        ctx.beginPath();
-        ctx.moveTo(x + width / 2, y); // Top point
-        ctx.lineTo(x, y + height); // Bottom left
-        ctx.lineTo(x + width, y + height); // Bottom right
-        ctx.closePath();
-        break;
-    }
-
-    // Fill and stroke the shape
-    if (element.fill) {
-      ctx.fill();
-    }
-    if (element.stroke && element.strokeWidth > 0) {
-      ctx.stroke();
-    }
-
-    ctx.restore();
-
-    // Draw selection border and resize handles if selected
-    if (isSelected) {
-      ctx.strokeStyle = "#0066cc";
-      ctx.lineWidth = 2;
-      ctx.setLineDash([4, 4]);
-      ctx.strokeRect(x, y, width, height);
-      ctx.setLineDash([]);
-
-      // Draw resize handles
-      drawResizeHandles(ctx, x, y, width, height);
     }
   };
 
@@ -830,36 +437,6 @@ export function CanvasArea() {
     }
 
     return null;
-  };
-
-  const drawResizeHandles = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number) => {
-    const handleSize = 12;
-    const handleRadius = handleSize / 2;
-
-    // Save current styles
-    ctx.save();
-
-    // Handle style
-    ctx.fillStyle = "#0066cc";
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
-
-    // Define handle positions
-    const handles = [
-      { x: x - handleRadius, y: y - handleRadius }, // Top-left
-      { x: x + width - handleRadius, y: y - handleRadius }, // Top-right
-      { x: x - handleRadius, y: y + height - handleRadius }, // Bottom-left
-      { x: x + width - handleRadius, y: y + height - handleRadius }, // Bottom-right
-    ];
-
-    // Draw each handle
-    handles.forEach((handle) => {
-      ctx.fillRect(handle.x, handle.y, handleSize, handleSize);
-      ctx.strokeRect(handle.x, handle.y, handleSize, handleSize);
-    });
-
-    // Restore styles
-    ctx.restore();
   };
 
   const getResizeHandleAtPosition = (mouseX: number, mouseY: number, elementId: string): string | null => {
@@ -1700,8 +1277,8 @@ export function CanvasArea() {
           shapeType: selectedShapeType,
           x: relativeX,
           y: relativeY,
-          width: 100,
-          height: 100,
+          width: 500,
+          height: 500,
           rotation: 0,
           scaleX: 1,
           scaleY: 1,
