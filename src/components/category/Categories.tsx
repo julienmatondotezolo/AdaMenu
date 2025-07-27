@@ -14,7 +14,10 @@ import {
   updateCategory,
 } from "@/_services/ada/adaMenuService";
 import { showActionToast } from "@/lib/utils";
+import { useMenuMakerStore } from "@/stores/menumaker";
+import { MenuProject } from "@/types/menumaker";
 
+import { PreviewMode } from "../menumaker/PreviewMode";
 import {
   Button,
   Card,
@@ -39,6 +42,7 @@ import { UpdateMenu, UpdateSubCategory } from "./update";
 function Categories() {
   const locale = useLocale();
   const text = useTranslations("Index");
+  const { loadProject } = useMenuMakerStore();
   const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
@@ -91,6 +95,29 @@ function Categories() {
   const { data: supplement } = useQuery("supplement", fetchSupplement, {
     refetchOnWindowFocus: false,
   });
+
+  // Check localStorage for menumaker projects on component mount
+  useEffect(() => {
+    // Loop through localStorage to find the first menumaker project
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+
+      if (key && key.startsWith("menumaker_project_")) {
+        try {
+          const projectData = localStorage.getItem(key);
+
+          if (projectData) {
+            const project: MenuProject = JSON.parse(projectData);
+
+            loadProject(project);
+            break; // Exit after loading the first project found
+          }
+        } catch (error) {
+          console.warn(`Failed to load menumaker project from key ${key}:`, error);
+        }
+      }
+    }
+  }, []); // Run only once on component mount
 
   // Auto-select the first category when categories are loaded
   useEffect(() => {
@@ -536,6 +563,18 @@ function Categories() {
               </div>
             </>
           )}
+        </div>
+
+        {/* Right menu preview */}
+        <div className="w-1/4 h-full flex flex-col border-l-2 dark:border-gray-800">
+          <div className="flex-1 overflow-y-auto">
+            <PreviewMode
+              onExit={() => {
+                /* No action needed for categories component */
+              }}
+              showExitButton={false}
+            />
+          </div>
         </div>
       </div>
 

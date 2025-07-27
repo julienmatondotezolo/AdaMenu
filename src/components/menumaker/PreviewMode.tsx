@@ -5,9 +5,10 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 
 interface PreviewModeProps {
   onExit: () => void;
+  showExitButton?: boolean;
 }
 
-export function PreviewMode({ onExit }: PreviewModeProps) {
+export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps) {
   const { generatePreviewImages, project, currentPageId } = useMenuMakerStore();
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
@@ -55,13 +56,15 @@ export function PreviewMode({ onExit }: PreviewModeProps) {
   return (
     <div className="relative w-full h-full bg-gray-100">
       {/* Exit Preview Button */}
-      <button
-        onClick={onExit}
-        className="absolute top-4 right-4 z-10 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-lg hover:bg-gray-50 flex items-center justify-center transition-colors"
-        title="Exit Preview Mode"
-      >
-        <X className="w-5 h-5 text-gray-600" />
-      </button>
+      {showExitButton && (
+        <button
+          onClick={onExit}
+          className="absolute top-4 right-4 z-10 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-lg hover:bg-gray-50 flex items-center justify-center transition-colors"
+          title="Exit Preview Mode"
+        >
+          <X className="w-5 h-5 text-gray-600" />
+        </button>
+      )}
 
       {/* Preview Content */}
       <div className="w-full h-full overflow-auto">
@@ -126,7 +129,7 @@ export function PreviewMode({ onExit }: PreviewModeProps) {
       </div>
 
       {/* Preview Header */}
-      <div className="absolute z-50 top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 bg-white px-4 py-2 rounded-lg shadow-sm border">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 bg-white px-4 py-2 rounded-lg shadow-sm border">
         <span className="text-sm font-medium text-gray-700">
           {previewImages.length === 1 ? "1 Page" : `${previewImages.length} Pages`}
         </span>
