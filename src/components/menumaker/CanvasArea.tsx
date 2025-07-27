@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { ShapeElement, ShapeType, TextElement } from "../../types/menumaker";
+import { ShapeElement, TextElement } from "../../types/menumaker";
 import { drawElements } from "./drawings";
 import { drawShapeElement } from "./drawings/drawShapeElement";
 import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";

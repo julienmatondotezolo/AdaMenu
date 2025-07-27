@@ -1,3 +1,5 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable indent */
 import { ChevronDown, ChevronRight } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
@@ -6,6 +8,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
 import { ExportLoader } from "./ExportLoader";
+import { ExportSuccessNotification } from "./ExportSuccessNotification";
 import { MainToolbar } from "./MainToolbar";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { DataPanel } from "./panels/DataPanel";
@@ -135,7 +138,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   // Check if any selected element is a data element
   const hasSelectedDataElement = selectedElements.some((element) => element.type === "data");
 
-  // Check if any selected element is a shape element  
+  // Check if any selected element is a shape element
   const hasSelectedShapeElement = selectedElements.some((element) => element.type === "shape");
 
   // Check if any selected element is an image element
@@ -216,14 +219,18 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && !hasSelectedShapeElement && !hasSelectedImageElement && (
+            {selectedElements.length > 0 &&
+              editorState.ui.propertiesPanelOpen &&
+              !hasSelectedDataElement &&
+              !hasSelectedShapeElement &&
+              !hasSelectedImageElement && (
               <div>
                 {/* Properties Header */}
                 <div
                   className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
                   onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
+                      if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       setPropertiesCollapsed(!propertiesCollapsed);
                     }
@@ -408,6 +415,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
       {/* Export Loader */}
       <ExportLoader />
+
+      {/* Export Success Notification */}
+      <ExportSuccessNotification />
     </div>
   );
 }

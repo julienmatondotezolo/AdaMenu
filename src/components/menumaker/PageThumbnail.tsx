@@ -207,6 +207,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 if (shapeElement.radius > 0) {
                   // Rounded rectangle
                   const radius = Math.max(shapeElement.radius * scale, 1);
+
                   ctx.beginPath();
                   ctx.roundRect(x, y, elementWidth, elementHeight, radius);
                 } else {
