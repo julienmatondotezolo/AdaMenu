@@ -1,10 +1,11 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable indent */
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { fetchCompleteMenu } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
+import { Button } from "../ui/button";
 import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
 import { ExportLoader } from "./ExportLoader";
@@ -23,7 +24,7 @@ interface MenuMakerEditorProps {
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError } =
+  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer } =
     useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -93,6 +94,39 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     window.addEventListener('focus', handleWindowFocus);
     return () => window.removeEventListener('focus', handleWindowFocus);
   }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
+
+  // Handler for adding a new layer
+  const handleAddLayer = () => {
+    if (!currentPageId || !currentPage) return;
+    
+    const layerCount = currentPage.layers.length;
+
+    addLayer(currentPageId, `Layer ${layerCount + 1}`);
+  };
+
+  // Handler for duplicating the selected layer
+  const handleDuplicateLayer = () => {
+    if (!currentPageId || !editorState.selectedLayerId) return;
+
+    duplicateLayer(currentPageId, editorState.selectedLayerId);
+  };
+
+  // Handler for deleting the selected layer
+  const handleDeleteLayer = () => {
+    if (!currentPageId || !editorState.selectedLayerId || !currentPage) return;
+    
+    // Prevent deleting the last layer
+    if (currentPage.layers.length <= 1) return;
+
+    deleteLayer(currentPageId, editorState.selectedLayerId);
+  };
+
+  // Unselect layer when layers panel is collapsed
+  useEffect(() => {
+    if (layersCollapsed && editorState.selectedLayerId) {
+      selectLayer(null);
+    }
+  }, [layersCollapsed, editorState.selectedLayerId, selectLayer]);
 
   // Auto-save every 30 seconds
   useEffect(() => {
@@ -227,8 +261,52 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-expanded={!layersCollapsed}
                   aria-controls="layers-content"
                 >
+                  <div className="flex items-center space-x-4">
                   <h3 className="font-semibold text-gray-900">Layers</h3>
-                  <div className="flex items-center">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddLayer();
+                      }}
+                      title="Add new layer"
+                      className="h-6 w-6 p-0"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    {/* Show duplicate and delete buttons only when a layer is selected */}
+                    {editorState.selectedLayerId && (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateLayer();
+                          }}
+                          title="Duplicate selected layer"
+                          className="h-6 w-6 p-0"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteLayer();
+                          }}
+                          disabled={currentPage.layers.length <= 1}
+                          title="Delete selected layer"
+                          className="h-6 w-6 p-0"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </>
+                    )}
                     {layersCollapsed ? (
                       <ChevronRight className="w-4 h-4 text-gray-500" />
                     ) : (

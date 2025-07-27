@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronRight,
   Circle,
-  Copy,
   Database,
   Edit2,
   Eye,
@@ -14,9 +13,7 @@ import {
   GripVertical,
   Image,
   Lock,
-  Plus,
   Square,
-  Trash2,
   Triangle,
   Type,
   Unlock,
@@ -33,9 +30,6 @@ export function LayersPanel() {
     project,
     currentPageId,
     editorState,
-    addLayer,
-    deleteLayer,
-    duplicateLayer,
     updateLayerName,
     updateLayerVisibility,
     updateLayerLock,
@@ -53,12 +47,6 @@ export function LayersPanel() {
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
 
   if (!currentPage) return null;
-
-  const handleAddLayer = () => {
-    const layerCount = currentPage.layers.length;
-
-    addLayer(currentPageId!, `Layer ${layerCount + 1}`);
-  };
 
   const handleLayerClick = (layerId: string) => {
     selectLayer(layerId);
@@ -207,18 +195,6 @@ export function LayersPanel() {
     }
   };
 
-  const handleDuplicateSelectedLayer = () => {
-    if (editorState.selectedLayerId) {
-      duplicateLayer(currentPageId!, editorState.selectedLayerId);
-    }
-  };
-
-  const handleDeleteSelectedLayer = () => {
-    if (editorState.selectedLayerId && currentPage.layers.length > 1) {
-      deleteLayer(currentPageId!, editorState.selectedLayerId);
-    }
-  };
-
   // Helper function to get data element display information
   const getDataElementInfo = (element: any) => {
     if (element.type !== "data") return null;
@@ -249,36 +225,6 @@ export function LayersPanel() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-gray-900">Layers</h3>
-          <div className="flex items-center space-x-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDuplicateSelectedLayer}
-              disabled={!editorState.selectedLayerId}
-              title="Duplicate selected layer"
-            >
-              <Copy className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDeleteSelectedLayer}
-              disabled={!editorState.selectedLayerId || currentPage.layers.length <= 1}
-              title="Delete selected layer"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleAddLayer}>
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
       {/* Layers List */}
       <div className="flex-1 overflow-y-auto">
         {/* Render layers in reverse order (top layer first) */}

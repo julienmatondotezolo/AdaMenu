@@ -84,7 +84,6 @@ export function drawHoverBoundingBox({
 
     // Draw text
     ctx.fillStyle = "#ffffff";
-    const alignedTextX = x; // Align text with the rectangle position
 
     ctx.fillText(text, x + textWidth + 4, textY - textHeight + 2);
 
