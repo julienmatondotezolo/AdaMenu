@@ -1,6 +1,8 @@
 export { drawDataElement } from "./drawDataElement";
 export { drawElements } from "./drawElements";
 export { drawImageElement } from "./drawImageElement";
+export { drawPageBackground } from "./drawPageBackground";
 export { drawResizeHandles } from "./drawResizeHandles";
+export { drawSelectionBox } from "./drawSelectionBox";
 export { drawShapeElement } from "./drawShapeElement";
 export { drawTextElement } from "./drawTextElement";
