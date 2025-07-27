@@ -130,10 +130,11 @@ export async function fetchCompleteMenu(): Promise<any> {
     if (responseMenu.ok) {
       return responseMenu.json();
     } else {
-      throw responseMenu;
+      throw new Error(`HTTP error! status: ${responseMenu.status}`);
     }
   } catch (error) {
     console.error("Impossible to fetch complete menu:", error);
+    throw error; // Re-throw the error so it can be handled by the caller
   }
 }
 

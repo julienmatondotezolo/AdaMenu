@@ -50,10 +50,13 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
       try {
         const menuResponse = await fetchCompleteMenu();
 
-        if (menuResponse) {
+        // eslint-disable-next-line no-console
+        console.log('menuResponse:', menuResponse);
+
+        if (menuResponse && Array.isArray(menuResponse)) {
           setMenuData(menuResponse);
         } else {
-          setMenuError("Failed to fetch menu data");
+          setMenuError("Invalid menu data format received");
         }
       } catch (error) {
         console.error("Error fetching menu data:", error);
@@ -78,10 +81,10 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
       try {
         const menuResponse = await fetchCompleteMenu();
 
-        if (menuResponse) {
+        if (menuResponse && Array.isArray(menuResponse)) {
           setMenuData(menuResponse);
         } else {
-          setMenuError("Failed to fetch menu data");
+          setMenuError("Invalid menu data format received");
         }
       } catch (error) {
         console.error("Error refetching menu data:", error);

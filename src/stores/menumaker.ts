@@ -1667,21 +1667,40 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
     // Actions for menu data management
     setMenuData: (categories: Category[]) => {
+      // Check if categories is valid
+      if (!categories || !Array.isArray(categories)) {
+        console.error("Invalid categories data passed to setMenuData:", categories);
+        set({ 
+          menuData: { 
+            ...get().menuData, 
+            categories: [],
+            menuItems: [],
+            isLoaded: true,
+            error: "Invalid menu data format",
+          }, 
+        });
+        return;
+      }
+
       // Flatten all menu items from all subcategories
       const allMenuItems: any[] = [];
 
       categories.forEach(category => {
-        category.subCategories.forEach(subcategory => {
-          subcategory.menuItems.forEach(menuItem => {
-            allMenuItems.push({
-              ...menuItem,
-              categoryId: category.id,
-              categoryName: category.names,
-              subcategoryId: subcategory.id,
-              subcategoryName: subcategory.names,
-            });
+        if (category.subCategories && Array.isArray(category.subCategories)) {
+          category.subCategories.forEach(subcategory => {
+            if (subcategory.menuItems && Array.isArray(subcategory.menuItems)) {
+              subcategory.menuItems.forEach(menuItem => {
+                allMenuItems.push({
+                  ...menuItem,
+                  categoryId: category.id,
+                  categoryName: category.names,
+                  subcategoryId: subcategory.id,
+                  subcategoryName: subcategory.names,
+                });
+              });
+            }
           });
-        });
+        }
       });
 
       set({ 
@@ -1689,7 +1708,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           ...get().menuData, 
           categories, 
           menuItems: allMenuItems,
-          isLoaded: true, 
+          isLoaded: true,
+          error: null, // Clear any previous errors
         }, 
       });
 
