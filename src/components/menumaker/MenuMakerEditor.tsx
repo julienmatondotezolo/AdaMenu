@@ -8,7 +8,6 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
 import { ExportLoader } from "./ExportLoader";
-import { ExportSuccessNotification } from "./ExportSuccessNotification";
 import { MainToolbar } from "./MainToolbar";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { DataPanel } from "./panels/DataPanel";
@@ -415,9 +414,6 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
       {/* Export Loader */}
       <ExportLoader />
-
-      {/* Export Success Notification */}
-      <ExportSuccessNotification />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
+import { toast } from "sonner";
 import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -15,6 +16,7 @@ interface MenuMakerStore {
   editorState: EditorState;
   isExportingPDF: boolean;
   isSaving: boolean;
+  exportProgress: number;
 
   // Shape selector state
   selectedShapeType: ShapeType | null;
@@ -30,6 +32,7 @@ interface MenuMakerStore {
   cleanupOldProjects: () => void;
   updateProjectName: (name: string) => void;
   exportToPDF: () => Promise<void>;
+  setExportProgress: (progress: number) => void;
 
   // Actions for menu data management
   setMenuData: (categories: Category[]) => void;
@@ -157,6 +160,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     editorState: createDefaultEditorState(),
     isExportingPDF: false,
     isSaving: false,
+    exportProgress: 0,
 
     // Shape selector state
     selectedShapeType: null,
@@ -1245,7 +1249,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     },
 
     exportToPDF: async () => {
-      const { project } = get();
+      const { project, setExportProgress } = get();
 
       if (!project) {
         console.warn("No project to export");
@@ -1258,8 +1262,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         return;
       }
 
-      // Set loading state
-      set({ isExportingPDF: true });
+      // Set loading state and reset progress
+      set({ isExportingPDF: true, exportProgress: 0 });
 
       try {
         // Dynamic import to avoid server-side issues
@@ -1281,9 +1285,19 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           floatPrecision: 16,
         });
 
+        // Update progress: PDF initialized
+        setExportProgress(10);
+        await new Promise(resolve => setTimeout(resolve, 100)); // Allow UI to update
+
         // Generate high-quality canvas images for each page
         for (let i = 0; i < project.pages.length; i++) {
           const page = project.pages[i];
+
+          // Update progress based on page processing (10% to 80%)
+          const pageProgress = 10 + (i / project.pages.length) * 70;
+
+          setExportProgress(Math.round(pageProgress));
+          await new Promise(resolve => setTimeout(resolve, 50)); // Allow UI to update
 
           if (i > 0) {
             // Add new page for subsequent pages
@@ -1523,18 +1537,36 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           const imageData = canvas.toDataURL("image/jpeg", 1.0);
 
           pdf.addImage(imageData, "JPEG", 0, 0, page.format.printWidth, page.format.printHeight);
+          
+          // Allow UI to update after processing each page
+          if (i < project.pages.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
         }
+
+        // Update progress: Preparing to save
+        setExportProgress(90);
+        await new Promise(resolve => setTimeout(resolve, 200)); // Allow UI to update
+
+        // Update progress: Complete
+        setExportProgress(100);
+        await new Promise(resolve => setTimeout(resolve, 500)); // Show completion briefly
+
+
 
         // Save the PDF
         const fileName = `${project.name.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_menu.pdf`;
 
         pdf.save(fileName);
+
+        // Show success notification
+        toast.success(`Menu "${project.name}" successfully exported !`);
       } catch (error) {
         console.error("Failed to export PDF:", error);
         alert("Failed to export PDF. Please try again.");
       } finally {
-        // Reset loading state
-        set({ isExportingPDF: false });
+        // Reset loading state and progress
+        set({ isExportingPDF: false, exportProgress: 0 });
       }
     },
 
@@ -1574,6 +1606,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     },
     clearMenuData: () => {
       set({ menuData: { categories: [], menuItems: [], isLoading: false, error: null, isLoaded: false } });
+    },
+
+    setExportProgress: (progress: number) => {
+      set({ exportProgress: Math.max(0, Math.min(100, progress)) });
     },
   })),
 );
