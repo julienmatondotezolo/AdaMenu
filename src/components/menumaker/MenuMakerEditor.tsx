@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable indent */
-import { ChevronDown, ChevronRight, Copy, Plus, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Plus, Trash2, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { fetchCompleteMenu } from "../../_services/ada/adaMenuService";
@@ -24,7 +24,7 @@ interface MenuMakerEditorProps {
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer } =
+  const { project, currentPageId, editorState, saveProject, menuData, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer, isPreviewMode, setPreviewMode } =
     useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -223,29 +223,48 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
   return (
     <div className="flex flex-col h-full bg-gray-100" ref={containerRef}>
-      {/* Top Toolbar */}
-      <div className="flex-shrink-0 border-b border-gray-300 bg-white">
-        <TopNavBar onNewProject={onNewProject} />
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Sidebar - Thumbnails */}
-        {editorState.ui.thumbnailsPanelOpen && (
-          <div className="w-64 flex-shrink-0 border-r border-gray-300 bg-white">
-            <ThumbnailsPanel />
+      {isPreviewMode ? (
+        /* Full Container Preview Mode */
+        <div className="relative w-full h-full bg-gray-100">
+          {/* Exit Preview Button */}
+          <button
+            onClick={() => setPreviewMode(false)}
+            className="absolute top-4 right-4 z-10 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-lg hover:bg-gray-50 flex items-center justify-center transition-colors"
+            title="Exit Preview Mode"
+          >
+            <X className="w-5 h-5 text-gray-600" />
+          </button>
+          
+          {/* Full Container Canvas */}
+          <div className="w-full h-full">
+            <CanvasArea />
           </div>
-        )}
-
-        {/* Canvas Area */}
-        <div className="flex-1 overflow-hidden relative">
-          <CanvasArea />
-          <MainToolbar />
-          <CenterToolbar />
         </div>
+      ) : (
+        <>
+          {/* Top Toolbar */}
+          <div className="flex-shrink-0 border-b border-gray-300 bg-white">
+            <TopNavBar onNewProject={onNewProject} />
+          </div>
 
-        {/* Right Sidebar */}
-        <div className="w-80 flex-shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-hidden">
+          {/* Main Content Area */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Left Sidebar - Thumbnails */}
+            {editorState.ui.thumbnailsPanelOpen && (
+              <div className="w-64 flex-shrink-0 border-r border-gray-300 bg-white">
+                <ThumbnailsPanel />
+              </div>
+            )}
+
+            {/* Canvas Area */}
+            <div className="flex-1 overflow-hidden relative">
+              <CanvasArea />
+              <MainToolbar />
+              <CenterToolbar />
+            </div>
+
+            {/* Right Sidebar */}
+            <div className="w-80 flex-shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto">
             {/* Layers Panel */}
             {editorState.ui.layersPanelOpen && (
@@ -522,6 +541,8 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
           </div>
         </div>
       </div>
+      </>
+      )}
 
       {/* Export Loader */}
       <ExportLoader />

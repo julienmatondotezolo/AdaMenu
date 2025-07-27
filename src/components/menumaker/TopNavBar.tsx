@@ -1,4 +1,4 @@
-import { Check, CheckCircle2, Clock, Download, Edit2, Loader2, Save, X } from "lucide-react";
+import { Check, CheckCircle2, Clock, Download, Edit2, Eye, Loader2, Save, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
@@ -10,8 +10,17 @@ interface ToolbarProps {
 }
 
 export function TopNavBar({ onNewProject }: ToolbarProps) {
-  const { project, saveProject, exportToPDF, isExportingPDF, isSaving, saveSuccess, updateProjectName } =
-    useMenuMakerStore();
+  const {
+    project,
+    saveProject,
+    exportToPDF,
+    isExportingPDF,
+    isSaving,
+    saveSuccess,
+    updateProjectName,
+    isPreviewMode,
+    setPreviewMode,
+  } = useMenuMakerStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
@@ -117,7 +126,18 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
       </div>
 
       {/* Right Section - View Controls */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-4">
+        <div className="w-px h-6 bg-gray-300 mx-2" />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setPreviewMode(true)}
+          title="Enter Preview Mode"
+          disabled={isPreviewMode}
+        >
+          <Eye className="w-4 h-4 mr-1" />
+          Preview
+        </Button>
         <div className="w-px h-6 bg-gray-300 mx-2" />
 
         <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
@@ -128,7 +148,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
           )}
           {isSaving ? "Saving..." : "Save"}
         </Button>
-        <Button variant="outline" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
+        <Button variant="default" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
           {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
           {isExportingPDF ? "Exporting..." : "Export"}
         </Button>

@@ -19,6 +19,10 @@ interface MenuMakerStore {
   exportProgress: number;
   saveSuccess: boolean;
 
+  // Preview state
+  isPreviewMode: boolean;
+  layersLockedBeforePreview: Record<string, boolean>;
+
   // Shape selector state
   selectedShapeType: ShapeType | null;
 
@@ -88,6 +92,10 @@ interface MenuMakerStore {
   toggleThumbnailsPanel: () => void;
   toggleLayersPanel: () => void;
   togglePropertiesPanel: () => void;
+
+  // Actions for preview mode
+  togglePreviewMode: () => void;
+  setPreviewMode: (isPreview: boolean) => void;
 
   // Actions for history (undo/redo)
   undo: () => void;
@@ -166,6 +174,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     isSaving: false,
     exportProgress: 0,
     saveSuccess: false,
+
+    // Preview state
+    isPreviewMode: false,
+    layersLockedBeforePreview: {},
 
     // Shape selector state
     selectedShapeType: null,
@@ -1818,6 +1830,56 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           });
         });
       });
+    },
+
+    // Preview mode actions
+    togglePreviewMode: () => {
+      const { isPreviewMode, setPreviewMode } = get();
+
+      setPreviewMode(!isPreviewMode);
+    },
+
+    setPreviewMode: (isPreview: boolean) => {
+      const { project, updateLayerLock } = get();
+
+      if (!project) return;
+
+      if (isPreview) {
+        // Entering preview mode - save current lock states and lock all layers
+        const lockStates: Record<string, boolean> = {};
+
+        project.pages.forEach(page => {
+          page.layers.forEach(layer => {
+            lockStates[`${page.id}-${layer.id}`] = layer.locked;
+            if (!layer.locked) {
+              updateLayerLock(page.id, layer.id, true);
+            }
+          });
+        });
+
+        set({
+          isPreviewMode: true,
+          layersLockedBeforePreview: lockStates,
+        });
+      } else {
+        // Exiting preview mode - restore previous lock states
+        const { layersLockedBeforePreview } = get();
+
+        project.pages.forEach(page => {
+          page.layers.forEach(layer => {
+            const originalLockState = layersLockedBeforePreview[`${page.id}-${layer.id}`];
+
+            if (originalLockState !== undefined) {
+              updateLayerLock(page.id, layer.id, originalLockState);
+            }
+          });
+        });
+
+        set({
+          isPreviewMode: false,
+          layersLockedBeforePreview: {},
+        });
+      }
     },
   })),
 );
