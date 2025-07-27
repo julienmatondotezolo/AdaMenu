@@ -2,9 +2,11 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import {
+  Check,
   Circle,
   Copy,
   Database,
+  Edit2,
   Eye,
   EyeOff,
   Image,
@@ -15,11 +17,13 @@ import {
   Triangle,
   Type,
   Unlock,
+  X,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../../stores/menumaker";
 import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
 
 export function LayersPanel() {
   const {
@@ -35,6 +39,9 @@ export function LayersPanel() {
     selectLayer,
     selectElements,
   } = useMenuMakerStore();
+
+  const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
 
@@ -60,8 +67,30 @@ export function LayersPanel() {
     updateLayerLock(currentPageId!, layerId, !locked);
   };
 
-  const handleLayerNameChange = (layerId: string, name: string) => {
-    updateLayerName(currentPageId!, layerId, name);
+  const handleStartEditLayerName = (layerId: string, currentName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingLayerId(layerId);
+    setEditingName(currentName);
+  };
+
+  const handleCancelEditLayerName = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingLayerId(null);
+    setEditingName("");
+  };
+
+  const handleSaveLayerName = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (editingName.trim() && editingLayerId) {
+      updateLayerName(currentPageId!, editingLayerId, editingName.trim());
+    }
+    setEditingLayerId(null);
+    setEditingName("");
+  };
+
+  const handleCancelEditLayerNameKeyboard = () => {
+    setEditingLayerId(null);
+    setEditingName("");
   };
 
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
@@ -171,13 +200,55 @@ export function LayersPanel() {
               <div className="flex items-center justify-between">
                 {/* Layer name and info */}
                 <div className="flex-1 min-w-0">
-                  <input
-                    type="text"
-                    value={layer.name}
-                    onChange={(e) => handleLayerNameChange(layer.id, e.target.value)}
-                    onClick={(e) => e.stopPropagation()}
-                    className="w-full text-sm font-medium text-gray-900 bg-transparent border-none outline-none"
-                  />
+                  {editingLayerId === layer.id ? (
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Input
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className="h-6 text-sm font-medium"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveLayerName();
+                          } else if (e.key === "Escape") {
+                            handleCancelEditLayerNameKeyboard();
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSaveLayerName}
+                        className="h-6 w-6 p-0"
+                        title="Save layer name"
+                      >
+                        <Check className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelEditLayerName}
+                        className="h-6 w-6 p-0"
+                        title="Cancel editing"
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-900" title={layer.name}>
+                        {layer.name}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => handleStartEditLayerName(layer.id, layer.name, e)}
+                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Edit layer name"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500">{layer.elements.length} elements</div>
                 </div>
 
