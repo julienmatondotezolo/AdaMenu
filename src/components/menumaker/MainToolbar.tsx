@@ -20,9 +20,9 @@ export function MainToolbar() {
   const tools = [
     { id: "select", icon: MousePointer, label: "Select" },
     { id: "text", icon: Type, label: "Add Text" },
+    { id: "shape", icon: Shapes, label: "Add Shape" },
     { id: "image", icon: Image, label: "Add Image" },
     { id: "data", icon: Database, label: "Add Data" },
-    { id: "shape", icon: Shapes, label: "Add Shape" },
   ] as const;
 
   const handleToolSelect = (toolId: Tool) => {

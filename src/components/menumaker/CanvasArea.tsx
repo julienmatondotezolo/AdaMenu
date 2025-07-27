@@ -1277,8 +1277,8 @@ export function CanvasArea() {
           shapeType: selectedShapeType,
           x: relativeX,
           y: relativeY,
-          width: 500,
-          height: 500,
+          width: selectedShapeType === "rectangle" ? 800 : 500,
+          height: selectedShapeType === "rectangle" ? 200 : 500,
           rotation: 0,
           scaleX: 1,
           scaleY: 1,
@@ -1289,7 +1289,7 @@ export function CanvasArea() {
           fill: "#3B82F6", // Blue fill
           stroke: "#1E40AF", // Darker blue stroke
           strokeWidth: 2,
-          radius: 8, // Default radius for rounded corners
+          radius: 0, // Default radius for rounded corners
         };
 
         const firstLayer = currentPage.layers[0];
