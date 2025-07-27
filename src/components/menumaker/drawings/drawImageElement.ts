@@ -97,9 +97,11 @@ export const drawImageElement = ({
   }
 
   // Draw border
-  ctx.strokeStyle = isSelected ? "#0066cc" : "#ccc";
-  ctx.lineWidth = isSelected ? 2 : 1;
+  ctx.strokeStyle = isSelected ? "#0066cc" : "transparent";
+  ctx.lineWidth = isSelected ? 2 : 0;
+  ctx.setLineDash([4, 4]);
   ctx.strokeRect(x, y, width, height);
+  ctx.setLineDash([]);
 
   // Draw resize handles if selected
   if (isSelected) {
