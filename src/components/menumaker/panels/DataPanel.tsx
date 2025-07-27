@@ -154,7 +154,6 @@ export function DataPanel() {
       dataId: dataConfig.subcategoryId || dataConfig.categoryId || "",
       categoryData: dataConfig.categoryData,
       subcategoryData: dataConfig.subcategoryData,
-      startIndex: dataConfig.startIndex,
     };
 
     // Find the layer containing this element

@@ -24,7 +24,6 @@ export interface DataConfiguration {
   subcategoryId?: string;
   categoryData?: any;
   subcategoryData?: any;
-  startIndex?: number;
 }
 
 export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection }: DataSelectorModalProps) {
@@ -37,7 +36,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>("");
   const [selectedSubcategoryData, setSelectedSubcategoryData] = useState<any>(null);
   const [availableSubcategories, setAvailableSubcategories] = useState<any[]>([]);
-  const [startIndex, setStartIndex] = useState<number>(0);
+
 
   // UI state
   const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Data Type, 2: Category, 3: Subcategory
@@ -115,13 +114,23 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
 
         setSelectedCategoryData(categoryData || null);
         setAvailableSubcategories(categoryData?.subCategories || []);
-      }
-      if (initialSelection.subcategoryId) {
-        setSelectedSubcategory(initialSelection.subcategoryId);
-        const subcategoryData = availableSubcategories.find((sub: any) => sub.id === initialSelection.subcategoryId);
+        
+        // Handle subcategory selection after setting available subcategories
+        if (initialSelection.subcategoryId && categoryData?.subCategories) {
+          const subcategoryData = categoryData.subCategories.find((sub: any) => sub.id === initialSelection.subcategoryId);
 
-        setSelectedSubcategoryData(subcategoryData || null);
+          setSelectedSubcategory(initialSelection.subcategoryId);
+          setSelectedSubcategoryData(subcategoryData || null);
+          
+          // Set step to 3 if we have subcategory selection
+          const option = dataTypeOptions.find((opt) => opt.id === initialSelection.dataType);
+
+          if (option?.requiresSubcategory) {
+            setStep(3);
+          }
+        }
       }
+
     }
   }, [initialSelection, isOpen, categories]);
 
@@ -134,7 +143,6 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
       setSelectedSubcategory("");
       setSelectedSubcategoryData(null);
       setAvailableSubcategories([]);
-      setStartIndex(0);
       setStep(1);
       setIsLoading(false);
     }
@@ -180,7 +188,6 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
       const subcategoryData = availableSubcategories.find((sub: any) => sub.id === subcategoryId);
 
       setSelectedSubcategoryData(subcategoryData || null);
-      setStartIndex(0); // Reset start index when subcategory changes
     },
     [availableSubcategories],
   );
@@ -212,7 +219,6 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         subcategoryId: selectedSubcategory || undefined,
         categoryData: selectedCategoryData,
         subcategoryData: selectedSubcategoryData,
-        startIndex: selectedDataType === "menuitem" ? startIndex : undefined,
       };
 
       if (onConfirm) {
@@ -283,7 +289,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         itemNameLanguage: "en",
         categoryData: config.categoryData,
         subcategoryData: config.subcategoryData,
-        startIndex: config.startIndex,
+
         subcategoryTitleTextFontSize: 58,
         subcategoryTitleTextMarginBottom: 30,
         // Menu item specific defaults
@@ -516,7 +522,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
                         <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
                           <h4 className="text-sm font-medium text-blue-900 mb-2">Menu Items Preview:</h4>
                           <div className="space-y-1 max-h-32 overflow-y-auto">
-                            {subcategory.menuItems.slice(startIndex, startIndex + 5).map((item: any, index: number) => (
+                            {subcategory.menuItems.slice(0, 5).map((item: any, index: number) => (
                               <div key={item.id || index} className="flex items-center justify-between text-xs">
                                 <span className="text-gray-700 truncate flex-1">
                                   {item.names?.en || item.name}
@@ -528,9 +534,9 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
                                 )}
                               </div>
                             ))}
-                            {subcategory.menuItems.length > startIndex + 5 && (
+                            {subcategory.menuItems.length > 5 && (
                               <div className="text-xs text-gray-500 italic">
-                                ...and {subcategory.menuItems.length - startIndex - 5} more items
+                                ...and {subcategory.menuItems.length - 5} more items
                               </div>
                             )}
                           </div>
@@ -543,103 +549,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
             </div>
           )}
 
-          {/* Menu Items Start Index Selection */}
-          {selectedDataType === "menuitem" && selectedSubcategory && selectedSubcategoryData && (
-            <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Menu Display Options</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Choose which menu item to start displaying from (useful for splitting long menus).
-              </p>
-              
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="startIndex" className="block text-sm font-medium text-gray-700 mb-2">
-                    Start from item #{startIndex + 1}
-                  </label>
-                  <div className="flex items-center space-x-4">
-                    <input
-                      type="range"
-                      id="startIndex"
-                      min="0"
-                      max={Math.max(0, (selectedSubcategoryData.menuItems?.length || 1) - 1)}
-                      value={startIndex}
-                      onChange={(e) => setStartIndex(parseInt(e.target.value))}
-                      className="flex-1 h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
-                      style={{
-                        background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(startIndex / Math.max(1, (selectedSubcategoryData.menuItems?.length || 1) - 1)) * 100}%, #dbeafe ${(startIndex / Math.max(1, (selectedSubcategoryData.menuItems?.length || 1) - 1)) * 100}%, #dbeafe 100%)`,
-                      }}
-                    />
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="number"
-                        min="1"
-                        max={selectedSubcategoryData.menuItems?.length || 1}
-                        value={startIndex + 1}
-                        onChange={(e) => setStartIndex(Math.max(0, parseInt(e.target.value) - 1))}
-                        className="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md text-center"
-                      />
-                      <span className="text-sm text-gray-500">
-                        of {selectedSubcategoryData.menuItems?.length || 0}
-                      </span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Preview of selected range */}
-                <div className="text-xs text-gray-600">
-                  <strong>Starting item:</strong> {selectedSubcategoryData.menuItems?.[startIndex]?.names?.en || selectedSubcategoryData.menuItems?.[startIndex]?.name || 'N/A'}
-                </div>
-
-                {/* Quick selection buttons */}
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setStartIndex(0)}
-                    className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                      startIndex === 0 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    From Beginning
-                  </button>
-                  {selectedSubcategoryData.menuItems?.length > 1 && (
-                    <button
-                      onClick={() => setStartIndex(Math.floor((selectedSubcategoryData.menuItems?.length || 0) / 2))}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                        startIndex === Math.floor((selectedSubcategoryData.menuItems?.length || 0) / 2)
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      From Middle
-                    </button>
-                  )}
-                  {selectedSubcategoryData.menuItems?.length > 2 && (
-                    <button
-                      onClick={() => setStartIndex(Math.max(0, (selectedSubcategoryData.menuItems?.length || 0) - 1))}
-                      className={`px-3 py-1 text-xs rounded-full transition-colors ${
-                        startIndex === Math.max(0, (selectedSubcategoryData.menuItems?.length || 0) - 1)
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      From Last
-                    </button>
-                  )}
-                </div>
-
-                {/* Items count info */}
-                <div className="flex items-center justify-between text-xs bg-white rounded-lg p-2 border border-blue-100">
-                  <span className="text-gray-600">
-                    Will display {Math.min(5, Math.max(0, (selectedSubcategoryData.menuItems?.length || 0) - startIndex))} items max
-                  </span>
-                  <span className="text-blue-600 font-medium">
-                    Items {startIndex + 1}-{Math.min(startIndex + 5, selectedSubcategoryData.menuItems?.length || 0)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Footer */}
