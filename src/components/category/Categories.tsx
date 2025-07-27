@@ -8,6 +8,7 @@ import {
   deleteCategory,
   fetchAllergen,
   fetchCategories,
+  fetchCompleteMenu,
   fetchMenuItemByCategoryId,
   fetchSidedish,
   fetchSupplement,
@@ -42,7 +43,7 @@ import { UpdateMenu, UpdateSubCategory } from "./update";
 function Categories() {
   const locale = useLocale();
   const text = useTranslations("Index");
-  const { loadProject } = useMenuMakerStore();
+  const { loadProject, setMenuData, clearMenuData } = useMenuMakerStore();
   const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
@@ -61,13 +62,28 @@ function Categories() {
   const fetchAllCategories = () => fetchCategories();
   const fetchAllAllergen = () => fetchAllergen();
 
-  // Define the mutation for fetching menu items
-  // const { mutate: fetchMenuItems, data: menuItems } = useMutation("menuItems", fetchMenuItemByCategoryId, {
-  //   onSuccess: () => {
-  //     // Store the current subCategory for reference
-  //     queryClient.setQueryData("currentSubCategory", subCategoryId);
-  //   },
-  // });
+  // Listen to all mutations and refetch menu data when any mutation succeeds
+  useEffect(() => {
+    const unsubscribe = queryClient.getMutationCache().subscribe(async (mutation) => {
+      if (mutation?.state?.status === "success") {
+        try {
+          // Clear existing menu data first
+          clearMenuData();
+
+          // Fetch the complete menu and save to store
+          const completeMenu = await fetchCompleteMenu();
+
+          setMenuData(completeMenu);
+          queryClient.invalidateQueries("menuItems");
+        } catch (error) {
+          console.error("Failed to fetch complete menu after mutation:", error);
+        }
+      }
+    });
+
+    // Cleanup subscription on component unmount
+    return unsubscribe;
+  }, [queryClient, clearMenuData, setMenuData]);
 
   // Define the query for fetching menu items based on the selected subCategoryId
   const { data: menuItems } = useQuery(
