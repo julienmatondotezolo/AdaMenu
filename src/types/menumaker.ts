@@ -139,6 +139,13 @@ export interface DataElement extends BaseElement {
   fontWeight?: FontWeight;
   lineSpacing?: number;
   itemNameLanguage?: "en" | "fr" | "it" | "nl";
+  // Category/Subcategory title properties
+  titleLanguage?: "en" | "fr" | "it" | "nl";
+  titleTextColor?: string;
+  titleTextFontSize?: number;
+  titleTextFontFamily?: string;
+  titleTextFontWeight?: FontWeight;
+  titleAlign?: "left" | "center" | "right";
   // Menu item specific properties
   showSubcategoryTitle?: boolean; // Toggle to show/hide subcategory title
   showMenuDescription?: boolean; // Toggle to show/hide menu description
@@ -410,6 +417,15 @@ export const MENU_PROJECT_SCHEMA = {
                       },
                       lineSpacing: { type: "number" },
                       itemNameLanguage: { enum: ["en", "fr", "it", "nl"] },
+                      // Category/Subcategory title properties
+                      titleLanguage: { enum: ["en", "fr", "it", "nl"] },
+                      titleTextColor: { type: "string" },
+                      titleTextFontSize: { type: "number" },
+                      titleTextFontFamily: { type: "string" },
+                      titleTextFontWeight: {
+                        enum: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900"],
+                      },
+                      titleAlign: { enum: ["left", "center", "right"] },
                       // Menu item specific properties
                       showSubcategoryTitle: { type: "boolean" },
                       showMenuDescription: { type: "boolean" },

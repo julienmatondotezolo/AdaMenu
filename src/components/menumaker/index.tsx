@@ -6,6 +6,6 @@ export { MainToolbar } from "./MainToolbar";
 export { MenuMakerEditor } from "./MenuMakerEditor";
 export { PageFormatSelector } from "./PageFormatSelector";
 export { PageThumbnail } from "./PageThumbnail";
+export * from "./panels";
 export { ProjectManager } from "./ProjectManager";
 export { TopNavBar } from "./TopNavBar";
-export * from "./panels";

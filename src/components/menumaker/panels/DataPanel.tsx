@@ -37,6 +37,16 @@ export function DataPanel() {
   const [elementWidth, setElementWidth] = useState(200);
   const [elementHeight, setElementHeight] = useState(100);
 
+  // Category/Subcategory title properties
+  const [titleLanguage, setTitleLanguage] = useState<"en" | "fr" | "it" | "nl">("en");
+  const [titleTextColor, setTitleTextColor] = useState("#000000");
+  const [titleTextFontSize, setTitleTextFontSize] = useState(48);
+  const [titleTextFontFamily, setTitleTextFontFamily] = useState("Arial, sans-serif");
+  const [titleTextFontWeight, setTitleTextFontWeight] = useState<
+    "normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  >("normal");
+  const [titleAlign, setTitleAlign] = useState<"left" | "center" | "right">("left");
+
   // Menu item specific properties
   const [showSubcategoryTitle, setShowSubcategoryTitle] = useState(true);
   const [showMenuDescription, setShowMenuDescription] = useState(false);
@@ -168,7 +178,7 @@ export function DataPanel() {
       setElementWidth(Math.round(selectedDataElement.width || 200));
       setElementHeight(Math.round(selectedDataElement.height || 100));
       setBackgroundColor(selectedDataElement.backgroundColor || "#ffffff");
-      setBackgroundOpacity(selectedDataElement.backgroundOpacity || 1);
+      setBackgroundOpacity(selectedDataElement.backgroundOpacity || 0);
       setBorderColor(selectedDataElement.borderColor || "#000000");
       setBorderSize(selectedDataElement.borderSize || 0);
       setBorderType(selectedDataElement.borderType || "solid");
@@ -179,6 +189,14 @@ export function DataPanel() {
       setFontWeight(selectedDataElement.fontWeight || "normal");
       setLineSpacing(selectedDataElement.lineSpacing || 1.2);
       setItemNameLanguage(selectedDataElement.itemNameLanguage || "en");
+
+      // Category/Subcategory title properties
+      setTitleLanguage(selectedDataElement.titleLanguage || "en");
+      setTitleTextColor(selectedDataElement.titleTextColor || "#000000");
+      setTitleTextFontSize(selectedDataElement.titleTextFontSize || 48);
+      setTitleTextFontFamily(selectedDataElement.titleTextFontFamily || "Arial, sans-serif");
+      setTitleTextFontWeight(selectedDataElement.titleTextFontWeight || "normal");
+      setTitleAlign(selectedDataElement.titleAlign || "left");
 
       // Menu item specific properties
       setShowSubcategoryTitle(selectedDataElement.showSubcategoryTitle !== false); // Default to true
@@ -259,6 +277,12 @@ export function DataPanel() {
     fontWeight,
     lineSpacing,
     itemNameLanguage,
+    titleLanguage,
+    titleTextColor,
+    titleTextFontSize,
+    titleTextFontFamily,
+    titleTextFontWeight,
+    titleAlign,
     showSubcategoryTitle,
     showMenuDescription,
     showPrice,
@@ -322,6 +346,17 @@ export function DataPanel() {
       fontWeight,
       lineSpacing,
       itemNameLanguage,
+      // Category/Subcategory title properties
+      titleLanguage: selectedDataType === "category" || selectedDataType === "subcategory" ? titleLanguage : undefined,
+      titleTextColor:
+        selectedDataType === "category" || selectedDataType === "subcategory" ? titleTextColor : undefined,
+      titleTextFontSize:
+        selectedDataType === "category" || selectedDataType === "subcategory" ? titleTextFontSize : undefined,
+      titleTextFontFamily:
+        selectedDataType === "category" || selectedDataType === "subcategory" ? titleTextFontFamily : undefined,
+      titleTextFontWeight:
+        selectedDataType === "category" || selectedDataType === "subcategory" ? titleTextFontWeight : undefined,
+      titleAlign: selectedDataType === "category" || selectedDataType === "subcategory" ? titleAlign : undefined,
       // Menu item specific properties
       showSubcategoryTitle: selectedDataType === "menuitem" ? showSubcategoryTitle : undefined,
       showMenuDescription: selectedDataType === "menuitem" ? showMenuDescription : undefined,
@@ -490,11 +525,139 @@ export function DataPanel() {
           </div>
         </div>
 
+        {/* Category/Subcategory Title Properties (only if category or subcategory is selected) */}
+        {(selectedDataType === "category" || selectedDataType === "subcategory") && (
+          <div className="border-t pt-4">
+            <h4 className="font-medium text-gray-900 mb-3">
+              {selectedDataType === "category" ? "Category" : "Subcategory"} Title Properties
+            </h4>
+
+            {/* Title Language */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Language</Label>
+              <select
+                value={titleLanguage}
+                onChange={(e) => setTitleLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
+                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+                <option value="it">Italiano</option>
+                <option value="nl">Nederlands</option>
+              </select>
+            </div>
+
+            {/* Title Color */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Color</Label>
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  type="color"
+                  value={titleTextColor}
+                  onChange={(e) => setTitleTextColor(e.target.value)}
+                  className="h-8 w-16 rounded border border-gray-300"
+                />
+                <input
+                  type="text"
+                  value={titleTextColor}
+                  onChange={(e) => setTitleTextColor(e.target.value)}
+                  className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                />
+              </div>
+            </div>
+
+            {/* Title Font Size */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Font Size</Label>
+              <input
+                type="range"
+                min="12"
+                max="120"
+                value={titleTextFontSize}
+                onChange={(e) => setTitleTextFontSize(Number(e.target.value))}
+                className="w-full mt-1"
+              />
+              <div className="text-xs text-gray-500 text-right">{titleTextFontSize}px</div>
+            </div>
+
+            {/* Title Font Family */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Font Family</Label>
+              <select
+                value={titleTextFontFamily}
+                onChange={(e) => setTitleTextFontFamily(e.target.value)}
+                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="Poppins, sans-serif">Poppins</option>
+                <option value="Arial, sans-serif">Arial</option>
+                <option value="Helvetica, sans-serif">Helvetica</option>
+                <option value="Times New Roman, serif">Times New Roman</option>
+                <option value="Georgia, serif">Georgia</option>
+                <option value="Verdana, sans-serif">Verdana</option>
+                <option value="Tahoma, sans-serif">Tahoma</option>
+                <option value="Trebuchet MS, sans-serif">Trebuchet MS</option>
+                <option value="Impact, sans-serif">Impact</option>
+                <option value="Comic Sans MS, cursive">Comic Sans MS</option>
+                <option value="Courier New, monospace">Courier New</option>
+              </select>
+            </div>
+
+            {/* Title Font Weight */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Font Weight</Label>
+              <select
+                value={titleTextFontWeight}
+                onChange={(e) =>
+                  setTitleTextFontWeight(
+                    e.target.value as
+                      | "normal"
+                      | "bold"
+                      | "100"
+                      | "200"
+                      | "300"
+                      | "400"
+                      | "500"
+                      | "600"
+                      | "700"
+                      | "800"
+                      | "900",
+                  )
+                }
+                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="normal">Normal</option>
+                <option value="bold">Bold</option>
+                <option value="100">100 - Thin</option>
+                <option value="200">200 - Extra Light</option>
+                <option value="300">300 - Light</option>
+                <option value="400">400 - Normal</option>
+                <option value="500">500 - Medium</option>
+                <option value="600">600 - Semi Bold</option>
+                <option value="700">700 - Bold</option>
+                <option value="800">800 - Extra Bold</option>
+                <option value="900">900 - Black</option>
+              </select>
+            </div>
+
+            {/* Title Alignment */}
+            <div className="mb-3">
+              <Label className="text-sm font-medium">Title Alignment</Label>
+              <select
+                value={titleAlign}
+                onChange={(e) => setTitleAlign(e.target.value as "left" | "center" | "right")}
+                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {/* Menu Item Properties (only if menuitem is selected) */}
         {selectedDataType === "menuitem" && (
           <div className="border-t pt-4">
-            <h4 className="font-medium text-gray-900 mb-3">Menu Item Options</h4>
-
             {/* Menu items text properties */}
             <div className="border-b pb-4 mb-4 space-y-4">
               {/* Menu Item Title */}

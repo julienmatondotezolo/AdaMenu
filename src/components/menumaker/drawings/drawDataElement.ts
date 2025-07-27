@@ -73,23 +73,39 @@ export const drawDataElement = ({
   }
 
   // Draw data content
-  ctx.fillStyle = element.textColor || "#333";
-  const fontSize = (element.fontSize || 64) * canvas.zoom;
+  let displayText = "";
+  let textColor = element.textColor || "#333";
+  let fontSize = (element.fontSize || 64) * canvas.zoom;
+  let fontFamily = "Arial";
+  let fontWeight = "normal";
+  let textAlign: "left" | "center" | "right" = "left";
 
-  ctx.font = `${fontSize}px Arial`;
-  ctx.textAlign = "left";
+  // Use title properties for category and subcategory
+  if (element.dataType === "category" || element.dataType === "subcategory") {
+    textColor = element.titleTextColor || element.textColor || "#333";
+    fontSize = (element.titleTextFontSize || element.fontSize || 48) * canvas.zoom;
+    fontFamily = element.titleTextFontFamily || "Arial, sans-serif";
+    fontWeight = element.titleTextFontWeight || "normal";
+    textAlign = element.titleAlign || "left";
+  }
+
+  ctx.fillStyle = textColor;
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+  ctx.textAlign = textAlign;
   ctx.textBaseline = "top";
 
-  let displayText = "";
-
   if (element.dataType === "category" && element.categoryData) {
-    // Show the actual category name
-    displayText = element.categoryData.names?.en || element.categoryData.name || "Select category";
+    // Show the actual category name in the selected language
+    const lang = element.titleLanguage || element.itemNameLanguage || "en";
+
+    displayText = element.categoryData.names?.[lang] || element.categoryData.name || "Select category";
   } else if (element.dataType === "category" && element.dataId) {
     displayText = "Select category";
   } else if (element.dataType === "subcategory" && element.subcategoryData) {
-    // Show the actual subcategory name
-    displayText = element.subcategoryData.names?.en || element.subcategoryData.name || "Select subcategory";
+    // Show the actual subcategory name in the selected language
+    const lang = element.titleLanguage || element.itemNameLanguage || "en";
+
+    displayText = element.subcategoryData.names?.[lang] || element.subcategoryData.name || "Select subcategory";
   } else if (element.dataType === "subcategory" && element.dataId) {
     displayText = "Select subcategory";
   } else if (element.dataType === "menuitem" && element.subcategoryData) {
@@ -112,11 +128,19 @@ export const drawDataElement = ({
     displayText = element.dataType ? element.dataType.toUpperCase() : "DATA";
   }
 
-  // Position text at top-left with some padding (only if we have displayText)
+  // Position text with alignment and padding (only if we have displayText)
   if (displayText) {
     const padding = 10 * canvas.zoom;
+    let textX = x + padding;
 
-    ctx.fillText(displayText, x + padding, y + padding);
+    // Adjust X position based on alignment
+    if (textAlign === "center") {
+      textX = x + width / 2;
+    } else if (textAlign === "right") {
+      textX = x + width - padding;
+    }
+
+    ctx.fillText(displayText, textX, y + padding);
   }
 
   // Draw selection border and resize handles if selected
