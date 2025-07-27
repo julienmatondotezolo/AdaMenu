@@ -1,5 +1,6 @@
 export { drawDataElement } from "./drawDataElement";
 export { drawElements } from "./drawElements";
+export { drawHoverBoundingBox } from "./drawHoverBoundingBox";
 export { drawImageElement } from "./drawImageElement";
 export { drawPageBackground } from "./drawPageBackground";
 export { drawResizeHandles } from "./drawResizeHandles";

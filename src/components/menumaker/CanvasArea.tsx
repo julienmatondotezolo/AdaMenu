@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { ShapeElement, TextElement } from "../../types/menumaker";
-import { drawElements, drawPageBackground, drawSelectionBox } from "./drawings";
+import { drawElements, drawHoverBoundingBox, drawPageBackground, drawSelectionBox } from "./drawings";
 import { drawShapeElement } from "./drawings/drawShapeElement";
 import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";
 
@@ -312,7 +312,15 @@ export function CanvasArea() {
 
     // Draw hover bounding box for text elements when in text mode
     if (hoveredElementId && !editorState.selectedElementIds.includes(hoveredElementId) && tool === "select") {
-      drawHoverBoundingBox(ctx, hoveredElementId);
+      drawHoverBoundingBox({
+        ctx,
+        elementId: hoveredElementId,
+        currentPage,
+        tempElementPositions,
+        tempElementDimensions,
+        pageOffset,
+        canvas,
+      });
     }
 
     // Draw snap guidelines
@@ -538,45 +546,6 @@ export function CanvasArea() {
 
     // Default cursor for other tools (image, data, etc.)
     return "crosshair";
-  };
-
-  const drawHoverBoundingBox = (ctx: CanvasRenderingContext2D, elementId: string) => {
-    if (!currentPage) return;
-
-    // Find the hovered element
-    let hoveredElement = null;
-
-    for (const layer of currentPage.layers) {
-      const element = layer.elements.find((el) => el.id === elementId);
-
-      if (element) {
-        hoveredElement = element;
-        break;
-      }
-    }
-
-    if (!hoveredElement) return;
-
-    // Use temporary position/dimensions if dragging/resizing, otherwise use element values
-    const tempPos = tempElementPositions[hoveredElement.id];
-    const tempDim = tempElementDimensions[hoveredElement.id];
-
-    const elementX = tempDim?.x !== undefined ? tempDim.x : tempPos ? tempPos.x : hoveredElement.x;
-    const elementY = tempDim?.y !== undefined ? tempDim.y : tempPos ? tempPos.y : hoveredElement.y;
-    const elementWidth = tempDim ? tempDim.width : hoveredElement.width;
-    const elementHeight = tempDim ? tempDim.height : hoveredElement.height;
-
-    const x = pageOffset.x + elementX * canvas.zoom;
-    const y = pageOffset.y + elementY * canvas.zoom;
-    const width = elementWidth * canvas.zoom;
-    const height = elementHeight * canvas.zoom;
-
-    // Draw hover bounding box using element dimensions
-    ctx.strokeStyle = "#ff6b35";
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.strokeRect(x, y, width, height);
-    ctx.setLineDash([]);
   };
 
   const getTextElementAtPosition = (mouseX: number, mouseY: number): string | null => {
