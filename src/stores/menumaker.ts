@@ -34,6 +34,8 @@ interface MenuMakerStore {
   updateProjectName: (name: string) => void;
   exportToPDF: () => Promise<void>;
   setExportProgress: (progress: number) => void;
+  getAllProjects: () => MenuProject[];
+  loadFirstProject: () => boolean;
 
   // Actions for menu data management
   setMenuData: (categories: Category[]) => void;
@@ -355,6 +357,46 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
         set({ project: updatedProject });
       }
+    },
+
+    getAllProjects: () => {
+      const projects: MenuProject[] = [];
+
+      // Iterate through localStorage to find menu maker projects
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+
+        if (key && key.startsWith("menumaker_project_")) {
+          try {
+            const projectData = localStorage.getItem(key);
+
+            if (projectData) {
+              const project: MenuProject = JSON.parse(projectData);
+
+              projects.push(project);
+            }
+          } catch (error) {
+            console.warn(`Failed to load project from key ${key}:`, error);
+          }
+        }
+      }
+
+      // Sort by most recently updated
+      projects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+      return projects;
+    },
+
+    loadFirstProject: () => {
+      const projects = get().getAllProjects();
+
+      if (projects.length > 0) {
+        const firstProject = projects[0];
+
+        get().loadProject(firstProject);
+        return true;
+      }
+
+      return false;
     },
 
     addPage: (format?: string) => {
@@ -1656,12 +1698,32 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
     // Actions for menu data management
     setMenuData: (categories: Category[]) => {
+      // Validate categories input
+      if (!categories || !Array.isArray(categories)) {
+        console.warn('setMenuData: invalid categories data provided');
+        set({ 
+          menuData: { 
+            ...get().menuData, 
+            categories: [], 
+            menuItems: [],
+            isLoaded: false, 
+          }, 
+        });
+        return;
+      }
+
       // Flatten all menu items from all subcategories
       const allMenuItems: any[] = [];
 
       categories.forEach(category => {
-        category.subCategories.forEach(subcategory => {
-          subcategory.menuItems.forEach(menuItem => {
+        // Ensure category has subCategories array
+        const subCategories = category.subCategories || [];
+
+        subCategories.forEach(subcategory => {
+          // Ensure subcategory has menuItems array
+          const menuItems = subcategory.menuItems || [];
+
+          menuItems.forEach(menuItem => {
             allMenuItems.push({
               ...menuItem,
               categoryId: category.id,

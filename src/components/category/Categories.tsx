@@ -33,6 +33,7 @@ import {
 import CategoryItem from "./CategoryItem";
 import { CreateCategory, CreateMenu } from "./create";
 import { MenuItem } from "./MenuItem";
+import { MenuPreview } from "./MenuPreview";
 import { SubCategories } from "./SubCategories";
 import { UpdateMenu, UpdateSubCategory } from "./update";
 
@@ -255,7 +256,7 @@ function Categories() {
 
   return (
     <>
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-full relative">
         {/* Left sidebar with fixed header and scrollable categories */}
         <div className="h-full w-1/4 flex flex-col border-r-2 dark:border-gray-800">
           {/* Fixed header */}
@@ -537,6 +538,9 @@ function Categories() {
             </>
           )}
         </div>
+
+        {/* Menu Preview Panel */}
+        <MenuPreview categories={categories} selectedCategoryId={categoryId} selectedSubCategoryId={subCategoryId} />
       </div>
 
       {/* Delete Confirmation Modal */}
