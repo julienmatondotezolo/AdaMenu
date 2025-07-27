@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -38,6 +39,7 @@ export function LayersPanel() {
     reorderLayers,
     setHoveredElement,
     moveElement,
+    reorderElements,
   } = useMenuMakerStore();
 
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
@@ -48,6 +50,13 @@ export function LayersPanel() {
   const [draggedElementId, setDraggedElementId] = useState<string | null>(null);
   const [draggedFromLayerId, setDraggedFromLayerId] = useState<string | null>(null);
   const [dropTargetLayerId, setDropTargetLayerId] = useState<string | null>(null);
+
+  // New state for element reordering within the same layer
+  const [elementDropPosition, setElementDropPosition] = useState<{
+    layerId: string;
+    position: number;
+    isInSameLayer: boolean;
+  } | null>(null);
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
 
@@ -226,6 +235,7 @@ export function LayersPanel() {
     setDraggedElementId(null);
     setDraggedFromLayerId(null);
     setDropTargetLayerId(null);
+    setElementDropPosition(null);
   };
 
   const handleLayerDragOver = (e: React.DragEvent, layerId: string) => {
@@ -236,6 +246,7 @@ export function LayersPanel() {
     if (draggedElementId && draggedFromLayerId !== layerId) {
       e.dataTransfer.dropEffect = "move";
       setDropTargetLayerId(layerId);
+      setElementDropPosition(null); // Clear element drop position when hovering over different layer
     }
   };
 
@@ -247,6 +258,7 @@ export function LayersPanel() {
 
     if (clientX < rect.left || clientX > rect.right || clientY < rect.top || clientY > rect.bottom) {
       setDropTargetLayerId(null);
+      setElementDropPosition(null);
     }
   };
 
@@ -254,15 +266,89 @@ export function LayersPanel() {
     e.preventDefault();
     e.stopPropagation();
 
-    if (draggedElementId && draggedFromLayerId && currentPageId && draggedFromLayerId !== targetLayerId) {
-      // Move the element to the target layer
-      moveElement(currentPageId, draggedFromLayerId, targetLayerId, draggedElementId);
+    if (draggedElementId && draggedFromLayerId && currentPageId) {
+      if (draggedFromLayerId !== targetLayerId) {
+        // Move the element to the target layer
+        moveElement(currentPageId, draggedFromLayerId, targetLayerId, draggedElementId);
+      } else if (elementDropPosition && elementDropPosition.isInSameLayer) {
+        // Reorder elements within the same layer
+        const sourceLayer = currentPage.layers.find((layer) => layer.id === draggedFromLayerId);
+
+        if (sourceLayer) {
+          const elementIndex = sourceLayer.elements.findIndex((el) => el.id === draggedElementId);
+
+          if (elementIndex !== -1 && elementIndex !== elementDropPosition.position) {
+            reorderElements(currentPageId, draggedFromLayerId, elementIndex, elementDropPosition.position);
+          }
+        }
+      }
     }
 
     // Clear drag state
     setDraggedElementId(null);
     setDraggedFromLayerId(null);
     setDropTargetLayerId(null);
+    setElementDropPosition(null);
+  };
+
+  // New handlers for element reordering within the same layer
+  const handleElementDragOver = (
+    e: React.DragEvent,
+    layerId: string,
+    elementIndex: number,
+    position: "above" | "below",
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedElementId && draggedFromLayerId === layerId) {
+      e.dataTransfer.dropEffect = "move";
+
+      let targetIndex = elementIndex;
+
+      if (position === "below") {
+        targetIndex = elementIndex + 1;
+      }
+
+      setElementDropPosition({
+        layerId,
+        position: targetIndex,
+        isInSameLayer: true,
+      });
+      setDropTargetLayerId(null); // Clear layer drop target
+    }
+  };
+
+  const handleElementDropZoneDrop = (e: React.DragEvent, layerId: string, targetIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedElementId && draggedFromLayerId === layerId && currentPageId) {
+      const sourceLayer = currentPage.layers.find((layer) => layer.id === layerId);
+
+      if (sourceLayer) {
+        const elementIndex = sourceLayer.elements.findIndex((el) => el.id === draggedElementId);
+
+        if (elementIndex !== -1) {
+          // Adjust target index if dragging from above
+          let adjustedTargetIndex = targetIndex;
+
+          if (elementIndex < targetIndex) {
+            adjustedTargetIndex = targetIndex - 1;
+          }
+
+          if (elementIndex !== adjustedTargetIndex) {
+            reorderElements(currentPageId, layerId, elementIndex, adjustedTargetIndex);
+          }
+        }
+      }
+    }
+
+    // Clear drag state
+    setDraggedElementId(null);
+    setDraggedFromLayerId(null);
+    setDropTargetLayerId(null);
+    setElementDropPosition(null);
   };
 
   // Helper function to get data element display information
@@ -460,81 +546,117 @@ export function LayersPanel() {
 
                 {/* Elements list - only show when not collapsed */}
                 {layer.elements.length > 0 && !collapsedLayers.has(layer.id) && (
-                  <div className="mt-2 ml-6 space-y-1">
-                    {layer.elements.map((element) => (
-                      <div
-                        key={element.id}
-                        className={`text-xs p-1 rounded transition-colors cursor-pointer ${layer.locked ? "opacity-25" : ""} ${
-                          editorState.selectedElementIds.includes(element.id)
-                            ? "bg-blue-200 text-blue-900 font-semibold"
-                            : "text-gray-600 hover:bg-blue-200"
-                        } ${draggedElementId === element.id ? "opacity-50" : ""}`}
-                        draggable={!layer.locked}
-                        onClick={(e) => handleElementClick(element.id, layer.locked, e)}
-                        onMouseEnter={() => {
-                          if (layer.locked) return;
-                          setHoveredElement(element.id);
-                        }}
-                        onMouseLeave={() => {
-                          if (layer.locked) return;
-                          setHoveredElement(null);
-                        }}
-                        onDragStart={(e) => !layer.locked && handleElementDragStart(e, element.id, layer.id)}
-                        onDragEnd={handleElementDragEnd}
-                        title={
-                          layer.locked ? "Element in locked layer" : "Click to select, drag to move to another layer"
-                        }
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1">
-                            {element.type === "data" && <Database className="w-3 h-3 text-blue-600" />}
-                            {element.type === "text" && <Type className="w-3 h-3 text-green-600" />}
-                            {element.type === "image" && <Image className="w-3 h-3 text-purple-600" />}
-                            {element.type === "shape" &&
-                              (() => {
-                                const shapeElement = element as any;
-                                const IconComponent =
-                                  shapeElement.shapeType === "rectangle"
-                                    ? Square
-                                    : shapeElement.shapeType === "circle"
-                                      ? Circle
-                                      : shapeElement.shapeType === "triangle"
-                                        ? Triangle
-                                        : Square;
+                  <div className="mt-2 ml-6">
+                    {layer.elements.map((element, index) => (
+                      <div key={element.id} className="relative">
+                        {/* Drop indicator above element */}
+                        {elementDropPosition?.layerId === layer.id &&
+                          elementDropPosition.position === index &&
+                          draggedElementId &&
+                          draggedFromLayerId === layer.id && (
+                          <div className="absolute -top-1 left-0 right-0 z-10">
+                            <div className="bg-blue-500 h-0.5 mx-2">
+                              <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded absolute -top-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                                  Drop here
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
-                                return (
-                                  <IconComponent
-                                    className="w-3 h-3"
-                                    style={{ color: shapeElement.fill || "#3B82F6" }}
-                                  />
-                                );
-                              })()}
-                            <span className="capitalize">
-                              {element.type === "data" ? (
+                        <div
+                          className={`text-xs p-1 rounded transition-colors cursor-pointer mb-1 ${layer.locked ? "opacity-25" : ""} ${
+                            editorState.selectedElementIds.includes(element.id)
+                              ? "bg-blue-200 text-blue-900 font-semibold"
+                              : "text-gray-600 hover:bg-blue-200"
+                          } ${draggedElementId === element.id ? "opacity-50" : ""}`}
+                          draggable={!layer.locked}
+                          onClick={(e) => handleElementClick(element.id, layer.locked, e)}
+                          onMouseEnter={() => {
+                            if (layer.locked) return;
+                            setHoveredElement(element.id);
+                          }}
+                          onMouseLeave={() => {
+                            if (layer.locked) return;
+                            setHoveredElement(null);
+                          }}
+                          onDragStart={(e) => !layer.locked && handleElementDragStart(e, element.id, layer.id)}
+                          onDragEnd={handleElementDragEnd}
+                          onDragOver={(e) => handleElementDragOver(e, layer.id, index, "above")}
+                          onDragLeave={() => {
+                            if (draggedElementId && draggedFromLayerId === layer.id) {
+                              setElementDropPosition(null);
+                            }
+                          }}
+                          onDrop={(e) => handleElementDropZoneDrop(e, layer.id, index)}
+                          title={
+                            layer.locked ? "Element in locked layer" : "Click to select, drag to move to another layer"
+                          }
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-1">
+                              {element.type === "data" && <Database className="w-3 h-3 text-blue-600" />}
+                              {element.type === "text" && <Type className="w-3 h-3 text-green-600" />}
+                              {element.type === "image" && <Image className="w-3 h-3 text-purple-600" />}
+                              {element.type === "shape" &&
                                 (() => {
-                                  const dataInfo = getDataElementInfo(element);
+                                  const shapeElement = element as any;
+                                  const IconComponent =
+                                    shapeElement.shapeType === "rectangle"
+                                      ? Square
+                                      : shapeElement.shapeType === "circle"
+                                        ? Circle
+                                        : shapeElement.shapeType === "triangle"
+                                          ? Triangle
+                                          : Square;
 
-                                  return dataInfo ? `"${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
-                                })()
-                              ) : element.type === "text" ? (
-                                <>
-                                  {element.content
-                                    ? `${element.content.length > 20 ? element.content.slice(0, 20) + "..." : element.content}`
-                                    : ""}
-                                </>
-                              ) : element.type === "image" ? (
-                                element.fileName
-                              ) : element.type === "shape" ? (
-                                (element as any).shapeType
-                              ) : (
-                                element.type
-                              )}
+                                  return (
+                                    <IconComponent
+                                      className="w-3 h-3"
+                                      style={{ color: shapeElement.fill || "#3B82F6" }}
+                                    />
+                                  );
+                                })()}
+                              <span className="capitalize">
+                                {element.type === "data" ? (
+                                  (() => {
+                                    const dataInfo = getDataElementInfo(element);
+
+                                    return dataInfo ? `"${dataInfo.dataType}" - ${dataInfo.value}` : "Data";
+                                  })()
+                                ) : element.type === "text" ? (
+                                  <>
+                                    {element.content
+                                      ? `${element.content.length > 20 ? element.content.slice(0, 20) + "..." : element.content}`
+                                      : ""}
+                                  </>
+                                ) : element.type === "image" ? (
+                                  element.fileName
+                                ) : element.type === "shape" ? (
+                                  (element as any).shapeType
+                                ) : (
+                                  element.type
+                                )}
+                              </span>
+                            </div>
+                            <span className="text-gray-400">
+                              {Math.round(element.x)}, {Math.round(element.y)}
                             </span>
                           </div>
-                          <span className="text-gray-400">
-                            {Math.round(element.x)}, {Math.round(element.y)}
-                          </span>
                         </div>
+
+                        {/* Drop indicator below element (for dropping at the end) */}
+                        {elementDropPosition?.layerId === layer.id &&
+                          elementDropPosition.position === index + 1 &&
+                          draggedElementId &&
+                          draggedFromLayerId === layer.id && (
+                          <div className="absolute -bottom-1 left-0 right-0 z-10">
+                            <div className="bg-blue-500 h-0.5 mx-2">
+                              <div className="bg-blue-500 text-white text-xs px-2 py-1 rounded absolute -bottom-3 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                                  Drop here
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
