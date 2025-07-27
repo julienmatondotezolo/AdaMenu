@@ -791,16 +791,44 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
       if (project) {
         const newElementId = generateId();
-        const newElement = { ...element, id: newElementId } as MenuElement;
+        const newElement: MenuElement = { ...element, id: newElementId } as MenuElement;
+
+        let targetLayerId = layerId;
+        let needsNewLayer = false;
 
         const updatedPages = project.pages.map((page) => {
           if (page.id === pageId) {
+            // Find the target layer
+            const targetLayer = page.layers.find(layer => layer.id === layerId);
+            
+            // If target layer is locked or hidden, find first unlocked and visible layer
+            if (targetLayer?.locked || !targetLayer?.visible) {
+              const availableLayer = page.layers.find(layer => !layer.locked && layer.visible);
+
+              if (availableLayer) {
+                targetLayerId = availableLayer.id;
+              } else {
+                // All layers are locked or hidden, we need to create a new layer
+                needsNewLayer = true;
+              }
+            }
+
+            let updatedLayers = [...page.layers];
+
+            // Create new layer if needed
+            if (needsNewLayer) {
+              const newLayer = createDefaultLayer(`Layer ${page.layers.length + 1}`);
+
+              updatedLayers.push(newLayer);
+              targetLayerId = newLayer.id;
+            }
+
             return {
               ...page,
-              layers: page.layers.map((layer) =>
-                layer.id === layerId ? { ...layer, elements: [...layer.elements, newElement] } : layer,
-              ),
-            };
+              layers: updatedLayers.map((layer) =>
+                layer.id === targetLayerId ? { ...layer, elements: [...layer.elements, newElement] } : layer,
+              ) as Layer[],
+            } as MenuPage;
           }
           return page;
         });
