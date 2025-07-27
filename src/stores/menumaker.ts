@@ -232,8 +232,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         // Set saving state to true and reset success state
         set({ isSaving: true, saveSuccess: false });
 
-        // Simulate 2 seconds of saving time
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Simulate 1 seconds of saving time
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const updatedProject = {
           ...project,
@@ -246,10 +246,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           // Show success state
           set({ project: updatedProject, isSaving: false, saveSuccess: true });
           
-          // Hide success state after 3 seconds
+          // Hide success state after 2 seconds
           setTimeout(() => {
             set({ saveSuccess: false });
-          }, 3000);
+          }, 2000);
           
         } catch (error) {
           if (error instanceof DOMException && error.name === 'QuotaExceededError') {
