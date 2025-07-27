@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 
@@ -8,9 +8,10 @@ interface PreviewModeProps {
 }
 
 export function PreviewMode({ onExit }: PreviewModeProps) {
-  const { generatePreviewImages } = useMenuMakerStore();
+  const { generatePreviewImages, project, currentPageId } = useMenuMakerStore();
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
+  const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   // Generate preview images when component mounts
   useEffect(() => {
@@ -32,6 +33,24 @@ export function PreviewMode({ onExit }: PreviewModeProps) {
 
     generateImages();
   }, [generatePreviewImages]);
+
+  // Scroll to current page when preview images are loaded
+  useEffect(() => {
+    if (previewImages.length > 0 && project && currentPageId) {
+      // Find the index of the current page
+      const currentPageIndex = project.pages.findIndex((page) => page.id === currentPageId);
+
+      if (currentPageIndex !== -1 && pageRefs.current[currentPageIndex]) {
+        // Small delay to ensure images are rendered
+        setTimeout(() => {
+          pageRefs.current[currentPageIndex]?.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 100);
+      }
+    }
+  }, [previewImages, project, currentPageId]);
 
   return (
     <div className="relative w-full h-full bg-gray-100">
@@ -59,11 +78,26 @@ export function PreviewMode({ onExit }: PreviewModeProps) {
           <div className="flex flex-col items-center space-y-6 p-6 pt-20 relative">
             {/* Pages */}
             {previewImages.map((imageData, index) => (
-              <div key={index} className="relative max-w-full">
+              <div
+                key={index}
+                ref={(el) => {
+                  pageRefs.current[index] = el;
+                }}
+                className="relative max-w-full"
+              >
                 {/* Page Number Badge */}
                 <div className="absolute -top-3 left-4 z-10">
-                  <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-md">
+                  <span
+                    className={`${
+                      project && currentPageId && project.pages[index]?.id === currentPageId
+                        ? "bg-green-600"
+                        : "bg-blue-600"
+                    } text-white text-xs font-medium px-2 py-1 rounded-full shadow-md`}
+                  >
                     Page {index + 1}
+                    {project && currentPageId && project.pages[index]?.id === currentPageId && (
+                      <span className="ml-1">•</span>
+                    )}
                   </span>
                 </div>
 
