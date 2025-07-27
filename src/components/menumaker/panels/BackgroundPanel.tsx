@@ -1,8 +1,8 @@
 import { Upload, X } from "lucide-react";
 import React, { useRef } from "react";
 
-import { useMenuMakerStore } from "../../stores/menumaker";
-import { Button } from "../ui/button";
+import { useMenuMakerStore } from "../../../stores/menumaker";
+import { Button } from "../../ui/button";
 
 export function BackgroundPanel() {
   const { project, currentPageId, updatePageBackground, saveProject } = useMenuMakerStore();

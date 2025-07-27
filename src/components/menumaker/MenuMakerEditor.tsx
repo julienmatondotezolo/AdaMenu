@@ -3,16 +3,17 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { fetchCompleteMenu } from "../../_services/ada/adaMenuService";
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { BackgroundPanel } from "./BackgroundPanel";
 import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
-import { DataPanel } from "./DataPanel";
 import { ExportLoader } from "./ExportLoader";
-import { LayersPanel } from "./LayersPanel";
 import { MainToolbar } from "./MainToolbar";
-import { PropertiesPanel } from "./PropertiesPanel";
-import { ShapePanel } from "./ShapePanel";
-import { ThumbnailsPanel } from "./ThumbnailsPanel";
+import { BackgroundPanel } from "./panels/BackgroundPanel";
+import { DataPanel } from "./panels/DataPanel";
+import { ImagePanel } from "./panels/ImagePanel";
+import { LayersPanel } from "./panels/LayersPanel";
+import { PropertiesPanel } from "./panels/PropertiesPanel";
+import { ShapePanel } from "./panels/ShapePanel";
+import { ThumbnailsPanel } from "./panels/ThumbnailsPanel";
 import { TopNavBar } from "./TopNavBar";
 
 interface MenuMakerEditorProps {
@@ -28,6 +29,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
   const [shapePropertiesCollapsed, setShapePropertiesCollapsed] = useState(false);
+  const [imagePropertiesCollapsed, setImagePropertiesCollapsed] = useState(false);
 
   // Ref to track if menu has been fetched to prevent multiple calls
   const menuFetched = useRef(false);
@@ -136,6 +138,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   // Check if any selected element is a shape element  
   const hasSelectedShapeElement = selectedElements.some((element) => element.type === "shape");
 
+  // Check if any selected element is an image element
+  const hasSelectedImageElement = selectedElements.some((element) => element.type === "image");
+
   if (!currentPage) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -211,7 +216,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && !hasSelectedShapeElement && (
+            {selectedElements.length > 0 && editorState.ui.propertiesPanelOpen && !hasSelectedDataElement && !hasSelectedShapeElement && !hasSelectedImageElement && (
               <div>
                 {/* Properties Header */}
                 <div
@@ -265,7 +270,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-expanded={!shapePropertiesCollapsed}
                   aria-controls="shape-properties-content"
                 >
-                  <h3 className="font-semibold text-gray-900">Shape Properties</h3>
+                  <h3 className="font-semibold text-gray-900">Properties</h3>
                   <div className="flex items-center">
                     {shapePropertiesCollapsed ? (
                       <ChevronRight className="w-4 h-4 text-gray-500" />
@@ -279,6 +284,43 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 {!shapePropertiesCollapsed && (
                   <div id="shape-properties-content" className="overflow-y-auto">
                     <ShapePanel />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Image Properties Panel */}
+            {hasSelectedImageElement && editorState.ui.propertiesPanelOpen && (
+              <div className="border-b border-gray-300">
+                {/* Image Properties Header */}
+                <div
+                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  onClick={() => setImagePropertiesCollapsed(!imagePropertiesCollapsed)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setImagePropertiesCollapsed(!imagePropertiesCollapsed);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!imagePropertiesCollapsed}
+                  aria-controls="image-properties-content"
+                >
+                  <h3 className="font-semibold text-gray-900">Properties</h3>
+                  <div className="flex items-center">
+                    {imagePropertiesCollapsed ? (
+                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Image Properties Content */}
+                {!imagePropertiesCollapsed && (
+                  <div id="image-properties-content" className="overflow-y-auto">
+                    <ImagePanel />
                   </div>
                 )}
               </div>

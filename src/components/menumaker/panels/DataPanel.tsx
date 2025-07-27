@@ -2,9 +2,9 @@
 import { Database, Edit3 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-import { useMenuMakerStore } from "../../stores/menumaker";
-import { Label } from "../ui/label";
-import { type DataConfiguration, DataSelectorModal } from "./DataSelectorModal";
+import { useMenuMakerStore } from "../../../stores/menumaker";
+import { Label } from "../../ui/label";
+import { type DataConfiguration, DataSelectorModal } from "../DataSelectorModal";
 
 export function DataPanel() {
   const { currentPageId, project, updateElement, editorState } = useMenuMakerStore();

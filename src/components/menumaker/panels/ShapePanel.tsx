@@ -1,9 +1,9 @@
 import React from "react";
 
-import { useMenuMakerStore } from "../../stores/menumaker";
-import { ShapeElement, ShapeType } from "../../types/menumaker";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { useMenuMakerStore } from "../../../stores/menumaker";
+import { ShapeElement, ShapeType } from "../../../types/menumaker";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 
 export function ShapePanel() {
   const { project, currentPageId, editorState, updateElement } = useMenuMakerStore();
@@ -29,9 +29,7 @@ export function ShapePanel() {
   if (selectedElements.length > 1) {
     return (
       <div className="p-4 space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">
-          {selectedElements.length} Shape Elements
-        </h4>
+        <h4 className="text-sm font-semibold text-gray-900 mb-3">{selectedElements.length} Shape Elements</h4>
         <div className="text-sm text-gray-500">
           Multi-shape editing coming soon. Select a single shape to edit its properties.
         </div>
@@ -47,35 +45,38 @@ export function ShapePanel() {
     const r = parseInt(hex.slice(1, 3), 16);
     const g = parseInt(hex.slice(3, 5), 16);
     const b = parseInt(hex.slice(5, 7), 16);
+
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
   const rgbaToHex = (rgba: string) => {
     const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+
     if (!match) return rgba;
-    const r = parseInt(match[1]).toString(16).padStart(2, '0');
-    const g = parseInt(match[2]).toString(16).padStart(2, '0');
-    const b = parseInt(match[3]).toString(16).padStart(2, '0');
+    const r = parseInt(match[1]).toString(16).padStart(2, "0");
+    const g = parseInt(match[2]).toString(16).padStart(2, "0");
+    const b = parseInt(match[3]).toString(16).padStart(2, "0");
+
     return `#${r}${g}${b}`;
   };
 
   const getRgbaAlpha = (rgba: string) => {
     const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+
     return match && match[4] ? parseFloat(match[4]) : 1;
   };
 
-  const fillColor = shapeElement.fill.startsWith('rgba') ? rgbaToHex(shapeElement.fill) : shapeElement.fill;
-  const fillOpacity = shapeElement.fill.startsWith('rgba') ? getRgbaAlpha(shapeElement.fill) : 1;
-  const strokeColor = shapeElement.stroke.startsWith('rgba') ? rgbaToHex(shapeElement.stroke) : shapeElement.stroke;
-  const strokeOpacity = shapeElement.stroke.startsWith('rgba') ? getRgbaAlpha(shapeElement.stroke) : 1;
+  const fillColor = shapeElement.fill.startsWith("rgba") ? rgbaToHex(shapeElement.fill) : shapeElement.fill;
+  const fillOpacity = shapeElement.fill.startsWith("rgba") ? getRgbaAlpha(shapeElement.fill) : 1;
+  const strokeColor = shapeElement.stroke.startsWith("rgba") ? rgbaToHex(shapeElement.stroke) : shapeElement.stroke;
+  const strokeOpacity = shapeElement.stroke.startsWith("rgba") ? getRgbaAlpha(shapeElement.stroke) : 1;
 
   const onUpdate = (updates: any) => handleElementUpdate(shapeElement.id, updates);
 
   return (
     <div className="p-4 space-y-4">
-      <h4 className="text-sm font-semibold text-gray-900 mb-3">Shape Properties</h4>
-      
       <div className="space-y-3">
+        <h4 className="font-medium text-gray-900 mb-3">Position & Size</h4>
         {/* Position */}
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -241,4 +242,4 @@ export function ShapePanel() {
       </div>
     </div>
   );
-} 
+}

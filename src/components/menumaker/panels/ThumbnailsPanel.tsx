@@ -3,9 +3,9 @@
 import { Copy, Plus, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
-import { useMenuMakerStore } from "../../stores/menumaker";
-import { Button } from "../ui/button";
-import { PageThumbnail } from "./PageThumbnail";
+import { useMenuMakerStore } from "../../../stores/menumaker";
+import { Button } from "../../ui/button";
+import { PageThumbnail } from "../PageThumbnail";
 
 export function ThumbnailsPanel() {
   const { project, currentPageId, setCurrentPage, addPage, deletePage, duplicatePage, reorderPages } =

@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import React from "react";
 
-import { useMenuMakerStore } from "../../stores/menumaker";
-import { TextElement } from "../../types/menumaker";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { useMenuMakerStore } from "../../../stores/menumaker";
+import { TextElement } from "../../../types/menumaker";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 
 export function PropertiesPanel() {
   const { project, currentPageId, editorState, updateElement, updatePageBackground } = useMenuMakerStore();
@@ -13,7 +13,10 @@ export function PropertiesPanel() {
   const selectedElements =
     currentPage?.layers
       .flatMap((layer) => layer.elements)
-      .filter((element) => editorState.selectedElementIds.includes(element.id) && element.type !== "shape") || [];
+      .filter(
+        (element) =>
+          editorState.selectedElementIds.includes(element.id) && element.type !== "shape" && element.type !== "image",
+      ) || [];
 
   if (!currentPage) return null;
 
