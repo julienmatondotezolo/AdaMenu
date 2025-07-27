@@ -65,6 +65,35 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     loadMenuData();
   }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
 
+  // Refetch menu data when window gains focus (user returns from updating categories)
+  useEffect(() => {
+    const handleWindowFocus = async () => {
+      // Only refetch if menu was already loaded and not currently loading
+      if (!menuData.isLoaded || menuData.isLoading) return;
+
+      setMenuLoading(true);
+      setMenuError(null);
+
+      try {
+        const menuResponse = await fetchCompleteMenu();
+
+        if (menuResponse) {
+          setMenuData(menuResponse);
+        } else {
+          setMenuError("Failed to fetch menu data");
+        }
+      } catch (error) {
+        console.error("Error refetching menu data:", error);
+        setMenuError(error instanceof Error ? error.message : "Unknown error occurred");
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    return () => window.removeEventListener('focus', handleWindowFocus);
+  }, [menuData.isLoaded, menuData.isLoading, setMenuData, setMenuLoading, setMenuError]);
+
   // Auto-save every 30 seconds
   useEffect(() => {
     const interval = setInterval(() => {

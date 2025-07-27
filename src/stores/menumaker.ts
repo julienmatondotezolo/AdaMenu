@@ -40,6 +40,7 @@ interface MenuMakerStore {
   setMenuLoading: (isLoading: boolean) => void;
   setMenuError: (error: string | null) => void;
   clearMenuData: () => void;
+  refreshDataElements: () => void;
 
   // Actions for page management
   addPage: (format?: string) => void;
@@ -223,6 +224,14 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           },
         },
       });
+
+      // Refresh data elements after loading the project
+      // Use setTimeout to ensure the project is fully loaded first
+      setTimeout(() => {
+        const { refreshDataElements } = get();
+
+        refreshDataElements();
+      }, 100);
     },
 
     saveProject: async () => {
@@ -1270,7 +1279,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     },
 
     exportToPDF: async () => {
-      const { project, setExportProgress } = get();
+      const { project, setExportProgress, saveProject } = get();
 
       if (!project) {
         console.warn("No project to export");
@@ -1282,6 +1291,9 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         console.warn("PDF export only available on client side");
         return;
       }
+
+      // First save the project
+      saveProject();
 
       // Set loading state and reset progress
       set({ isExportingPDF: true, exportProgress: 0 });
@@ -1618,6 +1630,14 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           isLoaded: true, 
         }, 
       });
+
+      // Refresh data elements after setting new menu data
+      // Use setTimeout to ensure the menu data is fully set first
+      setTimeout(() => {
+        const { refreshDataElements } = get();
+
+        refreshDataElements();
+      }, 50);
     },
     setMenuLoading: (isLoading: boolean) => {
       set({ menuData: { ...get().menuData, isLoading } });
@@ -1631,6 +1651,63 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
     setExportProgress: (progress: number) => {
       set({ exportProgress: Math.max(0, Math.min(100, progress)) });
+    },
+
+    refreshDataElements: () => {
+      const { project, menuData, updateElement } = get();
+
+      if (!project || !menuData.isLoaded || menuData.categories.length === 0) {
+        return;
+      }
+
+      // Create lookup maps for faster data retrieval
+      const categoryMap = new Map();
+      const subcategoryMap = new Map();
+
+      menuData.categories.forEach(category => {
+        categoryMap.set(category.id, category);
+        category.subCategories.forEach(subcategory => {
+          subcategoryMap.set(subcategory.id, subcategory);
+        });
+      });
+
+      // Check each page for data elements that need updating
+      project.pages.forEach(page => {
+        page.layers.forEach(layer => {
+          layer.elements.forEach(element => {
+            if (element.type === 'data') {
+              const dataElement = element as any;
+              const updates: any = {};
+              let needsUpdate = false;
+
+              // Check if category data needs updating
+              if (dataElement.dataType === 'category' && dataElement.dataId) {
+                const freshCategoryData = categoryMap.get(dataElement.dataId);
+
+                if (freshCategoryData && JSON.stringify(dataElement.categoryData) !== JSON.stringify(freshCategoryData)) {
+                  updates.categoryData = freshCategoryData;
+                  needsUpdate = true;
+                }
+              }
+
+              // Check if subcategory data needs updating
+              if ((dataElement.dataType === 'subcategory' || dataElement.dataType === 'menuitem') && dataElement.dataId) {
+                const freshSubcategoryData = subcategoryMap.get(dataElement.dataId);
+
+                if (freshSubcategoryData && JSON.stringify(dataElement.subcategoryData) !== JSON.stringify(freshSubcategoryData)) {
+                  updates.subcategoryData = freshSubcategoryData;
+                  needsUpdate = true;
+                }
+              }
+
+              // Update the element if needed
+              if (needsUpdate) {
+                updateElement(page.id, layer.id, element.id, updates);
+              }
+            }
+          });
+        });
+      });
     },
   })),
 );
