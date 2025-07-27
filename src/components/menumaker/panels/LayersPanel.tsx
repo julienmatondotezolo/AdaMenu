@@ -366,8 +366,8 @@ export function LayersPanel() {
                         key={element.id}
                         className={`text-xs p-1 rounded transition-colors cursor-pointer ${
                           editorState.selectedElementIds.includes(element.id)
-                            ? "bg-blue-100 text-blue-900"
-                            : "text-gray-600 hover:bg-gray-100"
+                            ? "bg-blue-200 text-blue-900 font-semibold"
+                            : "text-gray-600 hover:bg-blue-200"
                         }`}
                         onClick={(e) => handleElementClick(element.id, layer.locked, e)}
                         onMouseEnter={() => {
