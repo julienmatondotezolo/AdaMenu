@@ -1911,8 +1911,8 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
           if (!ctx) continue;
 
-          // Set moderate resolution for preview (faster generation)
-          const scaleFactor = 1.5; // Good quality but faster
+          // Set reduced resolution for faster preview generation
+          const scaleFactor = 0.25; // 50% scale for faster generation
 
           canvas.width = page.format.width * scaleFactor;
           canvas.height = page.format.height * scaleFactor;
