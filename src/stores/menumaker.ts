@@ -74,6 +74,7 @@ interface MenuMakerStore {
   setTool: (tool: Tool) => void;
   selectElements: (elementIds: string[]) => void;
   selectLayer: (layerId: string | null) => void;
+  setHoveredElement: (elementId: string | null) => void;
   clearSelection: () => void;
   setSelectedShapeType: (shapeType: ShapeType | null) => void;
 
@@ -134,6 +135,7 @@ const createDefaultEditorState = (): EditorState => ({
   tool: "select",
   selectedElementIds: [],
   selectedLayerId: null,
+  hoveredElementId: null,
   clipboard: [],
   history: {
     past: [],
@@ -1030,6 +1032,15 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         editorState: {
           ...get().editorState,
           selectedLayerId: layerId,
+        },
+      });
+    },
+
+    setHoveredElement: (elementId: string | null) => {
+      set({
+        editorState: {
+          ...get().editorState,
+          hoveredElementId: elementId,
         },
       });
     },

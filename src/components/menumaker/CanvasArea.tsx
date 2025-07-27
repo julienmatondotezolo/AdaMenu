@@ -23,6 +23,7 @@ export function CanvasArea() {
     setTool,
     selectedShapeType,
     setSelectedShapeType,
+    setHoveredElement,
   } = useMenuMakerStore();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -45,7 +46,6 @@ export function CanvasArea() {
   const [tempElementDimensions, setTempElementDimensions] = useState<
     Record<string, { width: number; height: number; x?: number; y?: number }>
   >({});
-  const [hoveredElementId, setHoveredElementId] = useState<string | null>(null);
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
   const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
   const [activeSnapGuidelines, setActiveSnapGuidelines] = useState<ActiveGuideline[]>([]);
@@ -311,10 +311,14 @@ export function CanvasArea() {
     }
 
     // Draw hover bounding box for text elements when in text mode
-    if (hoveredElementId && !editorState.selectedElementIds.includes(hoveredElementId) && tool === "select") {
+    if (
+      editorState.hoveredElementId &&
+      !editorState.selectedElementIds.includes(editorState.hoveredElementId) &&
+      tool === "select"
+    ) {
       drawHoverBoundingBox({
         ctx,
-        elementId: hoveredElementId,
+        elementId: editorState.hoveredElementId,
         currentPage,
         tempElementPositions,
         tempElementDimensions,
@@ -337,7 +341,7 @@ export function CanvasArea() {
     selectionStart,
     selectionEnd,
     tool,
-    hoveredElementId,
+    editorState.hoveredElementId,
     backgroundImageCache,
     imageElementCache,
     tempElementPositions,
@@ -607,7 +611,7 @@ export function CanvasArea() {
       }
 
       // Check if hovering over an element in a locked layer
-      if (hoveredElementId && isElementInLockedLayer(hoveredElementId)) {
+      if (editorState.hoveredElementId && isElementInLockedLayer(editorState.hoveredElementId)) {
         return "not-allowed";
       }
 
@@ -803,9 +807,9 @@ export function CanvasArea() {
       const hoveredElement = getElementAtPosition(mouseX, mouseY);
 
       if (hoveredElement) {
-        setHoveredElementId(hoveredElement);
+        setHoveredElement(hoveredElement);
       } else {
-        setHoveredElementId(null);
+        setHoveredElement(null);
       }
 
       if (isResizing && resizeHandle && editorState.selectedElementIds.length === 1) {
@@ -1165,7 +1169,7 @@ export function CanvasArea() {
 
   const handleCanvasMouseLeave = () => {
     setIsCanvasHovered(false);
-    setHoveredElementId(null); // Clear hover state when leaving canvas
+    setHoveredElement(null); // Clear hover state when leaving canvas
     setShapePreviewPosition(null); // Clear shape preview when leaving canvas
   };
 

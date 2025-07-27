@@ -244,6 +244,7 @@ export interface EditorState {
   tool: Tool;
   selectedElementIds: string[];
   selectedLayerId: string | null;
+  hoveredElementId: string | null;
   clipboard: MenuElement[];
   history: {
     past: MenuPage[];

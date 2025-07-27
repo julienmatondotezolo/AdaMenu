@@ -36,6 +36,7 @@ export function LayersPanel() {
     selectLayer,
     selectElements,
     reorderLayers,
+    setHoveredElement,
   } = useMenuMakerStore();
 
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
@@ -367,6 +368,8 @@ export function LayersPanel() {
                             : "text-gray-600 hover:bg-gray-100"
                         }`}
                         onClick={(e) => handleElementClick(element.id, e)}
+                        onMouseEnter={() => setHoveredElement(element.id)}
+                        onMouseLeave={() => setHoveredElement(null)}
                         title="Click to select element"
                       >
                         <div className="flex items-center justify-between">
