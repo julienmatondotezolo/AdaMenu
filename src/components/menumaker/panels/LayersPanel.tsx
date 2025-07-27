@@ -3,12 +3,15 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 import {
   Check,
+  ChevronDown,
+  ChevronRight,
   Circle,
   Copy,
   Database,
   Edit2,
   Eye,
   EyeOff,
+  GripVertical,
   Image,
   Lock,
   Plus,
@@ -38,10 +41,14 @@ export function LayersPanel() {
     updateLayerLock,
     selectLayer,
     selectElements,
+    reorderLayers,
   } = useMenuMakerStore();
 
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [collapsedLayers, setCollapsedLayers] = useState<Set<string>>(new Set());
+  const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
+  const [dragOverLayerId, setDragOverLayerId] = useState<string | null>(null);
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
 
@@ -65,6 +72,18 @@ export function LayersPanel() {
   const handleToggleLock = (layerId: string, locked: boolean, e: React.MouseEvent) => {
     e.stopPropagation();
     updateLayerLock(currentPageId!, layerId, !locked);
+  };
+
+  const handleToggleCollapse = (layerId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const newCollapsed = new Set(collapsedLayers);
+
+    if (collapsedLayers.has(layerId)) {
+      newCollapsed.delete(layerId);
+    } else {
+      newCollapsed.add(layerId);
+    }
+    setCollapsedLayers(newCollapsed);
   };
 
   const handleStartEditLayerName = (layerId: string, currentName: string, e: React.MouseEvent) => {
@@ -91,6 +110,53 @@ export function LayersPanel() {
   const handleCancelEditLayerNameKeyboard = () => {
     setEditingLayerId(null);
     setEditingName("");
+  };
+
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, layerId: string) => {
+    setDraggedLayerId(layerId);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", layerId);
+  };
+
+  const handleDragOver = (e: React.DragEvent, layerId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    setDragOverLayerId(layerId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverLayerId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetLayerId: string) => {
+    e.preventDefault();
+    setDragOverLayerId(null);
+
+    if (!draggedLayerId || draggedLayerId === targetLayerId) {
+      setDraggedLayerId(null);
+      return;
+    }
+
+    // Find the indices of the dragged and target layers
+    const reversedLayers = [...currentPage.layers].reverse();
+    const draggedIndex = reversedLayers.findIndex((layer) => layer.id === draggedLayerId);
+    const targetIndex = reversedLayers.findIndex((layer) => layer.id === targetLayerId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      // Convert back to original indices (since we reversed the array for display)
+      const originalDraggedIndex = currentPage.layers.length - 1 - draggedIndex;
+      const originalTargetIndex = currentPage.layers.length - 1 - targetIndex;
+
+      reorderLayers(currentPageId!, originalDraggedIndex, originalTargetIndex);
+    }
+
+    setDraggedLayerId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedLayerId(null);
+    setDragOverLayerId(null);
   };
 
   const handleElementClick = (elementId: string, e: React.MouseEvent) => {
@@ -193,63 +259,93 @@ export function LayersPanel() {
             key={layer.id}
             className={`group border-b border-gray-100 cursor-pointer transition-colors ${
               editorState.selectedLayerId === layer.id ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
+            } ${draggedLayerId === layer.id ? "opacity-50" : ""} ${
+              dragOverLayerId === layer.id ? "border-blue-400 border-2" : ""
             }`}
             onClick={() => handleLayerClick(layer.id)}
+            draggable
+            onDragStart={(e) => handleDragStart(e, layer.id)}
+            onDragOver={(e) => handleDragOver(e, layer.id)}
+            onDragLeave={handleDragLeave}
+            onDrop={(e) => handleDrop(e, layer.id)}
+            onDragEnd={handleDragEnd}
           >
             <div className="p-3">
               <div className="flex items-center justify-between">
-                {/* Layer name and info */}
-                <div className="flex-1 min-w-0">
-                  {editingLayerId === layer.id ? (
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Input
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        className="h-6 text-sm font-medium"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            handleSaveLayerName();
-                          } else if (e.key === "Escape") {
-                            handleCancelEditLayerNameKeyboard();
-                          }
-                        }}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleSaveLayerName}
-                        className="h-6 w-6 p-0"
-                        title="Save layer name"
-                      >
-                        <Check className="w-3 h-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCancelEditLayerName}
-                        className="h-6 w-6 p-0"
-                        title="Cancel editing"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900" title={layer.name}>
-                        {layer.name}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={(e) => handleStartEditLayerName(layer.id, layer.name, e)}
-                        className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Edit layer name"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="text-xs text-gray-500">{layer.elements.length} elements</div>
+                {/* Drag handle */}
+                <div className="flex items-center space-x-2">
+                  <div className="drag-handle cursor-grab active:cursor-grabbing">
+                    <GripVertical className="w-4 h-4 text-gray-400" />
+                  </div>
+
+                  {/* Collapse toggle */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-4 h-4 p-0"
+                    onClick={(e) => handleToggleCollapse(layer.id, e)}
+                    title={collapsedLayers.has(layer.id) ? "Expand layer" : "Collapse layer"}
+                  >
+                    {collapsedLayers.has(layer.id) ? (
+                      <ChevronRight className="w-3 h-3" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3" />
+                    )}
+                  </Button>
+
+                  {/* Layer name and info */}
+                  <div className="flex-1 min-w-0">
+                    {editingLayerId === layer.id ? (
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Input
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          className="h-6 text-sm font-medium"
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleSaveLayerName();
+                            } else if (e.key === "Escape") {
+                              handleCancelEditLayerNameKeyboard();
+                            }
+                          }}
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleSaveLayerName}
+                          className="h-6 w-6 p-0"
+                          title="Save layer name"
+                        >
+                          <Check className="w-3 h-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCancelEditLayerName}
+                          className="h-6 w-6 p-0"
+                          title="Cancel editing"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900" title={layer.name}>
+                          {layer.name}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleStartEditLayerName(layer.id, layer.name, e)}
+                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          title="Edit layer name"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                    <div className="text-xs text-gray-500">{layer.elements.length} elements</div>
+                  </div>
                 </div>
 
                 {/* Layer controls */}
@@ -276,9 +372,9 @@ export function LayersPanel() {
                 </div>
               </div>
 
-              {/* Elements list */}
-              {layer.elements.length > 0 && (
-                <div className="mt-2 ml-4 space-y-1">
+              {/* Elements list - only show when not collapsed */}
+              {layer.elements.length > 0 && !collapsedLayers.has(layer.id) && (
+                <div className="mt-2 ml-6 space-y-1">
                   {layer.elements.map((element) => (
                     <div
                       key={element.id}
