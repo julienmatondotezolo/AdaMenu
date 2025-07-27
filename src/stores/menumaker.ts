@@ -17,6 +17,7 @@ interface MenuMakerStore {
   isExportingPDF: boolean;
   isSaving: boolean;
   exportProgress: number;
+  saveSuccess: boolean;
 
   // Shape selector state
   selectedShapeType: ShapeType | null;
@@ -161,6 +162,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     isExportingPDF: false,
     isSaving: false,
     exportProgress: 0,
+    saveSuccess: false,
 
     // Shape selector state
     selectedShapeType: null,
@@ -223,12 +225,15 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       });
     },
 
-    saveProject: () => {
+    saveProject: async () => {
       const { project } = get();
 
       if (project) {
-        // Set saving state to true
-        set({ isSaving: true });
+        // Set saving state to true and reset success state
+        set({ isSaving: true, saveSuccess: false });
+
+        // Simulate 2 seconds of saving time
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
         const updatedProject = {
           ...project,
@@ -237,7 +242,15 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
         try {
           localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-          set({ project: updatedProject, isSaving: false });
+          
+          // Show success state
+          set({ project: updatedProject, isSaving: false, saveSuccess: true });
+          
+          // Hide success state after 3 seconds
+          setTimeout(() => {
+            set({ saveSuccess: false });
+          }, 3000);
+          
         } catch (error) {
           if (error instanceof DOMException && error.name === 'QuotaExceededError') {
             console.warn('LocalStorage quota exceeded. Attempting to clean up old projects...');
@@ -247,17 +260,25 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             
             try {
               localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-              set({ project: updatedProject, isSaving: false });
+              
+              // Show success state
+              set({ project: updatedProject, isSaving: false, saveSuccess: true });
+              
+              // Hide success state after 3 seconds
+              setTimeout(() => {
+                set({ saveSuccess: false });
+              }, 3000);
+              
               console.warn('Project saved successfully after cleanup.');
             } catch (retryError) {
               console.error('Failed to save project even after cleanup:', retryError);
               alert('Storage full! Please delete some old projects to continue saving.');
-              set({ isSaving: false });
+              set({ isSaving: false, saveSuccess: false });
             }
           } else {
             console.error('Failed to save project:', error);
             alert('Failed to save project. Please try again.');
-            set({ isSaving: false });
+            set({ isSaving: false, saveSuccess: false });
           }
         }
       }

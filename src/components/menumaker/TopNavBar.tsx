@@ -1,4 +1,4 @@
-import { Check, Clock, Download, Edit2, Loader2, Save, X } from "lucide-react";
+import { Check, CheckCircle2, Clock, Download, Edit2, Loader2, Save, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
@@ -10,7 +10,8 @@ interface ToolbarProps {
 }
 
 export function TopNavBar({ onNewProject }: ToolbarProps) {
-  const { project, saveProject, exportToPDF, isExportingPDF, isSaving, updateProjectName } = useMenuMakerStore();
+  const { project, saveProject, exportToPDF, isExportingPDF, isSaving, saveSuccess, updateProjectName } =
+    useMenuMakerStore();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
@@ -18,7 +19,11 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
   const formatSavedDate = (dateString: string) => {
     const date = new Date(dateString);
 
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+    );
   };
 
   const handleStartRename = () => {
@@ -87,9 +92,23 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
                     <Edit2 className="w-3 h-3" />
                   </Button>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Clock className="w-3 h-3" />
-                  <span>Saved: {formatSavedDate(project.updatedAt)}</span>
+                <div className="flex items-center gap-1 text-xs">
+                  {isSaving ? (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      <span>Saving changes....</span>
+                    </div>
+                  ) : saveSuccess ? (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <CheckCircle2 className="w-3 h-3" />
+                      <span>Successfully saved</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      <span>Saved: {formatSavedDate(project.updatedAt)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -102,8 +121,12 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
         <div className="w-px h-6 bg-gray-300 mx-2" />
 
         <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
-          {isSaving ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Save className="w-4 h-4 mr-1" />}
-          {isSaving ? "Saving menu..." : "Save"}
+          {isSaving ? (
+            <Loader2 className="w-4 h-4 mr-1 animate-spin text-blue-600" />
+          ) : (
+            <Save className="w-4 h-4 mr-1" />
+          )}
+          {isSaving ? "Saving..." : "Save"}
         </Button>
         <Button variant="outline" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
           {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
