@@ -5,6 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { ShapeElement, ShapeType, TextElement } from "../../types/menumaker";
 import { drawElements } from "./drawings";
+import { drawShapeElement } from "./drawings/drawShapeElement";
 import { ActiveGuideline, snapGuidelineManager } from "./utils/snapGuidelines";
 
 // Simplified canvas without React Konva for now to avoid DevTools errors
@@ -48,12 +49,20 @@ export function CanvasArea() {
   const [hoveredResizeHandle, setHoveredResizeHandle] = useState<string | null>(null);
   const [isShiftPressed, setIsShiftPressed] = useState<boolean>(false);
   const [activeSnapGuidelines, setActiveSnapGuidelines] = useState<ActiveGuideline[]>([]);
+  const [shapePreviewPosition, setShapePreviewPosition] = useState<{ x: number; y: number } | null>(null);
 
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
   const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
   const { canvas, tool } = editorState;
+
+  // Clear shape preview when tool changes or selectedShapeType is cleared
+  useEffect(() => {
+    if (tool !== "shape" || !selectedShapeType) {
+      setShapePreviewPosition(null);
+    }
+  }, [tool, selectedShapeType]);
 
   // Update canvas size based on page format and container
   useEffect(() => {
@@ -250,6 +259,40 @@ export function CanvasArea() {
       setImageElementCache,
     });
 
+    // Draw shape preview if hovering with shape tool
+    if (tool === "shape" && selectedShapeType && shapePreviewPosition) {
+      const previewShape: ShapeElement = {
+        id: "preview",
+        type: "shape",
+        shapeType: selectedShapeType,
+        x: shapePreviewPosition.x,
+        y: shapePreviewPosition.y,
+        width: selectedShapeType === "rectangle" ? 400 : 250,
+        height: selectedShapeType === "rectangle" ? 100 : 250,
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1,
+        zIndex: 0,
+        locked: false,
+        visible: true,
+        opacity: 0.25,
+        fill: "#3B82F6", // Blue fill
+        stroke: "#1E40AF", // Darker blue stroke
+        strokeWidth: 2,
+        radius: 0,
+      };
+
+      drawShapeElement({
+        ctx,
+        element: previewShape,
+        canvas,
+        isSelected: false,
+        pageOffset,
+        tempElementPositions: {},
+        tempElementDimensions: {},
+      });
+    }
+
     // Draw selection box if selecting
     if (isSelecting && tool === "select") {
       drawSelectionBox(ctx);
@@ -280,6 +323,8 @@ export function CanvasArea() {
     tempElementPositions,
     tempElementDimensions,
     activeSnapGuidelines,
+    selectedShapeType,
+    shapePreviewPosition,
   ]);
 
   const drawPageBackground = (ctx: CanvasRenderingContext2D, page: any, canvas: any) => {
@@ -1098,6 +1143,26 @@ export function CanvasArea() {
           setHoveredResizeHandle(null);
         }
       }
+    } else if (tool === "shape" && selectedShapeType) {
+      // Track mouse position for shape preview
+      const pageX = (mouseX - pageOffset.x) / canvas.zoom;
+      const pageY = (mouseY - pageOffset.y) / canvas.zoom;
+
+      // Only show preview if mouse is within page bounds
+      if (
+        currentPage &&
+        pageX >= 0 &&
+        pageY >= 0 &&
+        pageX <= currentPage.format.width &&
+        pageY <= currentPage.format.height
+      ) {
+        setShapePreviewPosition({ x: pageX, y: pageY });
+      } else {
+        setShapePreviewPosition(null);
+      }
+    } else {
+      // Clear preview position for other tools
+      setShapePreviewPosition(null);
     }
   };
 
@@ -1109,6 +1174,7 @@ export function CanvasArea() {
   const handleCanvasMouseLeave = () => {
     setIsCanvasHovered(false);
     setHoveredElementId(null); // Clear hover state when leaving canvas
+    setShapePreviewPosition(null); // Clear shape preview when leaving canvas
   };
 
   // Handle canvas mouse up
@@ -1276,8 +1342,8 @@ export function CanvasArea() {
           shapeType: selectedShapeType,
           x: relativeX,
           y: relativeY,
-          width: selectedShapeType === "rectangle" ? 800 : 500,
-          height: selectedShapeType === "rectangle" ? 200 : 500,
+          width: selectedShapeType === "rectangle" ? 400 : 250,
+          height: selectedShapeType === "rectangle" ? 100 : 250,
           rotation: 0,
           scaleX: 1,
           scaleY: 1,
