@@ -184,6 +184,67 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                 ctx.fillText("Img", x + elementWidth / 2, y + elementHeight / 2);
               }
             }
+          } else if (element.type === "shape") {
+            // Draw shape element
+            const shapeElement = element as any;
+            const x = shapeElement.x * scale;
+            const y = shapeElement.y * scale;
+            const elementWidth = shapeElement.width * scale;
+            const elementHeight = shapeElement.height * scale;
+
+            // Set fill and stroke styles
+            if (shapeElement.fill) {
+              ctx.fillStyle = shapeElement.fill;
+            }
+            if (shapeElement.stroke) {
+              ctx.strokeStyle = shapeElement.stroke;
+              ctx.lineWidth = Math.max((shapeElement.strokeWidth || 1) * scale, 0.5);
+            }
+
+            // Draw the shape based on its type
+            switch (shapeElement.shapeType) {
+              case "rectangle":
+                if (shapeElement.radius > 0) {
+                  // Rounded rectangle
+                  const radius = Math.max(shapeElement.radius * scale, 1);
+                  ctx.beginPath();
+                  ctx.roundRect(x, y, elementWidth, elementHeight, radius);
+                } else {
+                  // Regular rectangle
+                  ctx.beginPath();
+                  ctx.rect(x, y, elementWidth, elementHeight);
+                }
+                break;
+
+              case "circle": {
+                // Draw circle/ellipse
+                const centerX = x + elementWidth / 2;
+                const centerY = y + elementHeight / 2;
+                const radiusX = elementWidth / 2;
+                const radiusY = elementHeight / 2;
+
+                ctx.beginPath();
+                ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                break;
+              }
+
+              case "triangle":
+                // Draw triangle
+                ctx.beginPath();
+                ctx.moveTo(x + elementWidth / 2, y); // Top point
+                ctx.lineTo(x, y + elementHeight); // Bottom left
+                ctx.lineTo(x + elementWidth, y + elementHeight); // Bottom right
+                ctx.closePath();
+                break;
+            }
+
+            // Fill and stroke the shape
+            if (shapeElement.fill) {
+              ctx.fill();
+            }
+            if (shapeElement.stroke && (shapeElement.strokeWidth || 0) > 0) {
+              ctx.stroke();
+            }
           } else if (element.type === "data") {
             // Draw data element
             const dataElement = element as any;

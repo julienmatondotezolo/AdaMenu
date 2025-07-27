@@ -1372,6 +1372,62 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                   ctx.textAlign = "center";
                   ctx.fillText("Image", element.x + element.width / 2, element.y + element.height / 2);
                 }
+              } else if (element.type === "shape") {
+                // Draw shape element
+                const shapeElement = element as any;
+
+                // Set fill and stroke styles
+                if (shapeElement.fill) {
+                  ctx.fillStyle = shapeElement.fill;
+                }
+                if (shapeElement.stroke) {
+                  ctx.strokeStyle = shapeElement.stroke;
+                  ctx.lineWidth = shapeElement.strokeWidth || 1;
+                }
+
+                // Draw the shape based on its type
+                switch (shapeElement.shapeType) {
+                  case "rectangle":
+                    if (shapeElement.radius > 0) {
+                      // Rounded rectangle
+                      ctx.beginPath();
+                      ctx.roundRect(shapeElement.x, shapeElement.y, shapeElement.width, shapeElement.height, shapeElement.radius);
+                    } else {
+                      // Regular rectangle
+                      ctx.beginPath();
+                      ctx.rect(shapeElement.x, shapeElement.y, shapeElement.width, shapeElement.height);
+                    }
+                    break;
+
+                  case "circle": {
+                    // Draw circle/ellipse
+                    const centerX = shapeElement.x + shapeElement.width / 2;
+                    const centerY = shapeElement.y + shapeElement.height / 2;
+                    const radiusX = shapeElement.width / 2;
+                    const radiusY = shapeElement.height / 2;
+
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                    break;
+                  }
+
+                  case "triangle":
+                    // Draw triangle
+                    ctx.beginPath();
+                    ctx.moveTo(shapeElement.x + shapeElement.width / 2, shapeElement.y); // Top point
+                    ctx.lineTo(shapeElement.x, shapeElement.y + shapeElement.height); // Bottom left
+                    ctx.lineTo(shapeElement.x + shapeElement.width, shapeElement.y + shapeElement.height); // Bottom right
+                    ctx.closePath();
+                    break;
+                }
+
+                // Fill and stroke the shape
+                if (shapeElement.fill) {
+                  ctx.fill();
+                }
+                if (shapeElement.stroke && shapeElement.strokeWidth > 0) {
+                  ctx.stroke();
+                }
               } else if (element.type === "data") {
                 // Draw data element
                 const dataElement = element as any;
