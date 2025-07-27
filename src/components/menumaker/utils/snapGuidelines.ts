@@ -32,6 +32,9 @@ export class SnapGuidelineManager {
     this.snapPoints = [];
     const excludeSet = new Set(excludeElementIds);
 
+    // Add canvas edge snap points
+    this.addCanvasEdgeSnapPoints(page);
+
     page.layers.forEach((layer) => {
       if (!layer.visible) return;
 
@@ -42,6 +45,27 @@ export class SnapGuidelineManager {
         this.addElementSnapPoints(element);
       });
     });
+  }
+
+  /**
+   * Add snap points for canvas edges
+   */
+  private addCanvasEdgeSnapPoints(page: MenuPage): void {
+    const { width, height } = page.format;
+
+    // X-axis snap points (vertical guidelines) - left and right edges
+    this.snapPoints.push(
+      { value: 0, type: "x", elementId: "canvas-left", edge: "left" },
+      { value: width, type: "x", elementId: "canvas-right", edge: "right" },
+      { value: width / 2, type: "x", elementId: "canvas-center", edge: "center" },
+    );
+
+    // Y-axis snap points (horizontal guidelines) - top and bottom edges
+    this.snapPoints.push(
+      { value: 0, type: "y", elementId: "canvas-top", edge: "top" },
+      { value: height, type: "y", elementId: "canvas-bottom", edge: "bottom" },
+      { value: height / 2, type: "y", elementId: "canvas-middle", edge: "middle" },
+    );
   }
 
   /**
