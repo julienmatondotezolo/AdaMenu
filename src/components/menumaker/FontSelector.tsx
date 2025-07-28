@@ -36,9 +36,16 @@ export function FontSelector({
   onLineHeightChange,
   showAdvancedOptions = true,
 }: FontSelectorProps) {
-  const { getAllAvailableFonts, ensureFontLoaded } = useMenuMakerStore();
+  const { getAllAvailableFonts, ensureFontLoaded, refetchFontsFromIndexedDB } = useMenuMakerStore();
 
   const availableFonts = getAllAvailableFonts();
+
+  // Refetch fonts from IndexedDB when component mounts
+  React.useEffect(() => {
+    refetchFontsFromIndexedDB().catch((error) => {
+      console.warn('Failed to refetch fonts from IndexedDB:', error);
+    });
+  }, [refetchFontsFromIndexedDB]);
 
   const handleFontChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedFontFamily = event.target.value;
@@ -214,8 +221,8 @@ export function FontSelector({
                 onChange={(e) => onFontWeightChange?.(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
               >
-                {getAvailableWeights().map((weight) => (
-                  <option key={weight} value={weight}>
+                {Array.from(new Set(getAvailableWeights())).map((weight, index) => (
+                  <option key={`weight-${weight}-${index}`} value={weight}>
                     {weight === "400" ? "400 (Normal)" : weight === "700" ? "700 (Bold)" : weight}
                   </option>
                 ))}

@@ -8,7 +8,7 @@ import { GoogleFont, ProjectFont } from "../../../types/menumaker";
 import { Button } from "../../ui/button";
 
 export function FontManagementPanel() {
-  const { project, getAllAvailableFonts, addGoogleFont, addCustomFont, removeFont, ensureFontLoaded } =
+  const { project, getAllAvailableFonts, addGoogleFont, addCustomFont, removeFont, ensureFontLoaded, refetchFontsFromIndexedDB } =
     useMenuMakerStore();
   const [activeTab, setActiveTab] = useState<"all" | "system" | "google" | "custom">("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,9 +16,26 @@ export function FontManagementPanel() {
   const [googleFonts, setGoogleFonts] = useState<GoogleFont[]>([]);
   const [isUploadingFont, setIsUploadingFont] = useState(false);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [isRefreshingFonts, setIsRefreshingFonts] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const availableFonts = getAllAvailableFonts();
+
+  // Refetch fonts from IndexedDB when component mounts
+  React.useEffect(() => {
+    const refetchFonts = async () => {
+      setIsRefreshingFonts(true);
+      try {
+        await refetchFontsFromIndexedDB();
+      } catch (error) {
+        console.warn('Failed to refetch fonts from IndexedDB:', error);
+      } finally {
+        setIsRefreshingFonts(false);
+      }
+    };
+
+    refetchFonts();
+  }, [refetchFontsFromIndexedDB]);
 
   // Filter fonts based on active tab and search query
   const filteredFonts = availableFonts.filter((font) => {
@@ -55,6 +72,21 @@ IndexedDB Debug Info:
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`Debug failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  // Manual font refresh
+  const handleRefreshFonts = async () => {
+    setIsRefreshingFonts(true);
+    try {
+      await refetchFontsFromIndexedDB();
+      // eslint-disable-next-line no-alert
+      alert('Fonts refreshed successfully from IndexedDB!');
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert(`Failed to refresh fonts: ${error instanceof Error ? error.message : "Unknown error"}`);
+    } finally {
+      setIsRefreshingFonts(false);
     }
   };
 
@@ -272,6 +304,13 @@ You can now:
           {showDebugInfo && (
             <div className="flex space-x-2">
               <button
+                onClick={handleRefreshFonts}
+                disabled={isRefreshingFonts}
+                className="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 disabled:opacity-50"
+              >
+                {isRefreshingFonts ? 'Refreshing...' : 'Refresh Fonts'}
+              </button>
+              <button
                 onClick={handleTestFontSystem}
                 className="text-xs text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
               >
@@ -305,7 +344,14 @@ You can now:
       {/* Font List */}
       <div className="flex-1 overflow-auto">
         <div className="p-4 space-y-3">
-          {filteredFonts.map((font) => (
+          {isRefreshingFonts && (
+            <div className="text-center py-4 text-blue-600 dark:text-blue-400">
+              <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent mx-auto mb-2"></div>
+              <p className="text-sm">Refreshing fonts from IndexedDB...</p>
+            </div>
+          )}
+          
+          {!isRefreshingFonts && filteredFonts.map((font) => (
             <FontCard
               key={font.id}
               font={font}
@@ -314,7 +360,7 @@ You can now:
             />
           ))}
 
-          {filteredFonts.length === 0 && (
+          {!isRefreshingFonts && filteredFonts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
               <Type size={48} className="mx-auto mb-4 opacity-50" />
               <p>No fonts found</p>
@@ -462,9 +508,9 @@ function FontCard({ font, onPreview, onRemove }: FontCardProps) {
         <div className="mt-3">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Available weights:</p>
           <div className="flex flex-wrap gap-1">
-            {font.variants.map((variant) => (
+            {Array.from(new Set(font.variants)).map((variant, index) => (
               <span
-                key={variant}
+                key={`${font.id}-variant-${variant}-${index}`}
                 className="px-2 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
               >
                 {variant}

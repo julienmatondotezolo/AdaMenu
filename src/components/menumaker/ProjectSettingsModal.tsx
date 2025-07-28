@@ -429,9 +429,9 @@ function FontCard({ font, onRemove }: FontCardProps) {
         <div className="mt-2">
           <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Weights:</p>
           <div className="flex flex-wrap gap-1">
-            {font.variants.slice(0, 4).map((variant) => (
+            {Array.from(new Set(font.variants)).slice(0, 4).map((variant, index) => (
               <span
-                key={variant}
+                key={`${font.id}-variant-${variant}-${index}`}
                 className="px-1 py-0.5 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded"
               >
                 {variant}

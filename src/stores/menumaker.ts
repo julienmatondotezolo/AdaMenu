@@ -114,6 +114,7 @@ interface MenuMakerStore {
 
   // Actions for font management
   loadProjectFonts: () => Promise<void>;
+  refetchFontsFromIndexedDB: () => Promise<void>;
   addGoogleFont: (googleFont: GoogleFont) => Promise<void>;
   addCustomFont: (fontFile: File) => Promise<CustomFontFile | null>;
   removeFont: (fontId: string) => Promise<void>;
@@ -2274,6 +2275,97 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       const allFonts = [...project.fonts.defaultFonts, ...project.fonts.googleFonts, ...project.fonts.customFonts];
 
       await fontService.loadProjectFonts(allFonts);
+    },
+
+    refetchFontsFromIndexedDB: async () => {
+      const { project } = get();
+
+      if (!project) return;
+
+      try {
+        // Get all fonts from IndexedDB
+        const allFontBlobs = await indexedDBService.getAllFonts();
+        console.log(`Retrieved ${allFontBlobs.length} fonts from IndexedDB`);
+
+        // Convert FontBlob objects to CustomFontFile objects
+        const customFontFiles: CustomFontFile[] = allFontBlobs.map((fontBlob, index) => ({
+          id: fontBlob.id,
+          name: fontBlob.fileName,
+          familyName: fontBlob.familyName,
+          style: "normal", // TODO: Parse from font metadata if available
+          weight: 400, // TODO: Parse from font metadata if available
+          fileName: fontBlob.fileName,
+          blobId: fontBlob.id,
+          format: fontBlob.format,
+          createdAt: fontBlob.createdAt,
+        }));
+
+        // Group custom font files by family name to create ProjectFont objects
+        const fontFamilyMap = new Map<string, CustomFontFile[]>();
+        customFontFiles.forEach(fontFile => {
+          const existing = fontFamilyMap.get(fontFile.familyName) || [];
+          existing.push(fontFile);
+          fontFamilyMap.set(fontFile.familyName, existing);
+        });
+
+        // Create ProjectFont objects from grouped custom font files with unique IDs
+        const refreshedCustomFonts: ProjectFont[] = Array.from(fontFamilyMap.entries()).map(([familyName, fontFiles], index) => {
+          const projectFont = fontService.customFontFilesToProjectFont(fontFiles, familyName);
+          // Ensure unique ID to prevent React key conflicts
+          projectFont.id = `custom-${familyName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}-${index}`;
+          return projectFont;
+        });
+
+        console.log(`Created ${refreshedCustomFonts.length} ProjectFont objects from IndexedDB fonts`);
+
+        // Load all custom fonts into the document
+        for (const customFont of refreshedCustomFonts) {
+          if (customFont.customFontFiles) {
+            for (const fontFile of customFont.customFontFiles) {
+              try {
+                const blobUrl = await indexedDBService.getFont(fontFile.blobId);
+                if (blobUrl) {
+                  await fontService.loadCustomFontFromBlob(fontFile, blobUrl);
+                }
+              } catch (error) {
+                console.warn(`Failed to load custom font ${fontFile.name}:`, error);
+              }
+            }
+          }
+        }
+
+        // Force reload Google fonts to ensure they're fresh
+        if (project.fonts.googleFonts.length > 0) {
+          for (const googleFont of project.fonts.googleFonts) {
+            try {
+              await fontService.forceReloadGoogleFont(googleFont);
+            } catch (error) {
+              console.warn(`Failed to refetch Google font ${googleFont.familyName}:`, error);
+            }
+          }
+        }
+
+        // Merge existing Google fonts with refreshed custom fonts to avoid conflicts
+        const existingGoogleFonts = project.fonts.googleFonts.map(font => ({ ...font, isLoaded: true }));
+        
+        // Update the project fonts state with the complete list from IndexedDB
+        const updatedProject = {
+          ...project,
+          fonts: {
+            ...project.fonts,
+            // Replace custom fonts with the complete list from IndexedDB
+            customFonts: refreshedCustomFonts.map(font => ({ ...font, isLoaded: true })),
+            // Keep existing Google fonts
+            googleFonts: existingGoogleFonts,
+          },
+          updatedAt: new Date().toISOString(),
+        };
+
+        set({ project: updatedProject });
+        console.log(`Updated project with ${refreshedCustomFonts.length} custom fonts`);
+      } catch (error) {
+        console.error('Failed to refetch fonts from IndexedDB:', error);
+      }
     },
 
     addGoogleFont: async (googleFont: GoogleFont) => {
