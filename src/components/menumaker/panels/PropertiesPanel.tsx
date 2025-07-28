@@ -2,7 +2,7 @@
 import React from "react";
 
 import { useMenuMakerStore } from "../../../stores/menumaker";
-import { TextElement } from "../../../types/menumaker";
+import { FontWeight, TextElement } from "../../../types/menumaker";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
 import { FontSelector } from "../FontSelector";
@@ -73,8 +73,102 @@ export function PropertiesPanel() {
 
 // Component for editing a single element
 function ElementProperties({ element, onUpdate }: { element: any; onUpdate: (updates: any) => void }) {
+  const { getAllAvailableFonts, ensureFontLoaded } = useMenuMakerStore();
+
   if (element.type === "text") {
     const textElement = element as TextElement;
+
+    // Convert legacy fontStyle to separate fields if needed
+    const fontWeight =
+      textElement.fontWeight || ((textElement.fontStyle?.includes("bold") ? "700" : "400") as FontWeight);
+    const fontStyle = textElement.fontStyle?.includes("italic") ? "italic" : ("normal" as "normal" | "italic");
+
+    const handleFontWeightChange = (newWeight: string) => {
+      onUpdate({ fontWeight: newWeight as FontWeight });
+
+      // For Google Fonts, ensure the specific weight variant is loaded
+      const availableFonts = getAllAvailableFonts();
+      const currentFont = availableFonts.find((font) => font.familyName === textElement.fontFamily);
+
+      if (currentFont && currentFont.type === "google") {
+        // Force reload the Google Font to ensure the new weight is available
+        ensureFontLoaded(currentFont, true).then((loaded) => {
+          if (!loaded) {
+            console.warn(`Failed to load weight ${newWeight} for Google Font: ${textElement.fontFamily}`);
+          }
+        });
+      }
+    };
+
+    const handleFontStyleChange = (newStyle: "normal" | "italic") => {
+      onUpdate({ fontStyle: newStyle });
+
+      // For Google Fonts, ensure the specific style variant is loaded
+      const availableFonts = getAllAvailableFonts();
+      const currentFont = availableFonts.find((font) => font.familyName === textElement.fontFamily);
+
+      if (currentFont && currentFont.type === "google") {
+        // Force reload the Google Font to ensure the new style is available
+        ensureFontLoaded(currentFont, true).then((loaded) => {
+          if (!loaded) {
+            console.warn(`Failed to load style ${newStyle} for Google Font: ${textElement.fontFamily}`);
+          }
+        });
+      }
+    };
+
+    const handleFontFamilyChange = async (fontFamily: string) => {
+      try {
+        // Find the selected font
+        const availableFonts = getAllAvailableFonts();
+        const selectedFont = availableFonts.find((font) => font.familyName === fontFamily);
+
+        // Ensure the font is loaded before updating the element
+        if (selectedFont) {
+          const isLoaded = await ensureFontLoaded(selectedFont);
+
+          if (isLoaded) {
+            // Font is loaded, now update the element
+            onUpdate({
+              fontFamily,
+              fontWeight: "400" as FontWeight, // Reset to normal weight
+              fontStyle: "normal" as "normal", // Reset to normal style
+              letterSpacing: 0, // Reset letter spacing
+              lineHeight: 1.2, // Reset line height
+            });
+          } else {
+            console.warn(`Failed to load font: ${fontFamily}`);
+            // Still update but with a fallback
+            onUpdate({
+              fontFamily: "Arial", // Use fallback font
+              fontWeight: "400" as FontWeight,
+              fontStyle: "normal" as "normal",
+              letterSpacing: 0,
+              lineHeight: 1.2,
+            });
+          }
+        } else {
+          // Font not found in available fonts, use fallback
+          onUpdate({
+            fontFamily: "Arial",
+            fontWeight: "400" as FontWeight,
+            fontStyle: "normal" as "normal",
+            letterSpacing: 0,
+            lineHeight: 1.2,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading font:", error);
+        // Fallback to Arial if there's an error
+        onUpdate({
+          fontFamily: "Arial",
+          fontWeight: "400" as FontWeight,
+          fontStyle: "normal" as "normal",
+          letterSpacing: 0,
+          lineHeight: 1.2,
+        });
+      }
+    };
 
     return (
       <div className="space-y-3">
@@ -150,11 +244,19 @@ function ElementProperties({ element, onUpdate }: { element: any; onUpdate: (upd
           />
         </div>
 
+        {/* Enhanced Font Selector with all properties */}
         <div>
-          <Label htmlFor="text-font-family">Font Family</Label>
           <FontSelector
             value={textElement.fontFamily}
-            onChange={(fontFamily: string) => onUpdate({ fontFamily })}
+            onChange={handleFontFamilyChange}
+            fontWeight={fontWeight}
+            onFontWeightChange={handleFontWeightChange}
+            fontStyle={fontStyle}
+            onFontStyleChange={handleFontStyleChange}
+            letterSpacing={textElement.letterSpacing}
+            onLetterSpacingChange={(letterSpacing) => onUpdate({ letterSpacing })}
+            lineHeight={textElement.lineHeight}
+            onLineHeightChange={(lineHeight) => onUpdate({ lineHeight })}
             className="mt-1"
           />
         </div>

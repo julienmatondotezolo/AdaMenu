@@ -218,7 +218,8 @@ export interface TextElement extends BaseElement {
   content: string;
   fontSize: number;
   fontFamily: string;
-  fontStyle: "normal" | "bold" | "italic" | "bold italic";
+  fontWeight: FontWeight;
+  fontStyle: "normal" | "italic";
   textDecoration: "none" | "underline" | "line-through";
   fill: string;
   stroke: string;
@@ -502,7 +503,10 @@ export const MENU_PROJECT_SCHEMA = {
                       content: { type: "string" },
                       fontSize: { type: "number" },
                       fontFamily: { type: "string" },
-                      fontStyle: { enum: ["normal", "bold", "italic", "bold italic"] },
+                      fontStyle: { enum: ["normal", "italic"] },
+                      fontWeight: {
+                        enum: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900"],
+                      },
                       textDecoration: { enum: ["none", "underline", "line-through"] },
                       fill: { type: "string" },
                       stroke: { type: "string" },
@@ -570,9 +574,6 @@ export const MENU_PROJECT_SCHEMA = {
                       borderType: { enum: ["solid", "dashed", "dotted"] },
                       borderRadius: { type: "number" },
                       textColor: { type: "string" },
-                      fontWeight: {
-                        enum: ["normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900"],
-                      },
                       lineSpacing: { type: "number" },
                       itemNameLanguage: { enum: ["en", "fr", "it", "nl"] },
                       // Category/Subcategory title properties

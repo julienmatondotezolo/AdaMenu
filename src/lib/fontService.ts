@@ -122,8 +122,6 @@ class FontService {
       // Add display=swap for better performance
       fontUrl += "&display=swap";
 
-      console.log(`Loading Google Font: ${familyName} with URL: ${fontUrl}`);
-
       // Load the font using CSS
       const link = document.createElement("link");
 
@@ -300,9 +298,30 @@ class FontService {
     return this.loadedFonts.has(familyName);
   }
 
+  // Force reload a Google Font (useful when variants change)
+  async forceReloadGoogleFont(font: ProjectFont): Promise<boolean> {
+    if (font.type !== "google" || !font.googleFontData) {
+      return false;
+    }
+
+    const familyName = font.googleFontData.family;
+
+    // Remove from loaded cache to force reload
+    this.loadedGoogleFonts.delete(familyName);
+    this.loadedFonts.delete(familyName);
+
+    // Remove existing link elements for this font
+    const existingLinks = document.querySelectorAll(`link[href*="${familyName.replace(/\s+/g, "+")}"]`);
+
+    existingLinks.forEach((link) => link.remove());
+
+    // Reload with current variants
+    return await this.loadGoogleFont(font);
+  }
+
   // Ensure a font is loaded before use
-  async ensureFontLoaded(font: ProjectFont): Promise<boolean> {
-    if (this.isFontLoaded(font.familyName)) {
+  async ensureFontLoaded(font: ProjectFont, forceReload: boolean = false): Promise<boolean> {
+    if (!forceReload && this.isFontLoaded(font.familyName)) {
       return true;
     }
 
@@ -310,6 +329,9 @@ class FontService {
       this.loadedFonts.add(font.familyName);
       return true;
     } else if (font.type === "google") {
+      if (forceReload) {
+        return await this.forceReloadGoogleFont(font);
+      }
       return await this.loadGoogleFont(font);
     } else if (font.type === "custom" && font.customFontFiles) {
       const results = await Promise.all(

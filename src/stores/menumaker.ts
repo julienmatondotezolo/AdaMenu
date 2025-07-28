@@ -118,7 +118,7 @@ interface MenuMakerStore {
   addCustomFont: (fontFile: File) => Promise<CustomFontFile | null>;
   removeFont: (fontId: string) => Promise<void>;
   getAllAvailableFonts: () => ProjectFont[];
-  ensureFontLoaded: (font: ProjectFont) => Promise<boolean>;
+  ensureFontLoaded: (font: ProjectFont, forceReload?: boolean) => Promise<boolean>;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -2430,6 +2430,6 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       ]);
     },
 
-    ensureFontLoaded: async (font: ProjectFont) => await fontService.ensureFontLoaded(font),
+    ensureFontLoaded: async (font: ProjectFont, forceReload?: boolean) => await fontService.ensureFontLoaded(font, forceReload),
   })),
 );
