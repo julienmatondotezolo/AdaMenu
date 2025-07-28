@@ -1,9 +1,10 @@
-import { Check, CheckCircle2, Clock, Download, Edit2, Eye, Loader2, Save, X } from "lucide-react";
+import { Check, CheckCircle2, Clock, Download, Edit2, Eye, Loader2, Save, Settings, X } from "lucide-react";
 import React, { useState } from "react";
 
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { ProjectSettingsModal } from "./ProjectSettingsModal";
 
 interface ToolbarProps {
   onNewProject: () => void;
@@ -24,6 +25,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [editingName, setEditingName] = useState("");
+  const [showProjectSettings, setShowProjectSettings] = useState(false);
 
   const formatSavedDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -56,103 +58,114 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-      {/* Left Section - File Actions */}
-      <div className="flex items-center space-x-2">
-        <Button variant="outline" size="sm" onClick={onNewProject}>
-          Go to Dashboard
-        </Button>
+    <>
+      <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        {/* Left Section - File Actions */}
+        <div className="flex items-center space-x-2">
+          <Button variant="outline" size="sm" onClick={onNewProject}>
+            Go to Dashboard
+          </Button>
 
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-      </div>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
+        </div>
 
-      <div className="flex items-center space-x-2">
-        {/* Project Name with inline editing */}
-        {project && (
-          <>
-            {isEditingName ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  className="h-8 w-48"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      handleSaveRename();
-                    } else if (e.key === "Escape") {
-                      handleCancelRename();
-                    }
-                  }}
-                />
-                <Button variant="outline" size="sm" onClick={handleSaveRename} className="h-8 w-8 p-0">
-                  <Check className="w-3 h-3" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={handleCancelRename} className="h-8 w-8 p-0">
-                  <X className="w-3 h-3" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-1">
+        <div className="flex items-center space-x-2">
+          {/* Project Name with inline editing */}
+          {project && (
+            <>
+              {isEditingName ? (
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900 dark:text-white" title={project.name}>
-                    {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
-                  </span>
-                  <Button variant="ghost" size="sm" onClick={handleStartRename} className="h-6 w-6 p-0">
-                    <Edit2 className="w-3 h-3" />
+                  <Input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    className="h-8 w-48"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        handleSaveRename();
+                      } else if (e.key === "Escape") {
+                        handleCancelRename();
+                      }
+                    }}
+                  />
+                  <Button variant="outline" size="sm" onClick={handleSaveRename} className="h-8 w-8 p-0">
+                    <Check className="w-3 h-3" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleCancelRename} className="h-8 w-8 p-0">
+                    <X className="w-3 h-3" />
                   </Button>
                 </div>
-                <div className="flex items-center gap-1 text-xs">
-                  {isSaving ? (
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                      <span>Saving changes....</span>
-                    </div>
-                  ) : saveSuccess ? (
-                    <div className="flex items-center gap-1 text-green-600">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>Successfully saved</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                      <Clock className="w-3 h-3" />
-                      <span>Saved: {formatSavedDate(project.updatedAt)}</span>
-                    </div>
-                  )}
+              ) : (
+                <div className="flex flex-col items-center gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-gray-900 dark:text-white" title={project.name}>
+                      {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
+                    </span>
+                    <Button variant="ghost" size="sm" onClick={handleStartRename} className="h-6 w-6 p-0">
+                      <Edit2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs">
+                    {isSaving ? (
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Saving changes....</span>
+                      </div>
+                    ) : saveSuccess ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle2 className="w-3 h-3" />
+                        <span>Successfully saved</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+                        <Clock className="w-3 h-3" />
+                        <span>Saved: {formatSavedDate(project.updatedAt)}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {/* Right Section - View Controls */}
-      <div className="flex items-center space-x-4">
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setPreviewMode(true)}
-          title="Enter Preview Mode"
-          disabled={isPreviewMode}
-        >
-          <Eye className="w-4 h-4 mr-1" />
-          Preview
-        </Button>
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
-
-        <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
-          {isSaving ? (
-            <Loader2 className="w-4 h-4 mr-1 animate-spin text-blue-600" />
-          ) : (
-            <Save className="w-4 h-4 mr-1" />
+              )}
+            </>
           )}
-          {isSaving ? "Saving..." : "Save"}
-        </Button>
-        <Button variant="default" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
-          {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
-          {isExportingPDF ? "Exporting..." : "Export"}
-        </Button>
+        </div>
+
+        {/* Right Section - View Controls */}
+        <div className="flex items-center space-x-4">
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
+          <Button variant="outline" size="sm" onClick={() => setShowProjectSettings(true)} title="Project Settings">
+            <Settings className="w-4 h-4 mr-1" />
+            Settings
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPreviewMode(true)}
+            title="Enter Preview Mode"
+            disabled={isPreviewMode}
+          >
+            <Eye className="w-4 h-4 mr-1" />
+            Preview
+          </Button>
+
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
+
+          <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-1 animate-spin text-blue-600" />
+            ) : (
+              <Save className="w-4 h-4 mr-1" />
+            )}
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+          <Button variant="default" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
+            {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+            {isExportingPDF ? "Exporting..." : "Export"}
+          </Button>
+        </div>
       </div>
-    </div>
+
+      {/* Project Settings Modal */}
+      <ProjectSettingsModal isOpen={showProjectSettings} onClose={() => setShowProjectSettings(false)} />
+    </>
   );
 }

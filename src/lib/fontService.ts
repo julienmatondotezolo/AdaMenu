@@ -59,12 +59,70 @@ class FontService {
     }
 
     try {
-      // Create Google Fonts URL with requested variants
+      // Parse and format variants correctly for Google Fonts CSS API v2
       const variants = font.variants.length > 0 ? font.variants : ["400"];
-      const variantsString = variants.join(",");
-      const fontUrl = `https://fonts.googleapis.com/css2?family=${familyName.replace(/\s+/g, "+")}:wght@${variantsString}&display=swap`;
 
-      console.log("fontUrl:", fontUrl);
+      // Separate regular weights from italic weights
+      const regularWeights: string[] = [];
+      const italicWeights: string[] = [];
+
+      variants.forEach((variant) => {
+        if (variant.includes("italic")) {
+          // Extract weight from italic variant (e.g., "400italic" -> "400")
+          const weight = variant.replace("italic", "") || "400";
+
+          if (weight === "regular") {
+            italicWeights.push("400");
+          } else {
+            italicWeights.push(weight);
+          }
+        } else {
+          // Regular weights
+          if (variant === "regular") {
+            regularWeights.push("400");
+          } else {
+            regularWeights.push(variant);
+          }
+        }
+      });
+
+      // Build the font URL according to Google Fonts CSS API v2 format
+      let fontUrl = `https://fonts.googleapis.com/css2?family=${familyName.replace(/\s+/g, "+")}`;
+
+      // If we have both regular and italic weights, use ital,wght format
+      if (regularWeights.length > 0 && italicWeights.length > 0) {
+        const allWeights: string[] = [];
+
+        // Add regular weights (ital=0)
+        regularWeights.forEach((weight) => {
+          allWeights.push(`0,${weight}`);
+        });
+
+        // Add italic weights (ital=1)
+        italicWeights.forEach((weight) => {
+          allWeights.push(`1,${weight}`);
+        });
+
+        fontUrl += `:ital,wght@${allWeights.join(";")}`;
+      }
+      // If we only have italic weights
+      else if (italicWeights.length > 0 && regularWeights.length === 0) {
+        const allWeights: string[] = [];
+
+        italicWeights.forEach((weight) => {
+          allWeights.push(`1,${weight}`);
+        });
+        fontUrl += `:ital,wght@${allWeights.join(";")}`;
+      }
+      // If we only have regular weights
+      else if (regularWeights.length > 0) {
+        fontUrl += `:wght@${regularWeights.join(";")}`;
+      }
+
+      // Add display=swap for better performance
+      fontUrl += "&display=swap";
+
+      console.log(`Loading Google Font: ${familyName} with URL: ${fontUrl}`);
 
       // Load the font using CSS
       const link = document.createElement("link");
@@ -225,8 +283,6 @@ class FontService {
   // Get all available fonts for a project
   getAllAvailableFonts(projectFonts?: ProjectFont[]): ProjectFont[] {
     const allFonts: ProjectFont[] = [...DEFAULT_FONTS];
-
-    console.log("allFonts:", allFonts);
 
     if (projectFonts) {
       // Add Google Fonts
