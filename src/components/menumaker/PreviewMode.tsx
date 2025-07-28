@@ -54,15 +54,15 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
   }, [previewImages, project, currentPageId]);
 
   return (
-    <div className="relative w-full h-full bg-gray-100">
+    <div className="relative w-full h-full bg-gray-100 dark:bg-[#121212]">
       {/* Exit Preview Button */}
       {showExitButton && (
         <button
           onClick={onExit}
-          className="absolute top-4 right-4 z-10 w-10 h-10 bg-white border border-gray-300 rounded-lg shadow-lg hover:bg-gray-50 flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 z-10 w-10 h-10 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center transition-colors"
           title="Exit Preview Mode"
         >
-          <X className="w-5 h-5 text-gray-600" />
+          <X className="w-5 h-5 text-gray-600 dark:text-gray-300" />
         </button>
       )}
 
@@ -70,11 +70,11 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
       <div className="w-full h-full overflow-auto">
         {isGeneratingPreview ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-center bg-white p-6 rounded-lg shadow-lg border">
+            <div className="text-center bg-white dark:bg-gray-900 p-6 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Generating Preview</h3>
-              <p className="text-sm text-gray-600 mb-1">Rendering your menu design...</p>
-              <p className="text-xs text-gray-500">This may take a few moments</p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">Generating Preview</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Rendering your menu design...</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">This may take a few moments</p>
             </div>
           </div>
         ) : previewImages.length > 0 ? (
@@ -105,11 +105,11 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
                 </div>
 
                 {/* Page Image */}
-                <div className="bg-white p-2 rounded-lg shadow-lg">
+                <div className="bg-white dark:bg-gray-800 p-2 rounded-lg shadow-lg">
                   <img
                     src={imageData}
                     alt={`Page ${index + 1} Preview`}
-                    className="max-w-full h-auto rounded border border-gray-200"
+                    className="max-w-full h-auto rounded border border-gray-200 dark:border-gray-600"
                     style={{ maxHeight: "70vh" }}
                   />
                 </div>
@@ -117,24 +117,24 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
             ))}
 
             {/* Footer Info */}
-            <div className="text-xs text-gray-500 text-center">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
               This is a preview. Export to PDF for high-quality output.
             </div>
           </div>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p className="text-gray-600">No preview available</p>
+            <p className="text-gray-600 dark:text-gray-300">No preview available</p>
           </div>
         )}
       </div>
 
       {/* Preview Header */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 bg-white px-4 py-2 rounded-lg shadow-sm border">
-        <span className="text-sm font-medium text-gray-700">
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
           {previewImages.length === 1 ? "1 Page" : `${previewImages.length} Pages`}
         </span>
-        <div className="w-px h-4 bg-gray-300"></div>
-        <span className="text-xs text-gray-500">Preview Quality</span>
+        <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+        <span className="text-xs text-gray-500 dark:text-gray-400">Preview Quality</span>
       </div>
     </div>
   );
