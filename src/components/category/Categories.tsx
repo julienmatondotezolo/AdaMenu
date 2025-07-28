@@ -43,7 +43,7 @@ import { UpdateMenu, UpdateSubCategory } from "./update";
 function Categories() {
   const locale = useLocale();
   const text = useTranslations("Index");
-  const { loadProject, setMenuData, clearMenuData } = useMenuMakerStore();
+  const { loadProject, setMenuData, setMenuLoading, setMenuError, clearMenuData } = useMenuMakerStore();
   const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [categoryId, setCategoryId] = useState<string>();
@@ -67,23 +67,32 @@ function Categories() {
     const unsubscribe = queryClient.getMutationCache().subscribe(async (mutation) => {
       if (mutation?.state?.status === "success") {
         try {
+          setMenuLoading(true);
+          setMenuError(null);
           // Clear existing menu data first
           clearMenuData();
 
           // Fetch the complete menu and save to store
-          const completeMenu = await fetchCompleteMenu();
+          const menuResponse = await fetchCompleteMenu();
 
-          setMenuData(completeMenu);
+          if (menuResponse && Array.isArray(menuResponse)) {
+            setMenuData(menuResponse);
+          } else {
+            setMenuError("Invalid menu data format received");
+          }
           queryClient.invalidateQueries("menuItems");
         } catch (error) {
-          console.error("Failed to fetch complete menu after mutation:", error);
+          console.error("Error fetching menu data:", error);
+          setMenuError(error instanceof Error ? error.message : "Unknown error occurred");
+        } finally {
+          setMenuLoading(false);
         }
       }
     });
 
     // Cleanup subscription on component unmount
     return unsubscribe;
-  }, [queryClient, clearMenuData, setMenuData]);
+  }, [queryClient, clearMenuData, setMenuData, setMenuLoading, setMenuError]);
 
   // Define the query for fetching menu items based on the selected subCategoryId
   const { data: menuItems } = useQuery(
@@ -133,6 +142,31 @@ function Categories() {
         }
       }
     }
+  }, []); // Run only once on component mount
+
+  // Fetch initial menu data when component mounts
+  useEffect(() => {
+    const fetchInitialMenuData = async () => {
+      try {
+        setMenuLoading(true);
+        setMenuError(null);
+
+        const menuResponse = await fetchCompleteMenu();
+
+        if (menuResponse && Array.isArray(menuResponse)) {
+          setMenuData(menuResponse);
+        } else {
+          setMenuError("Invalid menu data format received");
+        }
+      } catch (error) {
+        console.error("Error fetching initial menu data:", error);
+        setMenuError(error instanceof Error ? error.message : "Unknown error occurred");
+      } finally {
+        setMenuLoading(false);
+      }
+    };
+
+    fetchInitialMenuData();
   }, []); // Run only once on component mount
 
   // Auto-select the first category when categories are loaded

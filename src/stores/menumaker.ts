@@ -1887,7 +1887,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
     // Generate preview images
     generatePreviewImages: async () => {
-      const { project } = get();
+      const { project, menuData } = get();
 
       if (!project) {
         return [];
@@ -2113,41 +2113,68 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
                 ctx.textBaseline = "top";
 
                 if (dataElement.dataType === "category") {
-                  if (dataElement.categoryData) {
+                  // Get fresh category data from menuData store
+                  const freshCategoryData = menuData.categories.find(cat => cat.id === dataElement.dataId);
+
+                  if (freshCategoryData) {
                     // Show the actual category name with language fallback
-                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
-                    
-                    displayText = dataElement.categoryData.names?.[lang] || 
-                                 dataElement.categoryData.names?.en ||
-                                 dataElement.categoryData.names?.fr ||
-                                 dataElement.categoryData.names?.it ||
-                                 dataElement.categoryData.names?.nl ||
-                                 dataElement.categoryData.name || 
+                    const lang: string = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+
+                    displayText = freshCategoryData.names?.[lang as keyof typeof freshCategoryData.names] || 
+                                 freshCategoryData.names?.en ||
+                                 freshCategoryData.names?.fr ||
+                                 freshCategoryData.names?.it ||
+                                 freshCategoryData.names?.nl ||
                                  "Category";
                   } else {
                     displayText = "Select category";
                   }
                 } else if (dataElement.dataType === "subcategory") {
-                  if (dataElement.subcategoryData) {
+                  // Get fresh subcategory data from menuData store
+                  let freshSubcategoryData = null;
+
+                  for (const category of menuData.categories) {
+                    if (category.subCategories) {
+                      freshSubcategoryData = category.subCategories.find(subcat => subcat.id === dataElement.dataId);
+                      if (freshSubcategoryData) break;
+                    }
+                  }
+                  
+                  if (freshSubcategoryData) {
                     // Show the actual subcategory name with language fallback
-                    const lang = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
-                    
-                    displayText = dataElement.subcategoryData.names?.[lang] ||
-                                 dataElement.subcategoryData.names?.en ||
-                                 dataElement.subcategoryData.names?.fr ||
-                                 dataElement.subcategoryData.names?.it ||
-                                 dataElement.subcategoryData.names?.nl ||
-                                 dataElement.subcategoryData.name || 
+                    const lang: string = dataElement.titleLanguage || dataElement.itemNameLanguage || "en";
+
+                    displayText = freshSubcategoryData.names?.[lang as keyof typeof freshSubcategoryData.names] ||
+                                 freshSubcategoryData.names?.en ||
+                                 freshSubcategoryData.names?.fr ||
+                                 freshSubcategoryData.names?.it ||
+                                 freshSubcategoryData.names?.nl ||
                                  "Subcategory";
                   } else {
                     displayText = "Select subcategory";
                   }
                 } else if (dataElement.dataType === "menuitem") {
-                  if (dataElement.subcategoryData) {
+                  // Get fresh subcategory data from menuData store for menu items
+                  let freshSubcategoryData = null;
+
+                  for (const category of menuData.categories) {
+                    if (category.subCategories) {
+                      freshSubcategoryData = category.subCategories.find(subcat => subcat.id === dataElement.dataId);
+                      if (freshSubcategoryData) break;
+                    }
+                  }
+                  
+                  if (freshSubcategoryData) {
+                    // Create a temporary element with fresh data for rendering
+                    const elementWithFreshData = {
+                      ...dataElement,
+                      subcategoryData: freshSubcategoryData,
+                    };
+                    
                     // Draw menu items list for menu item data elements using the utility function
                     drawMenuItemsList({
                       ctx,
-                      element: dataElement,
+                      element: elementWithFreshData,
                       x: dataElement.x,
                       y: dataElement.y,
                       width: dataElement.width,
