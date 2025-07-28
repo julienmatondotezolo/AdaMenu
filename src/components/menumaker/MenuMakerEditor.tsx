@@ -12,6 +12,7 @@ import { ExportLoader } from "./ExportLoader";
 import { MainToolbar } from "./MainToolbar";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { DataPanel } from "./panels/DataPanel";
+import { FontManagementPanel } from "./panels/FontManagementPanel";
 import { ImagePanel } from "./panels/ImagePanel";
 import { LayersPanel } from "./panels/LayersPanel";
 import { PropertiesPanel } from "./panels/PropertiesPanel";
@@ -25,15 +26,30 @@ interface MenuMakerEditorProps {
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
-  const { project, currentPageId, editorState, saveProject, setMenuData, setMenuLoading, setMenuError, addLayer, deleteLayer, duplicateLayer, selectLayer, isPreviewMode, setPreviewMode } =
-    useMenuMakerStore();
+  const {
+    project,
+    editorState,
+    currentPageId,
+    setMenuData,
+    setMenuLoading,
+    setMenuError,
+    addLayer,
+    duplicateLayer,
+    deleteLayer,
+    selectLayer,
+    exportToPDF,
+    saveProject,
+  } = useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isPreviewMode, setPreviewMode] = useState(false);
   const [layersCollapsed, setLayersCollapsed] = useState(false);
-  const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
-  const [shapePropertiesCollapsed, setShapePropertiesCollapsed] = useState(false);
-  const [imagePropertiesCollapsed, setImagePropertiesCollapsed] = useState(false);
+  const [fontsCollapsed, setFontsCollapsed] = useState(false);
+  const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
+  const [imagesCollapsed, setImagesCollapsed] = useState(false);
+  const [shapesCollapsed, setShapesCollapsed] = useState(false);
+  const [dataCollapsed, setDataCollapsed] = useState(false);
 
   // Fetch fresh menu data every time component loads
   useEffect(() => {
@@ -300,18 +316,14 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {selectedElements.length > 0 &&
-              editorState.ui.propertiesPanelOpen &&
-              !hasSelectedDataElement &&
-              !hasSelectedShapeElement &&
-              !hasSelectedImageElement && (
-              <div>
+            {editorState.ui.propertiesPanelOpen && (
+              <div className="border-b border-gray-300 dark:border-gray-700">
                 {/* Properties Header */}
                 <div
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
                   onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
+                    if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
                       setPropertiesCollapsed(!propertiesCollapsed);
                     }
@@ -333,12 +345,47 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
                 {/* Properties Content */}
                 {!propertiesCollapsed && (
-                  <div id="properties-content" className="overflow-y-auto">
+                  <div id="properties-content" className="max-h-96 overflow-y-auto">
                     <PropertiesPanel />
                   </div>
                 )}
               </div>
             )}
+
+            {/* Font Management Panel */}
+            <div className="border-b border-gray-300 dark:border-gray-700">
+              {/* Font Management Header */}
+              <div
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => setFontsCollapsed(!fontsCollapsed)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setFontsCollapsed(!fontsCollapsed);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={!fontsCollapsed}
+                aria-controls="fonts-content"
+              >
+                <h3 className="font-semibold text-gray-900 dark:text-white">Font Management</h3>
+                <div className="flex items-center">
+                  {fontsCollapsed ? (
+                    <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+              </div>
+
+              {/* Font Management Content */}
+              {!fontsCollapsed && (
+                <div id="fonts-content" className="max-h-96 overflow-y-auto">
+                  <FontManagementPanel />
+                </div>
+              )}
+            </div>
 
             {/* Shape Properties Panel */}
             {hasSelectedShapeElement && editorState.ui.propertiesPanelOpen && (
@@ -346,21 +393,21 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 {/* Shape Properties Header */}
                 <div
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => setShapePropertiesCollapsed(!shapePropertiesCollapsed)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setShapePropertiesCollapsed(!shapePropertiesCollapsed);
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  aria-expanded={!shapePropertiesCollapsed}
+                                  onClick={() => setShapesCollapsed(!shapesCollapsed)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setShapesCollapsed(!shapesCollapsed);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={!shapesCollapsed}
                   aria-controls="shape-properties-content"
                 >
                   <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                   <div className="flex items-center">
-                    {shapePropertiesCollapsed ? (
+                    {shapesCollapsed ? (
                       <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
                       <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -369,7 +416,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 </div>
 
                 {/* Shape Properties Content */}
-                {!shapePropertiesCollapsed && (
+                {!shapesCollapsed && (
                   <div id="shape-properties-content" className="overflow-y-auto">
                     <ShapePanel />
                   </div>
@@ -383,21 +430,21 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 {/* Image Properties Header */}
                 <div
                   className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                  onClick={() => setImagePropertiesCollapsed(!imagePropertiesCollapsed)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setImagePropertiesCollapsed(!imagePropertiesCollapsed);
+                                  onClick={() => setImagesCollapsed(!imagesCollapsed)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setImagesCollapsed(!imagesCollapsed);
                     }
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-expanded={!imagePropertiesCollapsed}
+                  aria-expanded={!imagesCollapsed}
                   aria-controls="image-properties-content"
                 >
                   <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                   <div className="flex items-center">
-                    {imagePropertiesCollapsed ? (
+                    {imagesCollapsed ? (
                       <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
                       <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -406,7 +453,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 </div>
 
                 {/* Image Properties Content */}
-                {!imagePropertiesCollapsed && (
+                {!imagesCollapsed && (
                   <div id="image-properties-content" className="overflow-y-auto">
                     <ImagePanel />
                   </div>

@@ -123,45 +123,42 @@ function ElementProperties({ element, onUpdate }: { element: any; onUpdate: (upd
         const availableFonts = getAllAvailableFonts();
         const selectedFont = availableFonts.find((font) => font.familyName === fontFamily);
 
-        // Ensure the font is loaded before updating the element
-        if (selectedFont) {
-          const isLoaded = await ensureFontLoaded(selectedFont);
+        // Always update the font family first
+        const fontUpdate = {
+          fontFamily,
+          fontWeight: "400" as FontWeight, // Reset to normal weight
+          fontStyle: "normal" as "normal", // Reset to normal style
+          letterSpacing: 0, // Reset letter spacing
+          lineHeight: 1.2, // Reset line height
+        };
 
-          if (isLoaded) {
-            // Font is loaded, now update the element
-            onUpdate({
-              fontFamily,
-              fontWeight: "400" as FontWeight, // Reset to normal weight
-              fontStyle: "normal" as "normal", // Reset to normal style
-              letterSpacing: 0, // Reset letter spacing
-              lineHeight: 1.2, // Reset line height
-            });
-          } else {
-            console.warn(`Failed to load font: ${fontFamily}`);
-            // Still update but with a fallback
-            onUpdate({
-              fontFamily: "Arial", // Use fallback font
-              fontWeight: "400" as FontWeight,
-              fontStyle: "normal" as "normal",
-              letterSpacing: 0,
-              lineHeight: 1.2,
-            });
+        // Update the element immediately with the selected font
+        onUpdate(fontUpdate);
+
+        // Try to ensure the font is loaded (for Google/custom fonts)
+        if (selectedFont) {
+          try {
+            const isLoaded = await ensureFontLoaded(selectedFont);
+
+            if (!isLoaded) {
+              console.warn(`Font may not have loaded properly: ${fontFamily}`);
+              // Don't fallback to Arial - keep the selected font
+            }
+          } catch (loadError) {
+            console.warn(`Error loading font ${fontFamily}:`, loadError);
+            // Don't fallback to Arial - keep the selected font
           }
         } else {
-          // Font not found in available fonts, use fallback
-          onUpdate({
-            fontFamily: "Arial",
-            fontWeight: "400" as FontWeight,
-            fontStyle: "normal" as "normal",
-            letterSpacing: 0,
-            lineHeight: 1.2,
-          });
+          // Font not found in available fonts list, but still use it
+          // This handles cases where custom fonts might not be properly registered
+          console.warn(`Font not found in available fonts: ${fontFamily}`);
+          // Don't fallback to Arial - keep the selected font
         }
       } catch (error) {
-        console.error("Error loading font:", error);
-        // Fallback to Arial if there's an error
+        console.error("Error in font family change:", error);
+        // Even on error, keep the selected font instead of falling back to Arial
         onUpdate({
-          fontFamily: "Arial",
+          fontFamily,
           fontWeight: "400" as FontWeight,
           fontStyle: "normal" as "normal",
           letterSpacing: 0,

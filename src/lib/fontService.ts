@@ -194,6 +194,9 @@ class FontService {
       // Extract family name from file name (basic approach)
       const familyName = fontFile.name.replace(/\.(woff2?|ttf|otf)$/i, "").replace(/[-_]/g, " ");
 
+      // Ensure IndexedDB is ready before saving
+      await indexedDBService.init();
+
       // Save font to IndexedDB
       const blobUrl = await indexedDBService.saveFont(fontId, fontFile, familyName, fontFile.name, format);
 
@@ -210,7 +213,11 @@ class FontService {
       };
 
       // Load the font into the document
-      await this.loadCustomFontFromBlob(customFontFile, blobUrl);
+      const loadSuccess = await this.loadCustomFontFromBlob(customFontFile, blobUrl);
+
+      if (!loadSuccess) {
+        throw new Error(`Failed to load font ${familyName} into the document`);
+      }
 
       return customFontFile;
     } catch (error) {
@@ -222,24 +229,40 @@ class FontService {
   // Load custom font from blob URL
   async loadCustomFontFromBlob(fontFile: CustomFontFile, blobUrl: string): Promise<boolean> {
     try {
+      // Check if FontFace is supported
+      if (typeof FontFace === "undefined") {
+        throw new Error("FontFace API not supported in this browser");
+      }
+
       // Create a @font-face rule
       const fontFace = new FontFace(fontFile.familyName, `url(${blobUrl})`, {
         style: fontFile.style,
         weight: fontFile.weight.toString(),
       });
 
-      // Load the font
-      const loadedFontFace = await fontFace.load();
+      // Load the font with timeout
+      const loadPromise = fontFace.load();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Font load timeout")), 10000),
+      );
+
+      const loadedFontFace = await Promise.race([loadPromise, timeoutPromise]);
 
       // Add to document fonts
       document.fonts.add(loadedFontFace);
+
+      // Verify the font was actually added
+      if (!Array.from(document.fonts).find((f) => f.family === fontFile.familyName)) {
+        throw new Error("Font was not properly added to document.fonts");
+      }
 
       this.loadedFonts.add(fontFile.familyName);
 
       return true;
     } catch (error) {
-      console.error(`Error loading custom font ${fontFile.familyName}:`, error);
-      return false;
+      throw new Error(
+        `Error loading custom font ${fontFile.familyName}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
@@ -321,39 +344,56 @@ class FontService {
 
   // Ensure a font is loaded before use
   async ensureFontLoaded(font: ProjectFont, forceReload: boolean = false): Promise<boolean> {
-    if (!forceReload && this.isFontLoaded(font.familyName)) {
-      return true;
-    }
-
-    if (font.type === "system") {
-      this.loadedFonts.add(font.familyName);
-      return true;
-    } else if (font.type === "google") {
-      if (forceReload) {
-        return await this.forceReloadGoogleFont(font);
+    try {
+      // Check if already loaded and not forcing reload
+      if (!forceReload && this.isFontLoaded(font.familyName)) {
+        return true;
       }
-      return await this.loadGoogleFont(font);
-    } else if (font.type === "custom" && font.customFontFiles) {
-      const results = await Promise.all(
-        font.customFontFiles.map(async (fontFile) => {
-          try {
-            const blobUrl = await indexedDBService.getFont(fontFile.blobId);
 
-            if (blobUrl) {
-              return await this.loadCustomFontFromBlob(fontFile, blobUrl);
+      if (font.type === "system") {
+        this.loadedFonts.add(font.familyName);
+        return true;
+      } else if (font.type === "google") {
+        if (forceReload) {
+          return await this.forceReloadGoogleFont(font);
+        }
+        return await this.loadGoogleFont(font);
+      } else if (font.type === "custom" && font.customFontFiles) {
+        // Ensure IndexedDB is ready
+        await indexedDBService.init();
+
+        const results = await Promise.all(
+          font.customFontFiles.map(async (fontFile) => {
+            try {
+              const blobUrl = await indexedDBService.getFont(fontFile.blobId);
+
+              if (blobUrl) {
+                return await this.loadCustomFontFromBlob(fontFile, blobUrl);
+              } else {
+                // Font not found in IndexedDB
+                throw new Error(`Font file ${fontFile.fileName} not found in IndexedDB`);
+              }
+            } catch (error) {
+              throw error; // Re-throw to be caught by outer try-catch
             }
-            return false;
-          } catch (error) {
-            console.error(`Failed to load custom font file ${fontFile.name}:`, error);
-            return false;
-          }
-        }),
+          }),
+        );
+
+        const anyLoaded = results.some((result) => result);
+
+        if (anyLoaded) {
+          this.loadedFonts.add(font.familyName);
+        }
+
+        return anyLoaded;
+      }
+
+      return false;
+    } catch (error) {
+      throw new Error(
+        `Failed to load font ${font.familyName}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
-
-      return results.some((result) => result);
     }
-
-    return false;
   }
 
   // Convert Google Font data to ProjectFont

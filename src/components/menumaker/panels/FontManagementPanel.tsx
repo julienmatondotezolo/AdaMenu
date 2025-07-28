@@ -15,6 +15,7 @@ export function FontManagementPanel() {
   const [isLoadingGoogleFonts, setIsLoadingGoogleFonts] = useState(false);
   const [googleFonts, setGoogleFonts] = useState<GoogleFont[]>([]);
   const [isUploadingFont, setIsUploadingFont] = useState(false);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const availableFonts = getAllAvailableFonts();
@@ -26,6 +27,64 @@ export function FontManagementPanel() {
 
     return matchesTab && matchesSearch;
   });
+
+  // Debug IndexedDB
+  const handleDebugIndexedDB = async () => {
+    try {
+      if (typeof window !== "undefined" && (window as any).debugIndexedDB) {
+        await (window as any).debugIndexedDB();
+      } else {
+        // Fallback debug method
+        const { indexedDBService } = await import("../../../lib/indexedDBService");
+        const debug = await indexedDBService.debugIndexedDB();
+
+        // Create a simple alert with debug info instead of console.log
+        const debugInfo = `
+IndexedDB Debug Info:
+- Supported: ${debug.isSupported ? "✅" : "❌"}
+- Initialized: ${debug.isInitialized ? "✅" : "❌"}
+- Database: ${debug.dbName} v${debug.version}
+- Stores: ${debug.stores.join(", ")}
+- Font Count: ${debug.fontCount}
+- Fonts: ${debug.fonts.map((f) => `${f.familyName} (${f.fileName})`).join(", ")}
+        `;
+
+        // eslint-disable-next-line no-alert
+        alert(debugInfo);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert(`Debug failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
+
+  // Test font functionality
+  const handleTestFontSystem = async () => {
+    try {
+      const { indexedDBService } = await import("../../../lib/indexedDBService");
+
+      // Test IndexedDB initialization
+      await indexedDBService.init();
+
+      // Get current font count
+      const allFonts = await indexedDBService.getAllFonts();
+
+      // eslint-disable-next-line no-alert
+      alert(`Font System Test Results:
+✅ IndexedDB initialized successfully
+✅ Found ${allFonts.length} fonts in storage
+✅ Font management system is working
+
+You can now:
+1. Upload custom fonts (.woff, .woff2, .ttf, .otf)
+2. Browse and add Google Fonts
+3. Preview fonts in real-time
+4. Use fonts in your menu designs`);
+    } catch (error) {
+      // eslint-disable-next-line no-alert
+      alert(`Font System Test Failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  };
 
   // Load Google Fonts for selection
   const loadGoogleFonts = useCallback(async () => {
@@ -58,12 +117,47 @@ export function FontManagementPanel() {
 
     setIsUploadingFont(true);
 
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as string[],
+    };
+
     try {
       for (const file of Array.from(files)) {
-        await addCustomFont(file);
+        try {
+          const customFont = await addCustomFont(file);
+
+          if (customFont) {
+            results.success++;
+          } else {
+            results.failed++;
+            results.errors.push(`Failed to upload ${file.name}: Unknown error`);
+          }
+        } catch (error) {
+          results.failed++;
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+          results.errors.push(`Failed to upload ${file.name}: ${errorMessage}`);
+        }
+      }
+
+      // Show results to user
+      if (results.success > 0) {
+        // You could replace this with a toast notification
+        // eslint-disable-next-line no-alert
+        alert(`Successfully uploaded ${results.success} font${results.success !== 1 ? "s" : ""}`);
+      }
+
+      if (results.failed > 0) {
+        // eslint-disable-next-line no-alert
+        alert(
+          `Failed to upload ${results.failed} font${results.failed !== 1 ? "s" : ""}:\n${results.errors.join("\n")}`,
+        );
       }
     } catch (error) {
-      console.error("Failed to upload custom font:", error);
+      // eslint-disable-next-line no-alert
+      alert(`Font upload failed: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsUploadingFont(false);
       if (fileInputRef.current) {
@@ -105,8 +199,6 @@ export function FontManagementPanel() {
     <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Font Management</h2>
-
         {/* Tabs */}
         <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1 mb-4">
           {[
@@ -145,7 +237,7 @@ export function FontManagementPanel() {
         <div className="flex space-x-2">
           <Button onClick={loadGoogleFonts} disabled={isLoadingGoogleFonts} className="flex-1" variant="outline">
             <Download size={16} className="mr-2" />
-            {isLoadingGoogleFonts ? "Loading..." : "Browse Google Fonts"}
+            <p className="text-xs">{isLoadingGoogleFonts ? "Loading..." : "Browse Google Fonts"}</p>
           </Button>
 
           <input
@@ -164,9 +256,50 @@ export function FontManagementPanel() {
             variant="outline"
           >
             <Upload size={16} className="mr-2" />
-            {isUploadingFont ? "Uploading..." : "Upload Fonts"}
+            <p className="text-xs">{isUploadingFont ? "Uploading..." : "Upload Fonts"}</p>
           </Button>
         </div>
+
+        {/* Debug Controls */}
+        <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={() => setShowDebugInfo(!showDebugInfo)}
+            className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          >
+            {showDebugInfo ? "Hide" : "Show"} Debug Info
+          </button>
+
+          {showDebugInfo && (
+            <div className="flex space-x-2">
+              <button
+                onClick={handleTestFontSystem}
+                className="text-xs text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+              >
+                Test System
+              </button>
+              <button
+                onClick={handleDebugIndexedDB}
+                className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Debug IndexedDB
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Debug Information Display */}
+        {showDebugInfo && (
+          <div className="mt-3 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+            <div className="grid grid-cols-2 gap-2 text-gray-700 dark:text-gray-300">
+              <div>Total Fonts: {availableFonts.length}</div>
+              <div>Custom Fonts: {availableFonts.filter((f) => f.type === "custom").length}</div>
+              <div>Google Fonts: {availableFonts.filter((f) => f.type === "google").length}</div>
+              <div>System Fonts: {availableFonts.filter((f) => f.type === "system").length}</div>
+              <div>Loaded Fonts: {availableFonts.filter((f) => f.isLoaded).length}</div>
+              <div>IndexedDB: {typeof window !== "undefined" && typeof indexedDB !== "undefined" ? "✅" : "❌"}</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Font List */}
@@ -212,13 +345,31 @@ interface FontCardProps {
 
 function FontCard({ font, onPreview, onRemove }: FontCardProps) {
   const [isPreviewLoaded, setIsPreviewLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const handlePreviewClick = async () => {
-    if (!isPreviewLoaded) {
+    if (isPreviewLoaded || isLoading) return;
+
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
       await onPreview(font);
       setIsPreviewLoaded(true);
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : "Failed to load font");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Auto-load preview for already loaded fonts
+  React.useEffect(() => {
+    if (font.isLoaded && !isPreviewLoaded && !isLoading) {
+      setIsPreviewLoaded(true);
+    }
+  }, [font.isLoaded, isPreviewLoaded, isLoading]);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
@@ -241,7 +392,20 @@ function FontCard({ font, onPreview, onRemove }: FontCardProps) {
             {font.isLoaded && (
               <span className="inline-block w-2 h-2 bg-green-500 rounded-full" title="Font loaded"></span>
             )}
+            {loadError && (
+              <span className="text-xs text-red-500" title={loadError}>
+                ⚠️
+              </span>
+            )}
           </div>
+
+          {/* Debug info for custom fonts */}
+          {font.type === "custom" && font.customFontFiles && (
+            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {font.customFontFiles.length} file{font.customFontFiles.length !== 1 ? "s" : ""}
+              {font.customFontFiles.map((file) => ` • ${file.fileName}`).join("")}
+            </div>
+          )}
         </div>
 
         <div className="flex space-x-1">
@@ -259,7 +423,9 @@ function FontCard({ font, onPreview, onRemove }: FontCardProps) {
 
       {/* Font Preview */}
       <div
-        className="p-3 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 transition-colors"
+        className={`p-3 bg-white dark:bg-gray-900 rounded border border-gray-200 dark:border-gray-600 cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 transition-colors relative ${
+          isLoading ? "opacity-50" : ""
+        }`}
         onClick={handlePreviewClick}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -273,10 +439,22 @@ function FontCard({ font, onPreview, onRemove }: FontCardProps) {
           fontFamily: isPreviewLoaded ? font.familyName : "inherit",
         }}
       >
+        {isLoading && (
+          <div className="absolute inset-0 bg-white dark:bg-gray-900 bg-opacity-75 flex items-center justify-center rounded">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+          </div>
+        )}
+
         <p className="text-lg text-gray-900 dark:text-white">The quick brown fox jumps over the lazy dog</p>
         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
           ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 1234567890
         </p>
+
+        {!isPreviewLoaded && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800 bg-opacity-90 rounded">
+            <span className="text-sm text-gray-600 dark:text-gray-300">Click to preview</span>
+          </div>
+        )}
       </div>
 
       {/* Variants */}

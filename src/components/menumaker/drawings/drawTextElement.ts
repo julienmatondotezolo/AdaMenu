@@ -109,10 +109,10 @@ export const drawTextElement = ({
   // For Google Fonts, ensure proper weight application
   if (fontFamily !== "Arial" && fontFamily !== "sans-serif") {
     // Use CSS font-weight property format for better Google Font support
-    fontString = `${fontStyle} ${fontWeight} ${fontSize}px "${fontFamily}", Arial, sans-serif`;
+    fontString = `${fontStyle} ${fontWeight} ${fontSize}px "${fontFamily}"`;
   } else {
     // For system fonts, use standard format
-    fontString = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}, Arial, sans-serif`;
+    fontString = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
   }
 
   ctx.font = fontString;

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { MenuProject } from "../types/menumaker";
 
 interface ProjectInfo {
@@ -31,17 +32,39 @@ class IndexedDBService {
   private dbName = "MenuMakerDB";
   private version = 2; // Incremented version for font support
   private db: IDBDatabase | null = null;
+  private initPromise: Promise<void> | null = null;
+  private isInitialized = false;
 
   async init(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    // Prevent multiple simultaneous initialization
+    if (this.initPromise) {
+      return this.initPromise;
+    }
+
+    if (this.isInitialized && this.db) {
+      return Promise.resolve();
+    }
+
+    this.initPromise = new Promise((resolve, reject) => {
+      if (typeof window === "undefined" || typeof indexedDB === "undefined") {
+        reject(new Error("IndexedDB not available in this environment"));
+        return;
+      }
+
       const request = indexedDB.open(this.dbName, this.version);
 
       request.onerror = () => {
-        reject(new Error("Failed to open IndexedDB"));
+        const error = new Error(`Failed to open IndexedDB: ${request.error?.message || "Unknown error"}`);
+
+        console.error("IndexedDB initialization error:", error);
+        this.initPromise = null;
+        reject(error);
       };
 
       request.onsuccess = () => {
         this.db = request.result;
+        this.isInitialized = true;
+        console.log("IndexedDB initialized successfully");
         resolve();
       };
 
@@ -49,12 +72,15 @@ class IndexedDBService {
         const db = (event.target as IDBOpenDBRequest).result;
         const oldVersion = event.oldVersion;
 
+        console.log(`IndexedDB upgrade: ${oldVersion} -> ${this.version}`);
+
         // Create projects store
         if (!db.objectStoreNames.contains("projects")) {
           const projectStore = db.createObjectStore("projects", { keyPath: "id" });
 
           projectStore.createIndex("updatedAt", "updatedAt", { unique: false });
           projectStore.createIndex("createdAt", "createdAt", { unique: false });
+          console.log("Created projects store");
         }
 
         // Create images store for blob storage
@@ -62,6 +88,7 @@ class IndexedDBService {
           const imageStore = db.createObjectStore("images", { keyPath: "id" });
 
           imageStore.createIndex("createdAt", "createdAt", { unique: false });
+          console.log("Created images store");
         }
 
         // Create fonts store for custom font blob storage (new in version 2)
@@ -70,13 +97,16 @@ class IndexedDBService {
 
           fontStore.createIndex("familyName", "familyName", { unique: false });
           fontStore.createIndex("createdAt", "createdAt", { unique: false });
+          console.log("Created fonts store");
         }
       };
     });
+
+    return this.initPromise;
   }
 
   private async ensureDB(): Promise<IDBDatabase> {
-    if (!this.db) {
+    if (!this.isInitialized || !this.db) {
       await this.init();
     }
     if (!this.db) {
@@ -298,67 +328,116 @@ class IndexedDBService {
     fileName: string,
     format: "woff" | "woff2" | "ttf" | "otf",
   ): Promise<string> {
-    const db = await this.ensureDB();
+    try {
+      console.log(`Saving font to IndexedDB: ${fontId} (${familyName})`);
+      const db = await this.ensureDB();
 
-    const fontData: FontBlob = {
-      id: fontId,
-      blob,
-      mimeType: blob.type,
-      familyName,
-      fileName,
-      format,
-      createdAt: new Date().toISOString(),
-    };
-
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["fonts"], "readwrite");
-      const store = transaction.objectStore("fonts");
-      const request = store.put(fontData);
-
-      request.onsuccess = () => {
-        // Return a blob URL that can be used immediately
-        const url = URL.createObjectURL(blob);
-
-        resolve(url);
+      const fontData: FontBlob = {
+        id: fontId,
+        blob,
+        mimeType: blob.type,
+        familyName,
+        fileName,
+        format,
+        createdAt: new Date().toISOString(),
       };
-      request.onerror = () => reject(new Error("Failed to save font"));
-    });
+
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readwrite");
+        const store = transaction.objectStore("fonts");
+        const request = store.put(fontData);
+
+        request.onsuccess = () => {
+          // Return a blob URL that can be used immediately
+          const url = URL.createObjectURL(blob);
+
+          console.log(`Font saved successfully: ${fontId} -> ${url}`);
+          resolve(url);
+        };
+
+        request.onerror = () => {
+          const error = new Error(`Failed to save font ${fontId}: ${request.error?.message || "Unknown error"}`);
+
+          console.error("Font save error:", error);
+          reject(error);
+        };
+
+        transaction.onerror = () => {
+          const error = new Error(`Transaction failed while saving font ${fontId}`);
+
+          console.error("Font save transaction error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error(`Error in saveFont for ${fontId}:`, error);
+      throw error;
+    }
   }
 
   async getFont(fontId: string): Promise<string | null> {
-    const db = await this.ensureDB();
+    try {
+      console.log(`Retrieving font from IndexedDB: ${fontId}`);
+      const db = await this.ensureDB();
 
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["fonts"], "readonly");
-      const store = transaction.objectStore("fonts");
-      const request = store.get(fontId);
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readonly");
+        const store = transaction.objectStore("fonts");
+        const request = store.get(fontId);
 
-      request.onsuccess = () => {
-        const result = request.result as FontBlob;
+        request.onsuccess = () => {
+          const result = request.result as FontBlob;
 
-        if (result) {
-          const url = URL.createObjectURL(result.blob);
+          if (result) {
+            const url = URL.createObjectURL(result.blob);
 
-          resolve(url);
-        } else {
-          resolve(null);
-        }
-      };
-      request.onerror = () => reject(new Error("Failed to get font"));
-    });
+            console.log(`Font retrieved successfully: ${fontId} -> ${url}`);
+            resolve(url);
+          } else {
+            console.warn(`Font not found in IndexedDB: ${fontId}`);
+            resolve(null);
+          }
+        };
+
+        request.onerror = () => {
+          const error = new Error(`Failed to get font ${fontId}: ${request.error?.message || "Unknown error"}`);
+
+          console.error("Font retrieval error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error(`Error in getFont for ${fontId}:`, error);
+      throw error;
+    }
   }
 
   async deleteFont(fontId: string): Promise<void> {
-    const db = await this.ensureDB();
+    try {
+      console.log(`Deleting font from IndexedDB: ${fontId}`);
+      const db = await this.ensureDB();
 
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["fonts"], "readwrite");
-      const store = transaction.objectStore("fonts");
-      const request = store.delete(fontId);
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readwrite");
+        const store = transaction.objectStore("fonts");
+        const request = store.delete(fontId);
 
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(new Error("Failed to delete font"));
-    });
+        request.onsuccess = () => {
+          console.log(`Font deleted successfully: ${fontId}`);
+          resolve();
+        };
+
+        request.onerror = () => {
+          const error = new Error(`Failed to delete font ${fontId}: ${request.error?.message || "Unknown error"}`);
+
+          console.error("Font deletion error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error(`Error in deleteFont for ${fontId}:`, error);
+      throw error;
+    }
   }
 
   async getAllFontIds(): Promise<string[]> {
@@ -377,19 +456,137 @@ class IndexedDBService {
   }
 
   async getFontsByFamily(familyName: string): Promise<FontBlob[]> {
-    const db = await this.ensureDB();
+    try {
+      console.log(`Getting fonts by family: ${familyName}`);
+      const db = await this.ensureDB();
 
-    return new Promise((resolve, reject) => {
-      const transaction = db.transaction(["fonts"], "readonly");
-      const store = transaction.objectStore("fonts");
-      const index = store.index("familyName");
-      const request = index.getAll(familyName);
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readonly");
+        const store = transaction.objectStore("fonts");
+        const index = store.index("familyName");
+        const request = index.getAll(familyName);
 
-      request.onsuccess = () => {
-        resolve(request.result as FontBlob[]);
-      };
-      request.onerror = () => reject(new Error("Failed to get fonts by family"));
-    });
+        request.onsuccess = () => {
+          const results = request.result as FontBlob[];
+
+          console.log(`Found ${results.length} fonts for family: ${familyName}`);
+          resolve(results);
+        };
+
+        request.onerror = () => {
+          const error = new Error(
+            `Failed to get fonts by family ${familyName}: ${request.error?.message || "Unknown error"}`,
+          );
+
+          console.error("Font family retrieval error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error(`Error in getFontsByFamily for ${familyName}:`, error);
+      throw error;
+    }
+  }
+
+  // Debug utilities
+  async getAllFonts(): Promise<FontBlob[]> {
+    try {
+      const db = await this.ensureDB();
+
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readonly");
+        const store = transaction.objectStore("fonts");
+        const request = store.getAll();
+
+        request.onsuccess = () => {
+          const results = request.result as FontBlob[];
+
+          console.log(`Total fonts in IndexedDB: ${results.length}`);
+          resolve(results);
+        };
+
+        request.onerror = () => {
+          const error = new Error(`Failed to get all fonts: ${request.error?.message || "Unknown error"}`);
+
+          console.error("Get all fonts error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error("Error in getAllFonts:", error);
+      throw error;
+    }
+  }
+
+  async debugIndexedDB(): Promise<{
+    isSupported: boolean;
+    isInitialized: boolean;
+    dbName: string;
+    version: number;
+    stores: string[];
+    fontCount: number;
+    fonts: { id: string; familyName: string; fileName: string; size: number }[];
+  }> {
+    const debug = {
+      isSupported: typeof window !== "undefined" && typeof indexedDB !== "undefined",
+      isInitialized: this.isInitialized,
+      dbName: this.dbName,
+      version: this.version,
+      stores: [] as string[],
+      fontCount: 0,
+      fonts: [] as { id: string; familyName: string; fileName: string; size: number }[],
+    };
+
+    try {
+      if (debug.isSupported && debug.isInitialized && this.db) {
+        debug.stores = Array.from(this.db.objectStoreNames);
+
+        if (debug.stores.includes("fonts")) {
+          const allFonts = await this.getAllFonts();
+
+          debug.fontCount = allFonts.length;
+          debug.fonts = allFonts.map((font) => ({
+            id: font.id,
+            familyName: font.familyName,
+            fileName: font.fileName,
+            size: font.blob.size,
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error during IndexedDB debug:", error);
+    }
+
+    return debug;
+  }
+
+  // Clear all fonts (for testing)
+  async clearAllFonts(): Promise<void> {
+    try {
+      console.log("Clearing all fonts from IndexedDB");
+      const db = await this.ensureDB();
+
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction(["fonts"], "readwrite");
+        const store = transaction.objectStore("fonts");
+        const request = store.clear();
+
+        request.onsuccess = () => {
+          console.log("All fonts cleared successfully");
+          resolve();
+        };
+
+        request.onerror = () => {
+          const error = new Error(`Failed to clear fonts: ${request.error?.message || "Unknown error"}`);
+
+          console.error("Clear fonts error:", error);
+          reject(error);
+        };
+      });
+    } catch (error) {
+      console.error("Error in clearAllFonts:", error);
+      throw error;
+    }
   }
 
   // Utility methods
@@ -434,7 +631,24 @@ class IndexedDBService {
 // Create singleton instance
 export const indexedDBService = new IndexedDBService();
 
-// Initialize the service
+// Initialize the service when in browser environment
 if (typeof window !== "undefined") {
-  indexedDBService.init().catch(console.error);
+  indexedDBService
+    .init()
+    .then(() => {
+      console.log("IndexedDBService initialized successfully");
+
+      // Add global debug helper
+      if (typeof window !== "undefined") {
+        (window as any).debugIndexedDB = async () => {
+          const debug = await indexedDBService.debugIndexedDB();
+
+          console.log("IndexedDB Debug Info:", debug);
+          return debug;
+        };
+      }
+    })
+    .catch((error) => {
+      console.error("Failed to initialize IndexedDBService:", error);
+    });
 }

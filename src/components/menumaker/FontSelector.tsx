@@ -59,12 +59,19 @@ export function FontSelector({
       onLineHeightChange(1.2);
     }
 
-    // Ensure the font is loaded for immediate use
+    // Try to ensure the font is loaded for immediate use (best effort)
     const selectedFont = availableFonts.find((font) => font.familyName === selectedFontFamily);
 
     if (selectedFont) {
-      await ensureFontLoaded(selectedFont);
+      try {
+        await ensureFontLoaded(selectedFont);
+      } catch (error) {
+        // Don't worry if font loading fails - the font family is already set
+        console.warn(`Font loading failed for ${selectedFontFamily}:`, error);
+      }
     }
+    // If font not found in available fonts, that's okay - custom fonts might not be properly registered
+    // but the font family is already set via onChange above
   };
 
   // Get available weights for the selected font
@@ -314,10 +321,20 @@ export function FontPreview({
 }: FontPreviewProps) {
   const { ensureFontLoaded, getAllAvailableFonts } = useMenuMakerStore();
   const [isLoaded, setIsLoaded] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [loadError, setLoadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const loadFont = async () => {
-      if (fontFamily) {
+      if (!fontFamily) {
+        setIsLoaded(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
         const availableFonts = getAllAvailableFonts();
         const font = availableFonts.find((f) => f.familyName === fontFamily);
 
@@ -325,7 +342,19 @@ export function FontPreview({
           const loaded = await ensureFontLoaded(font);
 
           setIsLoaded(loaded);
+
+          if (!loaded) {
+            setLoadError(`Failed to load font: ${fontFamily}`);
+          }
+        } else {
+          // For system fonts or fonts not in our list, assume they're available
+          setIsLoaded(true);
         }
+      } catch (error) {
+        setLoadError(`Error loading font: ${error instanceof Error ? error.message : "Unknown error"}`);
+        setIsLoaded(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -334,7 +363,7 @@ export function FontPreview({
 
   return (
     <div
-      className={`p-3 bg-gray-50 dark:bg-gray-800 rounded border text-gray-900 dark:text-white ${className}`}
+      className={`p-3 bg-gray-50 dark:bg-gray-800 rounded border text-gray-900 dark:text-white relative ${className}`}
       style={{
         fontFamily: isLoaded ? fontFamily : "inherit",
         fontSize: `${fontSize}px`,
@@ -344,10 +373,29 @@ export function FontPreview({
         lineHeight,
       }}
     >
-      {text}
-      {!isLoaded && fontFamily && (
-        <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Loading font...)</span>
+      {isLoading && (
+        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-700 bg-opacity-75 flex items-center justify-center rounded">
+          <div className="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent mr-2"></div>
+            Loading font...
+          </div>
+        </div>
       )}
+
+      {loadError && (
+        <div className="absolute top-1 right-1">
+          <span className="text-xs text-red-500 bg-white dark:bg-gray-800 px-1 rounded" title={loadError}>
+            ⚠️
+          </span>
+        </div>
+      )}
+
+      <div className={isLoading ? "opacity-50" : ""}>
+        {text}
+        {!isLoaded && fontFamily && !isLoading && !loadError && (
+          <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">(Font not loaded)</span>
+        )}
+      </div>
     </div>
   );
 }
