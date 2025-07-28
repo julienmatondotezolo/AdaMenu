@@ -14,9 +14,9 @@ import {
   fetchSupplement,
   updateCategory,
 } from "@/_services/ada/adaMenuService";
+import { indexedDBService } from "@/lib/indexedDBService";
 import { showActionToast } from "@/lib/utils";
 import { useMenuMakerStore } from "@/stores/menumaker";
-import { MenuProject } from "@/types/menumaker";
 
 import { PreviewMode } from "../menumaker/PreviewMode";
 import {
@@ -121,27 +121,21 @@ function Categories() {
     refetchOnWindowFocus: false,
   });
 
-  // Check localStorage for menumaker projects on component mount
+  // Check IndexedDB for menumaker projects on component mount
   useEffect(() => {
-    // Loop through localStorage to find the first menumaker project
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+    const loadFirstProject = async () => {
+      try {
+        const project = await indexedDBService.getFirstProject();
 
-      if (key && key.startsWith("menumaker_project_")) {
-        try {
-          const projectData = localStorage.getItem(key);
-
-          if (projectData) {
-            const project: MenuProject = JSON.parse(projectData);
-
-            loadProject(project);
-            break; // Exit after loading the first project found
-          }
-        } catch (error) {
-          console.warn(`Failed to load menumaker project from key ${key}:`, error);
+        if (project) {
+          loadProject(project);
         }
+      } catch (error) {
+        console.warn("Failed to load menumaker project from IndexedDB:", error);
       }
-    }
+    };
+
+    loadFirstProject();
   }, []); // Run only once on component mount
 
   // Fetch initial menu data when component mounts

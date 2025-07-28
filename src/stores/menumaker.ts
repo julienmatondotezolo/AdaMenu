@@ -6,6 +6,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 import { drawMenuItemsList } from "../components/menumaker/utils/drawMenuItemsList";
+import { indexedDBService } from "../lib/indexedDBService";
 import { Category, MenuData } from "../types/adamenudata";
 import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, ShapeType, Tool } from "../types/menumaker";
 
@@ -57,7 +58,7 @@ interface MenuMakerStore {
   setCurrentPage: (pageId: string) => void;
   updatePageName: (pageId: string, name: string) => void;
   updatePageFormat: (pageId: string, format: string, customWidth?: number, customHeight?: number) => void;
-  updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number) => void;
+  updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number, backgroundImageId?: string) => void;
 
   // Actions for layer management
   addLayer: (pageId: string, name: string) => void;
@@ -228,15 +229,48 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       });
     },
 
-    loadProject: (project: MenuProject) => {
+    loadProject: async (project: MenuProject) => {
+      // Load image blobs for all image elements and background images
+      const updatedProject = { ...project };
+      
+      for (const page of updatedProject.pages) {
+        // Load background image if it has a backgroundImageId
+        if (page.backgroundImageId) {
+          try {
+            const blobUrl = await indexedDBService.getImage(page.backgroundImageId);
+            if (blobUrl) {
+              page.backgroundImage = blobUrl;
+            }
+          } catch (error) {
+            console.warn(`Failed to load background image ${page.backgroundImageId}:`, error);
+          }
+        }
+
+        // Load element images
+        for (const layer of page.layers) {
+          for (const element of layer.elements) {
+            if (element.type === "image" && (element as any).imageId) {
+              try {
+                const blobUrl = await indexedDBService.getImage((element as any).imageId);
+                if (blobUrl) {
+                  (element as any).src = blobUrl;
+                }
+              } catch (error) {
+                console.warn(`Failed to load image ${(element as any).imageId}:`, error);
+              }
+            }
+          }
+        }
+      }
+
       set({
-        project,
-        currentPageId: project.pages[0]?.id || null,
+        project: updatedProject,
+        currentPageId: updatedProject.pages[0]?.id || null,
         editorState: {
           ...get().editorState,
           history: {
             past: [],
-            present: project.pages[0] || createDefaultPage(),
+            present: updatedProject.pages[0] || createDefaultPage(),
             future: [],
           },
         },
@@ -267,7 +301,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         };
 
         try {
-          localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
+          await indexedDBService.saveProject(updatedProject);
           
           // Show success state
           set({ project: updatedProject, isSaving: false, saveSuccess: true });
@@ -278,32 +312,25 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           }, 2000);
           
         } catch (error) {
-          if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-            console.warn('LocalStorage quota exceeded. Attempting to clean up old projects...');
+          console.error('Failed to save project:', error);
+          
+          // Try to clean up old projects and retry
+          try {
+            await get().cleanupOldProjects();
+            await indexedDBService.saveProject(updatedProject);
             
-            // Try to clean up old projects and retry
-            get().cleanupOldProjects();
+            // Show success state
+            set({ project: updatedProject, isSaving: false, saveSuccess: true });
             
-            try {
-              localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-              
-              // Show success state
-              set({ project: updatedProject, isSaving: false, saveSuccess: true });
-              
-              // Hide success state after 3 seconds
-              setTimeout(() => {
-                set({ saveSuccess: false });
-              }, 3000);
-              
-              console.warn('Project saved successfully after cleanup.');
-            } catch (retryError) {
-              console.error('Failed to save project even after cleanup:', retryError);
-              alert('Storage full! Please delete some old projects to continue saving.');
-              set({ isSaving: false, saveSuccess: false });
-            }
-          } else {
-            console.error('Failed to save project:', error);
-            alert('Failed to save project. Please try again.');
+            // Hide success state after 3 seconds
+            setTimeout(() => {
+              set({ saveSuccess: false });
+            }, 3000);
+            
+            console.warn('Project saved successfully after cleanup.');
+          } catch (retryError) {
+            console.error('Failed to save project even after cleanup:', retryError);
+            alert('Storage full! Please delete some old projects to continue saving.');
             set({ isSaving: false, saveSuccess: false });
           }
         }
@@ -318,48 +345,15 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       });
     },
 
-    cleanupOldProjects: () => {
+    cleanupOldProjects: async () => {
       try {
-        const projectKeys = Object.keys(localStorage).filter(key => key.startsWith('menumaker_project_'));
-        
-        if (projectKeys.length <= 5) {
-          // Keep at least 5 projects, no cleanup needed
-          return;
-        }
-
-        // Get projects with their timestamps
-        const projects = projectKeys.map(key => {
-          try {
-            const projectData = JSON.parse(localStorage.getItem(key) || '{}');
-
-            return {
-              key,
-              updatedAt: projectData.updatedAt || projectData.createdAt || '1970-01-01T00:00:00.000Z',
-              size: new Blob([localStorage.getItem(key) || '']).size,
-            };
-          } catch {
-            return { key, updatedAt: '1970-01-01T00:00:00.000Z', size: 0 };
-          }
-        });
-
-        // Sort by updatedAt (oldest first) and remove the oldest projects
-        projects.sort((a, b) => new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime());
-        
-        // Remove oldest projects until we have removed at least 3 projects
-        const projectsToRemove = projects.slice(0, Math.max(3, projects.length - 5));
-        
-        projectsToRemove.forEach(project => {
-          localStorage.removeItem(project.key);
-          console.warn(`Removed old project: ${project.key}`);
-        });
-
-        console.warn(`Cleaned up ${projectsToRemove.length} old projects to free storage space.`);
+        await indexedDBService.cleanupOldProjects();
       } catch (error) {
         console.error('Failed to cleanup old projects:', error);
       }
     },
 
-    updateProjectName: (name: string) => {
+    updateProjectName: async (name: string) => {
       const { project } = get();
 
       if (project) {
@@ -369,8 +363,12 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             updatedAt: new Date().toISOString(),
         };
 
-        localStorage.setItem(`menumaker_project_${project.id}`, JSON.stringify(updatedProject));
-        set({ project: updatedProject });
+        try {
+          await indexedDBService.saveProject(updatedProject);
+          set({ project: updatedProject });
+        } catch (error) {
+          console.error('Failed to update project name:', error);
+        }
       }
     },
 
@@ -563,7 +561,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       }
     },
 
-    updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number) => {
+    updatePageBackground: (pageId: string, backgroundColor?: string, backgroundImage?: string, backgroundImageOpacity?: number, backgroundImageId?: string) => {
       const { project } = get();
 
       if (project) {
@@ -573,6 +571,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
               ...page,
               backgroundColor: backgroundColor !== undefined ? backgroundColor : page.backgroundColor,
               backgroundImage: backgroundImage !== undefined ? (backgroundImage || undefined) : page.backgroundImage,
+              backgroundImageId: backgroundImageId !== undefined ? backgroundImageId : page.backgroundImageId,
               backgroundImageOpacity: backgroundImage === "" ? 1 : (backgroundImageOpacity !== undefined ? backgroundImageOpacity : page.backgroundImageOpacity ?? 1),
             }
             : page,

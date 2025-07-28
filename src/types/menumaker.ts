@@ -89,6 +89,7 @@ export interface ImageElement extends BaseElement {
   type: "image";
   fileName: string;
   src: string;
+  imageId?: string; // ID for blob storage in IndexedDB
   originalWidth: number;
   originalHeight: number;
   crop?: {
@@ -218,6 +219,7 @@ export interface MenuPage {
   customHeight?: number;
   backgroundColor: string;
   backgroundImage?: string;
+  backgroundImageId?: string; // ID for blob storage in IndexedDB
   backgroundImageOpacity?: number; // 0-1, default 1
   layers: Layer[];
   thumbnail?: string; // base64 data URL

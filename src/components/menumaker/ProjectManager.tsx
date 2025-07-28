@@ -2,8 +2,8 @@
 import { Calendar, Check, Clock, Edit2, FileText, Folder, Plus, Trash2, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
+import { indexedDBService } from "../../lib/indexedDBService";
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { MenuProject } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { PageThumbnail } from "./PageThumbnail";
@@ -30,55 +30,30 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>("");
 
-  // Load projects from localStorage
+  // Load projects from IndexedDB
   useEffect(() => {
-    const loadSavedProjects = () => {
-      const savedProjects: ProjectInfo[] = [];
+    const loadSavedProjects = async () => {
+      try {
+        const savedProjects = await indexedDBService.getAllProjects();
 
-      // Iterate through localStorage to find menu maker projects
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-
-        if (key && key.startsWith("menumaker_project_")) {
-          try {
-            const projectData = localStorage.getItem(key);
-
-            if (projectData) {
-              const project: MenuProject = JSON.parse(projectData);
-
-              savedProjects.push({
-                id: project.id,
-                name: project.name,
-                createdAt: project.createdAt,
-                updatedAt: project.updatedAt,
-                pageCount: project.pages.length,
-                thumbnail: project.pages[0]?.thumbnail,
-                firstPage: project.pages[0], // Store the first page for preview
-              });
-            }
-          } catch (error) {
-            console.warn(`Failed to load project from key ${key}:`, error);
-          }
-        }
+        setProjects(savedProjects);
+      } catch (error) {
+        console.error('Failed to load projects:', error);
       }
-
-      // Sort by most recently updated
-      savedProjects.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      setProjects(savedProjects);
     };
 
     loadSavedProjects();
   }, []);
 
-  const handleOpenProject = (projectId: string) => {
+  const handleOpenProject = async (projectId: string) => {
     try {
-      const projectData = localStorage.getItem(`menumaker_project_${projectId}`);
+      const project = await indexedDBService.getProject(projectId);
 
-      if (projectData) {
-        const project: MenuProject = JSON.parse(projectData);
-
+      if (project) {
         loadProject(project);
         onOpenProject();
+      } else {
+        alert("Project not found.");
       }
     } catch (error) {
       console.error("Failed to load project:", error);
@@ -86,12 +61,17 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
     }
   };
 
-  const handleDeleteProject = (projectId: string, projectName: string) => {
+  const handleDeleteProject = async (projectId: string, projectName: string) => {
     if (confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
-      localStorage.removeItem(`menumaker_project_${projectId}`);
-      setProjects(projects.filter((p) => p.id !== projectId));
-      if (selectedProject === projectId) {
-        setSelectedProject(null);
+      try {
+        await indexedDBService.deleteProject(projectId);
+        setProjects(projects.filter((p) => p.id !== projectId));
+        if (selectedProject === projectId) {
+          setSelectedProject(null);
+        }
+      } catch (error) {
+        console.error("Failed to delete project:", error);
+        alert("Failed to delete project. Please try again.");
       }
     }
   };
@@ -106,20 +86,19 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
     setEditingName("");
   };
 
-  const handleSaveRename = (projectId: string) => {
+  const handleSaveRename = async (projectId: string) => {
     if (editingName.trim() && editingName.trim() !== projects.find((p) => p.id === projectId)?.name) {
       try {
-        const projectData = localStorage.getItem(`menumaker_project_${projectId}`);
+        const project = await indexedDBService.getProject(projectId);
 
-        if (projectData) {
-          const project: MenuProject = JSON.parse(projectData);
+        if (project) {
           const updatedProject = {
             ...project,
             name: editingName.trim(),
             updatedAt: new Date().toISOString(),
           };
 
-          localStorage.setItem(`menumaker_project_${projectId}`, JSON.stringify(updatedProject));
+          await indexedDBService.saveProject(updatedProject);
 
           // Update local state
           setProjects(

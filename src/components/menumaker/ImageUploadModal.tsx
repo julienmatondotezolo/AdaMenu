@@ -1,6 +1,7 @@
 import { Upload, X } from "lucide-react";
 import React, { useCallback, useRef, useState } from "react";
 
+import { indexedDBService } from "../../lib/indexedDBService";
 import { useMenuMakerStore } from "../../stores/menumaker";
 import { ImageElement } from "../../types/menumaker";
 import { Button } from "../ui/button";
@@ -33,14 +34,11 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
       setIsLoading(true);
 
       try {
-        // Convert file to base64
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
+        // Generate unique image ID
+        const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        // Save file as blob to IndexedDB and get blob URL
+        const blobUrl = await indexedDBService.saveImage(imageId, file);
 
         // Get image dimensions
         const { width, height } = await new Promise<{ width: number; height: number }>((resolve, reject) => {
@@ -48,7 +46,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
 
           img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
           img.onerror = reject;
-          img.src = base64;
+          img.src = blobUrl;
         });
 
         // Create ImageElement
@@ -75,7 +73,8 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
               locked: false,
               visible: true,
               opacity: 1,
-              src: base64,
+              src: blobUrl,
+              imageId, // Store the image ID for future retrieval
               originalWidth: width,
               originalHeight: height,
             };
@@ -98,7 +97,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
         setIsLoading(false);
       }
     },
-    [project, currentPageId, addElement, setTool, onClose],
+    [project, currentPageId, addElement, setTool, onClose, selectElements, editorState.selectedLayerId],
   );
 
   const handleDrop = useCallback(

@@ -1,6 +1,7 @@
 import { Upload, X } from "lucide-react";
 import React, { useRef } from "react";
 
+import { indexedDBService } from "../../../lib/indexedDBService";
 import { useMenuMakerStore } from "../../../stores/menumaker";
 import { Button } from "../../ui/button";
 
@@ -16,7 +17,7 @@ export function BackgroundPanel() {
     updatePageBackground(currentPageId, color, undefined);
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
@@ -33,18 +34,32 @@ export function BackgroundPanel() {
       return;
     }
 
-    const reader = new FileReader();
+    try {
+      // Generate unique background image ID
+      const backgroundImageId = `bg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    reader.onload = (e) => {
-      const base64String = e.target?.result as string;
+      // Save file as blob to IndexedDB and get blob URL
+      const blobUrl = await indexedDBService.saveImage(backgroundImageId, file);
 
-      updatePageBackground(currentPageId, undefined, base64String);
-    };
-    reader.readAsDataURL(file);
+      // Update page background with blob URL and ID
+      updatePageBackground(currentPageId, undefined, blobUrl, undefined, backgroundImageId);
+    } catch (error) {
+      console.error("Error uploading background image:", error);
+      alert("Failed to upload background image. Please try again.");
+    }
   };
 
-  const handleRemoveImage = () => {
-    updatePageBackground(currentPageId, undefined, ""); // Opacity automatically resets to 1 in store
+  const handleRemoveImage = async () => {
+    // Clean up image from IndexedDB if it has an ID
+    if (currentPage.backgroundImageId) {
+      try {
+        await indexedDBService.deleteImage(currentPage.backgroundImageId);
+      } catch (error) {
+        console.warn("Failed to delete background image from IndexedDB:", error);
+      }
+    }
+
+    updatePageBackground(currentPageId, undefined, "", undefined, undefined); // Clear image and ID
     saveProject();
   };
 
