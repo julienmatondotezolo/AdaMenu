@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
+import { indexedDBService } from "../../lib/indexedDBService";
 import { MenuPage } from "../../types/menumaker";
 import { getBackgroundStyle } from "./utils/colorUtils";
 import { drawMenuItemsList } from "./utils/drawMenuItemsList";
@@ -14,6 +15,40 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageCacheRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
+  // Helper function to calculate image fitting (like CSS object-fit: cover)
+  const calculateImageFit = (
+    imageWidth: number,
+    imageHeight: number,
+    containerWidth: number,
+    containerHeight: number,
+    containerX: number,
+    containerY: number
+  ) => {
+    const imageAspect = imageWidth / imageHeight;
+    const containerAspect = containerWidth / containerHeight;
+
+    let drawWidth: number;
+    let drawHeight: number;
+    let drawX: number;
+    let drawY: number;
+
+    if (imageAspect > containerAspect) {
+      // Image is wider than container - fit by height (cover effect)
+      drawHeight = containerHeight;
+      drawWidth = drawHeight * imageAspect;
+      drawX = containerX - (drawWidth - containerWidth) / 2;
+      drawY = containerY;
+    } else {
+      // Image is taller than container - fit by width (cover effect)
+      drawWidth = containerWidth;
+      drawHeight = drawWidth / imageAspect;
+      drawX = containerX;
+      drawY = containerY - (drawHeight - containerHeight) / 2;
+    }
+
+    return { drawX, drawY, drawWidth, drawHeight };
+  };
+
   useEffect(() => {
     if (!canvasRef.current) return;
 
@@ -26,43 +61,98 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
     canvas.width = width;
     canvas.height = height;
 
-    // Calculate scale factor
+    // Calculate scale factor for cover effect (fills entire thumbnail)
     const scaleX = width / page.format.width;
     const scaleY = height / page.format.height;
-    const scale = Math.min(scaleX, scaleY);
+    const scale = Math.max(scaleX, scaleY); // Use max for cover effect
+
+    // Calculate centering offsets
+    const scaledPageWidth = page.format.width * scale;
+    const scaledPageHeight = page.format.height * scale;
+    const offsetX = (width - scaledPageWidth) / 2;
+    const offsetY = (height - scaledPageHeight) / 2;
+
+    // Track if we're currently drawing to prevent infinite loops
+    let isDrawing = false;
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
 
-    // Draw page background
+    // Draw page background to fill entire thumbnail
     ctx.fillStyle = page.backgroundColor;
     ctx.fillRect(0, 0, width, height);
 
-    // Draw background image if available
-    if (page.backgroundImage) {
-      const img = new Image();
+    // Set up clipping to thumbnail bounds
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, width, height);
+    ctx.clip();
 
-      img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+    // Load and draw background image if available
+    const loadBackgroundImage = async () => {
+      let backgroundImageSrc = page.backgroundImage;
 
-      img.onload = () => {
-        ctx.save();
-        ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
-        ctx.drawImage(img, 0, 0, width, height);
-        ctx.restore();
-        // Redraw elements after background image loads
+      // If we have a backgroundImageId, always load fresh blob from IndexedDB
+      // This ensures we get a valid blob URL even if the stored one became invalid
+      if (page.backgroundImageId) {
+        try {
+          const blobUrl = await indexedDBService.getImage(page.backgroundImageId);
+
+          if (blobUrl) {
+            backgroundImageSrc = blobUrl;
+          }
+        } catch (error) {
+          console.warn("Failed to load background image from IndexedDB:", error);
+        }
+      }
+
+      if (backgroundImageSrc) {
+        const img = new Image();
+
+        img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
+        img.onload = () => {
+          ctx.save();
+          ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
+          
+          // Calculate proper background image fitting to maintain aspect ratio
+          const bgFit = calculateImageFit(
+            img.naturalWidth,
+            img.naturalHeight,
+            scaledPageWidth,
+            scaledPageHeight,
+            offsetX,
+            offsetY
+          );
+
+          // Draw background image with proper fitting
+          ctx.drawImage(img, bgFit.drawX, bgFit.drawY, bgFit.drawWidth, bgFit.drawHeight);
+          
+          ctx.restore();
+          // Redraw elements after background image loads
+          if (!isDrawing) {
+            drawElements();
+          }
+        };
+        img.onerror = () => {
+          console.warn("Failed to load background image for thumbnail");
+          if (!isDrawing) {
+            drawElements();
+          }
+        };
+        img.src = backgroundImageSrc;
+      } else {
         drawElements();
-      };
-      img.onerror = () => {
-        console.warn("Failed to load background image for thumbnail");
-        drawElements();
-      };
-      img.src = page.backgroundImage;
-    } else {
-      drawElements();
-    }
+      }
+    };
+
+    loadBackgroundImage();
 
     function drawElements() {
-      if (!ctx) return;
+      if (!ctx || isDrawing) return;
+
+      // Set drawing flag to prevent infinite loops
+      isDrawing = true;
 
       // Draw all elements from all layers
       page.layers.forEach((layer) => {
@@ -77,8 +167,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
           if (element.type === "text") {
             // Draw text element
             const fontSize = Math.max(element.fontSize * scale, 1); // Minimum 1px font size
-            const x = element.x * scale;
-            const y = element.y * scale;
+            const x = element.x * scale + offsetX;
+            const y = element.y * scale + offsetY;
 
             ctx.font = `${element.fontStyle} ${fontSize}px ${element.fontFamily}`;
             ctx.fillStyle = element.fill;
@@ -95,79 +185,171 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
             }
           } else if (element.type === "image") {
             // Draw image element
-            const x = element.x * scale;
-            const y = element.y * scale;
+            const x = element.x * scale + offsetX;
+            const y = element.y * scale + offsetY;
             const elementWidth = element.width * scale;
             const elementHeight = element.height * scale;
 
-            // Draw actual image if available
-            if (element.src) {
-              const cachedImage = imageCacheRef.current.get(element.src);
+            // Load and draw actual image if available
+            const loadElementImage = async () => {
+              let imageSrc = element.src;
 
-              if (cachedImage && cachedImage.complete) {
-                // Image is loaded and ready to draw
-                ctx.save();
-                ctx.globalAlpha = (element.opacity ?? 1) * layer.opacity;
+              // If we have an imageId, always load fresh blob from IndexedDB
+              // This ensures we get a valid blob URL even if the stored one became invalid
+              if ((element as any).imageId) {
+                try {
+                  const blobUrl = await indexedDBService.getImage((element as any).imageId);
 
-                // Draw the image scaled to fit the element dimensions
-                ctx.drawImage(cachedImage, x, y, elementWidth, elementHeight);
-
-                ctx.restore();
-              } else if (!cachedImage) {
-                // Load the image and cache it
-                const img = new Image();
-
-                img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
-
-                img.onload = () => {
-                  imageCacheRef.current.set(element.src, img);
-                  // Manually trigger redraw since we're using ref instead of state
-                  drawElements();
-                };
-                img.onerror = () => {
-                  console.warn("Failed to load image for thumbnail:", element.src);
-                };
-                img.src = element.src;
-
-                // Store the loading image in cache to prevent multiple loads
-                imageCacheRef.current.set(element.src, img);
-
-                // Draw placeholder while loading
-                ctx.fillStyle = "#f0f0f0";
-                ctx.fillRect(x, y, elementWidth, elementHeight);
-
-                // Draw border
-                ctx.strokeStyle = "#ccc";
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, elementWidth, elementHeight);
-
-                // Only draw loading text if element is large enough
-                if (elementWidth > 20 && elementHeight > 10) {
-                  ctx.fillStyle = "#666";
-                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
-                  ctx.textAlign = "center";
-                  ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
-                }
-              } else {
-                // Image is loading, show placeholder
-                ctx.fillStyle = "#f0f0f0";
-                ctx.fillRect(x, y, elementWidth, elementHeight);
-
-                // Draw border
-                ctx.strokeStyle = "#ccc";
-                ctx.lineWidth = 0.5;
-                ctx.strokeRect(x, y, elementWidth, elementHeight);
-
-                // Only draw loading text if element is large enough
-                if (elementWidth > 20 && elementHeight > 10) {
-                  ctx.fillStyle = "#666";
-                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
-                  ctx.textAlign = "center";
-                  ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
+                  if (blobUrl) {
+                    imageSrc = blobUrl;
+                  }
+                } catch (error) {
+                  console.warn("Failed to load element image from IndexedDB:", error);
                 }
               }
+
+              if (imageSrc) {
+                const cachedImage = imageCacheRef.current.get(imageSrc);
+
+                if (cachedImage && cachedImage.complete) {
+                  // Image is loaded and ready to draw
+                  ctx.save();
+                  ctx.globalAlpha = (element.opacity ?? 1) * layer.opacity;
+
+                  // Calculate proper image fitting to maintain aspect ratio
+                  const fit = calculateImageFit(
+                    cachedImage.naturalWidth,
+                    cachedImage.naturalHeight,
+                    elementWidth,
+                    elementHeight,
+                    x,
+                    y
+                  );
+
+                  // Clip to element bounds to prevent overflow
+                  ctx.beginPath();
+                  ctx.rect(x, y, elementWidth, elementHeight);
+                  ctx.clip();
+
+                  // Draw the image with proper fitting
+                  ctx.drawImage(cachedImage, fit.drawX, fit.drawY, fit.drawWidth, fit.drawHeight);
+
+                  ctx.restore();
+                } else if (!cachedImage) {
+                  // Load the image and cache it
+                  const img = new Image();
+
+                  img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
+
+                  img.onload = () => {
+                    imageCacheRef.current.set(imageSrc!, img);
+                    // Draw this specific image element instead of redrawing everything
+                    ctx.save();
+                    ctx.globalAlpha = (element.opacity ?? 1) * layer.opacity;
+
+                    // Calculate proper image fitting to maintain aspect ratio
+                    const fit = calculateImageFit(
+                      img.naturalWidth,
+                      img.naturalHeight,
+                      elementWidth,
+                      elementHeight,
+                      x,
+                      y
+                    );
+
+                    // Clip to element bounds to prevent overflow
+                    ctx.beginPath();
+                    ctx.rect(x, y, elementWidth, elementHeight);
+                    ctx.clip();
+
+                    // Draw the image with proper fitting
+                    ctx.drawImage(img, fit.drawX, fit.drawY, fit.drawWidth, fit.drawHeight);
+
+                    ctx.restore();
+                  };
+                  img.onerror = () => {
+                    console.warn("Failed to load image for thumbnail:", imageSrc);
+                    // Remove failed image from cache to allow retry
+                    imageCacheRef.current.delete(imageSrc!);
+                  };
+                  img.src = imageSrc;
+
+                  // Store the loading image in cache to prevent multiple loads
+                  imageCacheRef.current.set(imageSrc, img);
+
+                  // Draw placeholder while loading
+                  ctx.fillStyle = "#f0f0f0";
+                  ctx.fillRect(x, y, elementWidth, elementHeight);
+
+                  // Draw border
+                  ctx.strokeStyle = "#ccc";
+                  ctx.lineWidth = 0.5;
+                  ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+                  // Only draw loading text if element is large enough
+                  if (elementWidth > 20 && elementHeight > 10) {
+                    ctx.fillStyle = "#666";
+                    ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
+                  }
+                } else {
+                  // Image is loading, show placeholder
+                  ctx.fillStyle = "#f0f0f0";
+                  ctx.fillRect(x, y, elementWidth, elementHeight);
+
+                  // Draw border
+                  ctx.strokeStyle = "#ccc";
+                  ctx.lineWidth = 0.5;
+                  ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+                  // Only draw loading text if element is large enough
+                  if (elementWidth > 20 && elementHeight > 10) {
+                    ctx.fillStyle = "#666";
+                    ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                    ctx.textAlign = "center";
+                    ctx.fillText("...", x + elementWidth / 2, y + elementHeight / 2);
+                  }
+                }
+              } else {
+                // No src available, draw placeholder
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(x, y, elementWidth, elementHeight);
+
+                // Draw border
+                ctx.strokeStyle = "#ccc";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, elementWidth, elementHeight);
+
+                // Only draw "No Image" text if element is large enough
+                if (elementWidth > 20 && elementHeight > 10) {
+                  ctx.fillStyle = "#666";
+                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                  ctx.textAlign = "center";
+                  ctx.fillText("Img", x + elementWidth / 2, y + elementHeight / 2);
+                }
+              }
+            };
+
+            if (element.src || (element as any).imageId) {
+              // Call the async function and handle it properly
+              loadElementImage().catch((error) => {
+                console.warn("Error loading element image:", error);
+                // Draw placeholder on error
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(x, y, elementWidth, elementHeight);
+                ctx.strokeStyle = "#ccc";
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, elementWidth, elementHeight);
+                if (elementWidth > 20 && elementHeight > 10) {
+                  ctx.fillStyle = "#666";
+                  ctx.font = `${Math.min(elementHeight * 0.3, 8)}px Arial`;
+                  ctx.textAlign = "center";
+                  ctx.fillText("Error", x + elementWidth / 2, y + elementHeight / 2);
+                }
+              });
             } else {
-              // No src, draw placeholder
+              // No src or imageId, draw placeholder
               ctx.fillStyle = "#f0f0f0";
               ctx.fillRect(x, y, elementWidth, elementHeight);
 
@@ -187,8 +369,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
           } else if (element.type === "shape") {
             // Draw shape element
             const shapeElement = element as any;
-            const x = shapeElement.x * scale;
-            const y = shapeElement.y * scale;
+            const x = shapeElement.x * scale + offsetX;
+            const y = shapeElement.y * scale + offsetY;
             const elementWidth = shapeElement.width * scale;
             const elementHeight = shapeElement.height * scale;
 
@@ -249,8 +431,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
           } else if (element.type === "data") {
             // Draw data element
             const dataElement = element as any;
-            const x = dataElement.x * scale;
-            const y = dataElement.y * scale;
+            const x = dataElement.x * scale + offsetX;
+            const y = dataElement.y * scale + offsetY;
             const elementWidth = dataElement.width * scale;
             const elementHeight = dataElement.height * scale;
 
@@ -356,6 +538,12 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
           ctx.restore();
         });
       });
+
+      // Reset drawing flag
+      isDrawing = false;
+
+      // Restore canvas context (removes clipping)
+      ctx.restore();
     }
   }, [page, width, height]);
 
