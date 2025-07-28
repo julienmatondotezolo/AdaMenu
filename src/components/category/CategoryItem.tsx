@@ -21,6 +21,7 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
   const locale = useLocale();
   const [orderedCategories, setOrderedCategories] = useState<any[]>([]);
   const [draggedItem, setDraggedItem] = useState<any>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (categories) {
@@ -73,19 +74,30 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
 
   const handleDragEnd = (e: React.DragEvent) => {
     setDraggedItem(null);
+    setDropTargetIndex(null);
     // Remove the styling
     if (e.target instanceof HTMLElement) {
       e.target.classList.remove("opacity-50");
     }
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = "move";
+
+    if (draggedItem) {
+      const draggedIndex = orderedCategories.findIndex((item) => item.id === draggedItem.id);
+
+      // Don't show drop indicator on the dragged item itself
+      if (draggedIndex !== targetIndex) {
+        setDropTargetIndex(targetIndex);
+      }
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetCategory: any, targetIndex: number) => {
     e.preventDefault();
+    setDropTargetIndex(null);
 
     if (!draggedItem || draggedItem.id === targetCategory.id) return;
 
@@ -157,33 +169,44 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
       <div className="p-4">
         <nav className="space-y-1">
           {orderedCategories.map((category: any, index: number) => (
-            <div
-              key={category.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, category, index)}
-              onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, category, index)}
-              className={`
-                relative transition-all duration-200
-                ${draggedItem?.id === category.id ? "opacity-50" : ""}
-              `}
-            >
-              <button
-                onClick={() => onClick(category)}
+            <div key={category.id}>
+              {/* Drop indicator above the current item */}
+              {dropTargetIndex === index && draggedItem?.id !== category.id && (
+                <div className="h-0.5 bg-blue-500 mx-3 mb-1 rounded-full shadow-lg">
+                  <div className="flex justify-center">
+                    <div className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full -mt-3 shadow-md">
+                      Drop here
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, category, index)}
+                onDragEnd={handleDragEnd}
+                onDragOver={(e) => handleDragOver(e, index)}
+                onDrop={(e) => handleDrop(e, category, index)}
                 className={`
-                  group relative w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
-                  ${category.hidden ? "opacity-60" : "opacity-100"}
-                  ${
-                    category.id === categoryId
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-                  }
+                  relative transition-all duration-200
+                  ${draggedItem?.id === category.id ? "opacity-50" : ""}
                 `}
               >
-                {/* Drag Handle */}
-                <div
+                <button
+                  onClick={() => onClick(category)}
                   className={`
+                    group relative w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200
+                    ${category.hidden ? "opacity-60" : "opacity-100"}
+                    ${
+                      category.id === categoryId
+                        ? "bg-blue-600 text-white shadow-md"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                    }
+                  `}
+                >
+                  {/* Drag Handle */}
+                  <div
+                    className={`
                     flex-shrink-0 mr-3 w-5 h-5 flex items-center justify-center
                     ${
                       category.id === categoryId
@@ -192,43 +215,120 @@ export default function CategoryItem({ categories, categoryId, onClick }: Catego
                     }
                     cursor-grab active:cursor-grabbing
                   `}
-                >
-                  <GripVertical className="w-4 h-4" />
-                </div>
+                  >
+                    <GripVertical className="w-4 h-4" />
+                  </div>
 
-                {/* Category Name */}
-                <span className="flex-1 text-left truncate">{category.names[locale]}</span>
+                  {/* Category Name */}
+                  <span className="flex-1 text-left truncate">{category.names[locale]}</span>
 
-                {/* Visibility Toggle */}
-                <button
-                  onClick={(e) => handleToggleVisibility(category, e)}
-                  className={`p-1.5 rounded-lg transition-colors duration-200 ${
-                    category.hidden
-                      ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                      : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
-                  }`}
-                  title={category.hidden ? "Show category" : "Hide category"}
-                  disabled={toggleLoadingId === category.id}
-                >
-                  {toggleLoadingId === category.id ? (
-                    <LoaderCircle className="w-4 h-4 animate-spin" />
-                  ) : category.hidden ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
+                  {/* Visibility Toggle */}
+                  <button
+                    onClick={(e) => handleToggleVisibility(category, e)}
+                    className={`p-1.5 rounded-lg transition-colors duration-200 ${
+                      category.hidden
+                        ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                    }`}
+                    title={category.hidden ? "Show category" : "Hide category"}
+                    disabled={toggleLoadingId === category.id}
+                  >
+                    {toggleLoadingId === category.id ? (
+                      <LoaderCircle className="w-4 h-4 animate-spin" />
+                    ) : category.hidden ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+
+                  {/* Arrow */}
+                  {category.id === categoryId && <ChevronRight className="w-4 h-4 text-blue-200 ml-2" />}
+
+                  {/* Active indicator */}
+                  {category.id === categoryId && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/30 rounded-r-full" />
                   )}
                 </button>
+              </div>
 
-                {/* Arrow */}
-                {category.id === categoryId && <ChevronRight className="w-4 h-4 text-blue-200 ml-2" />}
-
-                {/* Active indicator */}
-                {category.id === categoryId && (
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-white/30 rounded-r-full" />
-                )}
-              </button>
+              {/* Drop indicator at the end if this is the last item */}
+              {index === orderedCategories.length - 1 && dropTargetIndex === orderedCategories.length && (
+                <div className="h-0.5 bg-blue-500 mx-3 mt-1 rounded-full shadow-lg">
+                  <div className="flex justify-center">
+                    <div className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full -mt-3 shadow-md">
+                      Drop here
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
+
+          {/* Drop indicator for dropping at the very end */}
+          {orderedCategories.length > 0 && dropTargetIndex === orderedCategories.length && (
+            <div
+              onDragOver={(e) => handleDragOver(e, orderedCategories.length)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDropTargetIndex(null);
+
+                if (!draggedItem) return;
+
+                const items = [...orderedCategories];
+                const draggedIndex = items.findIndex((item) => item.id === draggedItem.id);
+
+                // Remove the dragged item from its original position
+                items.splice(draggedIndex, 1);
+                // Add it to the end
+                items.push(draggedItem);
+
+                // Update the order property of each item
+                const updatedItems = items.map((item, index) => ({
+                  ...item,
+                  order: index,
+                }));
+
+                setOrderedCategories(updatedItems);
+
+                const newCategoryObject = mapCategories(updatedItems);
+
+                updateCategoryMutation.mutate(
+                  {
+                    categoryObject: newCategoryObject,
+                  },
+                  {
+                    onSuccess: () => {
+                      showActionToast({
+                        type: "success",
+                        action: "update",
+                        itemName: draggedItem.names[locale],
+                        locale,
+                      });
+                    },
+                    onError: (error: unknown) => {
+                      showActionToast({
+                        type: "error",
+                        action: "update",
+                        itemName: draggedItem.names[locale],
+                        locale,
+                        error: error instanceof Error ? error : new Error("Unknown error"),
+                      });
+                    },
+                  },
+                );
+              }}
+              className="h-8 flex items-center justify-center"
+            >
+              <div className="h-0.5 bg-blue-500 w-full mx-3 rounded-full shadow-lg">
+                <div className="flex justify-center">
+                  <div className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full -mt-3 shadow-md">
+                    Drop here
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </nav>
       </div>
     </div>
