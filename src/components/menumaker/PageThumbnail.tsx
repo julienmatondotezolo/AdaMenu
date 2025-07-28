@@ -22,7 +22,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
     containerWidth: number,
     containerHeight: number,
     containerX: number,
-    containerY: number
+    containerY: number,
   ) => {
     const imageAspect = imageWidth / imageHeight;
     const containerAspect = containerWidth / containerHeight;
@@ -114,7 +114,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
         img.onload = () => {
           ctx.save();
           ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
-          
+
           // Calculate proper background image fitting to maintain aspect ratio
           const bgFit = calculateImageFit(
             img.naturalWidth,
@@ -122,12 +122,12 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
             scaledPageWidth,
             scaledPageHeight,
             offsetX,
-            offsetY
+            offsetY,
           );
 
           // Draw background image with proper fitting
           ctx.drawImage(img, bgFit.drawX, bgFit.drawY, bgFit.drawWidth, bgFit.drawHeight);
-          
+
           ctx.restore();
           // Redraw elements after background image loads
           if (!isDrawing) {
@@ -223,7 +223,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                     elementWidth,
                     elementHeight,
                     x,
-                    y
+                    y,
                   );
 
                   // Clip to element bounds to prevent overflow
@@ -254,7 +254,7 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
                       elementWidth,
                       elementHeight,
                       x,
-                      y
+                      y,
                     );
 
                     // Clip to element bounds to prevent overflow

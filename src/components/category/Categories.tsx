@@ -1,5 +1,6 @@
 import { Label } from "@radix-ui/react-label";
-import { ChevronDown, ChevronUp, Edit, Loader2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Edit, Eye, Loader2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -43,6 +44,7 @@ import { UpdateMenu, UpdateSubCategory } from "./update";
 function Categories() {
   const locale = useLocale();
   const text = useTranslations("Index");
+  const router = useRouter();
   const { loadProject, setMenuData, setMenuLoading, setMenuError, clearMenuData } = useMenuMakerStore();
   const [dialogMode, setDialogMode] = useState<"addCat" | "addSubCat" | "addMenu" | "editMenu" | "editCat">("addCat");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
@@ -56,6 +58,7 @@ function Categories() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [isCategoryDetailsExpanded, setIsCategoryDetailsExpanded] = useState(false);
   const [isSubcategoriesExpanded, setIsSubcategoriesExpanded] = useState(true);
+  const [isRightPanelExpanded, setIsRightPanelExpanded] = useState(true);
   const [menuViewMode, setMenuViewMode] = useState<"grid" | "list">("grid");
 
   const queryClient = useQueryClient();
@@ -326,9 +329,11 @@ function Categories() {
 
   return (
     <>
-      <div className="flex w-full h-full">
+      <div className="flex w-full h-[calc(100vh-56px)]">
         {/* Left sidebar with fixed header and scrollable categories */}
-        <div className="h-full w-1/4 flex flex-col border-r-2 dark:border-gray-800">
+        <div
+          className={`h-full ${isRightPanelExpanded ? "w-1/4" : "w-1/5"} flex flex-col border-r-2 dark:border-gray-800 transition-all duration-200`}
+        >
           {/* Fixed header */}
           <div className="flex-none p-4 border-b dark:border-gray-800 space-y-4">
             <Button
@@ -357,7 +362,7 @@ function Categories() {
         </div>
 
         {/* Main content area */}
-        <div className="flex-1 h-full flex flex-col">
+        <div className="flex-1 h-full flex flex-col transition-all duration-200">
           {category && category.names && (
             <>
               {/* Collapsible category details */}
@@ -610,8 +615,78 @@ function Categories() {
         </div>
 
         {/* Right menu preview */}
-        <div className="w-1/4 h-full flex flex-col border-l-2 dark:border-gray-800">
-          <div className="flex-1 overflow-y-auto">
+        <div
+          className={`${isRightPanelExpanded ? "w-[30%]" : "w-36"} h-full flex flex-col border-l-2 dark:border-gray-800 transition-all duration-200`}
+        >
+          {/* Right panel header */}
+          <div className="flex-none border-b dark:border-gray-800">
+            <button
+              className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+              onClick={() => setIsRightPanelExpanded(!isRightPanelExpanded)}
+              aria-expanded={isRightPanelExpanded}
+              aria-controls="right-panel-content"
+            >
+              <div className="flex items-center space-x-2">
+                {isRightPanelExpanded ? (
+                  <div className="flex items-center justify-between w-full pr-4 space-x-4">
+                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Menu Preview</h3>
+                    <Button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const project = await indexedDBService.getFirstProject();
+
+                          if (project) {
+                            loadProject(project);
+                            router.push(`/${locale}/menumaker`);
+                          } else {
+                            alert("Project not found.");
+                          }
+                        } catch (error) {
+                          console.error("Failed to load project:", error);
+                          alert("Failed to load project. The project file may be corrupted.");
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      Open Menu
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Eye className="w-4 h-4 text-gray-500" />
+                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">View Menu</p>
+                  </div>
+                )}
+              </div>
+              {isRightPanelExpanded ? (
+                <ChevronUp className="w-5 h-5 text-gray-500 transform rotate-90" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500 transform -rotate-90" />
+              )}
+            </button>
+          </div>
+
+          {/* Content when collapsed */}
+          {!isRightPanelExpanded && (
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="text-center">
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Click view menu to see the menu
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Collapsible content when expanded */}
+          <div
+            id="right-panel-content"
+            role="region"
+            aria-labelledby="right-panel-header"
+            className={`flex-1 overflow-y-auto transition-all duration-200 ${isRightPanelExpanded ? "block" : "hidden"}`}
+          >
             <PreviewMode
               onExit={() => {
                 /* No action needed for categories component */

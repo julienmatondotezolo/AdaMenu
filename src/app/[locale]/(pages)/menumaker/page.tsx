@@ -39,16 +39,16 @@ export default function MenuMakerPage() {
   return (
     <main className="relative h-screen overflow-hidden">
       <AdaHeader />
-      <div className="h-[calc(100vh-48px)]">
+      <div className="h-[calc(100vh-48px)] bg-white dark:bg-[#121212]">
         {currentView === "projects" && (
-          <div className="h-full bg-gray-50 overflow-auto">
+          <div className="h-full overflow-auto">
             <ProjectManager onCreateNew={handleCreateNew} onOpenProject={handleOpenProject} />
           </div>
         )}
 
         {currentView === "format" && (
-          <div className="h-full flex items-center justify-center bg-gray-50">
-            <PageFormatSelector onFormatSelected={handleFormatSelected} />
+          <div className="h-full overflow-auto">
+            <PageFormatSelector onFormatSelected={handleFormatSelected} onReturn={handleNewProject} />
           </div>
         )}
 

@@ -238,6 +238,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         if (page.backgroundImageId) {
           try {
             const blobUrl = await indexedDBService.getImage(page.backgroundImageId);
+
             if (blobUrl) {
               page.backgroundImage = blobUrl;
             }
@@ -252,6 +253,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             if (element.type === "image" && (element as any).imageId) {
               try {
                 const blobUrl = await indexedDBService.getImage((element as any).imageId);
+
                 if (blobUrl) {
                   (element as any).src = blobUrl;
                 }

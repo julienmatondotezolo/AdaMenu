@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 
 import { HamburgerMenu } from "./HamburgerMenu";
@@ -24,7 +25,9 @@ const AdaHeader = () => {
     <div className="flex items-center justify-between p-2 bg-primary text-white">
       <div className="flex items-center space-x-4">
         <HamburgerMenu />
-        <small className="font-bold">ADA - Menu</small>
+        <Link href="/">
+          <small className="font-bold cursor-pointer hover:opacity-80 transition-opacity">ADA - Menu</small>
+        </Link>
       </div>
 
       <div>
