@@ -31,6 +31,158 @@ export const PAGE_FORMATS: Record<string, PageFormat> = {
   },
 };
 
+// Font management interfaces
+export interface CustomFontFile {
+  id: string;
+  name: string;
+  familyName: string;
+  style: "normal" | "italic";
+  weight: number;
+  fileName: string;
+  blobId: string; // Reference to IndexedDB blob storage
+  format: "woff" | "woff2" | "ttf" | "otf";
+  createdAt: string;
+}
+
+export interface GoogleFont {
+  id: string;
+  family: string;
+  category: "serif" | "sans-serif" | "display" | "handwriting" | "monospace";
+  variants: string[];
+  subsets: string[];
+  version: string;
+  lastModified: string;
+  files: Record<string, string>; // variant -> url mapping
+}
+
+export interface ProjectFont {
+  id: string;
+  type: "system" | "google" | "custom";
+  familyName: string;
+  displayName: string;
+  category: "serif" | "sans-serif" | "display" | "handwriting" | "monospace";
+  variants: string[];
+  // For Google Fonts
+  googleFontData?: GoogleFont;
+  // For Custom Fonts
+  customFontFiles?: CustomFontFile[];
+  // Loading state
+  isLoaded: boolean;
+  isLoading: boolean;
+  loadError?: string;
+}
+
+export interface FontSettings {
+  defaultFonts: ProjectFont[];
+  customFonts: ProjectFont[];
+  googleFonts: ProjectFont[];
+  loadedFonts: Set<string>; // Set of font family names that are currently loaded
+}
+
+// Default system fonts
+export const DEFAULT_FONTS: ProjectFont[] = [
+  {
+    id: "arial",
+    type: "system",
+    familyName: "Arial",
+    displayName: "Arial",
+    category: "sans-serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "helvetica",
+    type: "system",
+    familyName: "Helvetica",
+    displayName: "Helvetica",
+    category: "sans-serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "times-new-roman",
+    type: "system",
+    familyName: "Times New Roman",
+    displayName: "Times New Roman",
+    category: "serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "georgia",
+    type: "system",
+    familyName: "Georgia",
+    displayName: "Georgia",
+    category: "serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "verdana",
+    type: "system",
+    familyName: "Verdana",
+    displayName: "Verdana",
+    category: "sans-serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "tahoma",
+    type: "system",
+    familyName: "Tahoma",
+    displayName: "Tahoma",
+    category: "sans-serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "trebuchet-ms",
+    type: "system",
+    familyName: "Trebuchet MS",
+    displayName: "Trebuchet MS",
+    category: "sans-serif",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "impact",
+    type: "system",
+    familyName: "Impact",
+    displayName: "Impact",
+    category: "sans-serif",
+    variants: ["400"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "comic-sans-ms",
+    type: "system",
+    familyName: "Comic Sans MS",
+    displayName: "Comic Sans MS",
+    category: "handwriting",
+    variants: ["400"],
+    isLoaded: true,
+    isLoading: false,
+  },
+  {
+    id: "courier-new",
+    type: "system",
+    familyName: "Courier New",
+    displayName: "Courier New",
+    category: "monospace",
+    variants: ["400", "700"],
+    isLoaded: true,
+    isLoading: false,
+  },
+];
+
 // Element types
 export type ElementType = "text" | "image" | "background" | "data" | "shape";
 
@@ -232,6 +384,7 @@ export interface MenuProject {
   createdAt: string;
   updatedAt: string;
   pages: MenuPage[];
+  fonts: FontSettings;
   settings: {
     defaultFormat: string;
     zoom: number;

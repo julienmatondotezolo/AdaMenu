@@ -5,9 +5,10 @@ import { useMenuMakerStore } from "../../../stores/menumaker";
 import { TextElement } from "../../../types/menumaker";
 import { Input } from "../../ui/input";
 import { Label } from "../../ui/label";
+import { FontSelector } from "../FontSelector";
 
 export function PropertiesPanel() {
-  const { project, currentPageId, editorState, updateElement, updatePageBackground } = useMenuMakerStore();
+  const { project, currentPageId, editorState, updateElement } = useMenuMakerStore();
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
   const selectedElements =
@@ -19,10 +20,6 @@ export function PropertiesPanel() {
       ) || [];
 
   if (!currentPage) return null;
-
-  const handlePageBackgroundChange = (color: string) => {
-    updatePageBackground(currentPageId!, color);
-  };
 
   const handleElementUpdate = (elementId: string, updates: any) => {
     // Find the layer containing this element
@@ -155,18 +152,11 @@ function ElementProperties({ element, onUpdate }: { element: any; onUpdate: (upd
 
         <div>
           <Label htmlFor="text-font-family">Font Family</Label>
-          <select
-            id="text-font-family"
+          <FontSelector
             value={textElement.fontFamily}
-            onChange={(e) => onUpdate({ fontFamily: e.target.value })}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
-          >
-            <option value="Arial">Arial</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Helvetica">Helvetica</option>
-            <option value="Verdana">Verdana</option>
-          </select>
+            onChange={(fontFamily: string) => onUpdate({ fontFamily })}
+            className="mt-1"
+          />
         </div>
 
         {/* Color */}

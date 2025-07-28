@@ -6,9 +6,10 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 
 import { drawMenuItemsList } from "../components/menumaker/utils/drawMenuItemsList";
+import { fontService } from "../lib/fontService";
 import { indexedDBService } from "../lib/indexedDBService";
 import { Category, MenuData } from "../types/adamenudata";
-import { EditorState, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, ShapeType, Tool } from "../types/menumaker";
+import { CustomFontFile, DEFAULT_FONTS, EditorState, GoogleFont, Layer, MenuElement, MenuPage, MenuProject, PAGE_FORMATS, ProjectFont, ShapeType, Tool } from "../types/menumaker";
 
 interface MenuMakerStore {
   // Project state
@@ -31,7 +32,7 @@ interface MenuMakerStore {
   menuData: MenuData;
 
   // Actions for project management
-  createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => void;
+  createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => Promise<void>;
   loadProject: (project: MenuProject) => void;
   saveProject: () => void;
   clearProject: () => void;
@@ -110,6 +111,14 @@ interface MenuMakerStore {
   copy: () => void;
   cut: () => void;
   paste: () => void;
+
+  // Actions for font management
+  loadProjectFonts: () => Promise<void>;
+  addGoogleFont: (googleFont: GoogleFont) => Promise<void>;
+  addCustomFont: (fontFile: File) => Promise<CustomFontFile | null>;
+  removeFont: (fontId: string) => Promise<void>;
+  getAllAvailableFonts: () => ProjectFont[];
+  ensureFontLoaded: (font: ProjectFont) => Promise<boolean>;
 }
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -137,6 +146,12 @@ const createDefaultProject = (name: string): MenuProject => ({
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   pages: [createDefaultPage()],
+  fonts: {
+    defaultFonts: [...DEFAULT_FONTS],
+    customFonts: [],
+    googleFonts: [],
+    loadedFonts: new Set(),
+  },
   settings: {
     defaultFormat: "A4",
     zoom: 1,
@@ -195,7 +210,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       isLoaded: false,
     },
 
-    createProject: (name: string, format?: string, customWidth?: number, customHeight?: number) => {
+    createProject: async (name: string, format?: string, customWidth?: number, customHeight?: number) => {
       const selectedFormat = format || "A4";
       let pageFormat = PAGE_FORMATS[selectedFormat];
 
@@ -227,11 +242,28 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           },
         },
       });
+
+      // Load default fonts immediately
+      try {
+        await get().loadProjectFonts();
+      } catch (error) {
+        console.error('Failed to load default fonts:', error);
+      }
     },
 
     loadProject: async (project: MenuProject) => {
       // Load image blobs for all image elements and background images
       const updatedProject = { ...project };
+      
+      // Ensure project has fonts property (for backward compatibility)
+      if (!updatedProject.fonts) {
+        updatedProject.fonts = {
+          defaultFonts: [...DEFAULT_FONTS],
+          customFonts: [],
+          googleFonts: [],
+          loadedFonts: new Set(),
+        };
+      }
       
       for (const page of updatedProject.pages) {
         // Load background image if it has a backgroundImageId
@@ -277,6 +309,13 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
           },
         },
       });
+
+      // Load project fonts
+      try {
+        await get().loadProjectFonts();
+      } catch (error) {
+        console.error('Failed to load project fonts:', error);
+      }
 
       // Refresh data elements after loading the project
       // Use setTimeout to ensure the project is fully loaded first
@@ -2225,5 +2264,172 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         return [];
       }
     },
+
+    // Font management actions
+    loadProjectFonts: async () => {
+      const { project } = get();
+
+      if (!project) return;
+
+      const allFonts = [...project.fonts.defaultFonts, ...project.fonts.googleFonts, ...project.fonts.customFonts];
+
+      await fontService.loadProjectFonts(allFonts);
+    },
+
+    addGoogleFont: async (googleFont: GoogleFont) => {
+      const { project } = get();
+
+      if (!project) return;
+
+      const projectFont = fontService.googleFontToProjectFont(googleFont);
+      
+      // Check if already added
+      const exists = project.fonts.googleFonts.some(font => font.id === projectFont.id);
+
+      if (exists) return;
+
+      // Load the font
+      const loaded = await fontService.loadGoogleFont(projectFont);
+
+      projectFont.isLoaded = loaded;
+
+      const updatedProject = {
+        ...project,
+        fonts: {
+          ...project.fonts,
+          googleFonts: [...project.fonts.googleFonts, projectFont],
+        },
+        updatedAt: new Date().toISOString(),
+      };
+
+      set({ project: updatedProject });
+      
+      try {
+        await indexedDBService.saveProject(updatedProject);
+      } catch (error) {
+        console.error('Failed to save project with new Google font:', error);
+      }
+    },
+
+    addCustomFont: async (fontFile: File) => {
+      const { project } = get();
+
+      if (!project) return null;
+
+      try {
+        const customFontFile = await fontService.loadCustomFont(fontFile);
+
+        if (!customFontFile) return null;
+
+        // Check if a font with this family name already exists
+        const existingFontIndex = project.fonts.customFonts.findIndex(
+          font => font.familyName === customFontFile.familyName
+        );
+
+        let updatedCustomFonts: ProjectFont[];
+
+        if (existingFontIndex >= 0) {
+          // Add to existing font family
+          const existingFont = project.fonts.customFonts[existingFontIndex];
+          const updatedFont = {
+            ...existingFont,
+            customFontFiles: [...(existingFont.customFontFiles || []), customFontFile],
+            variants: [...new Set([...existingFont.variants, customFontFile.weight.toString()])],
+            isLoaded: true,
+          };
+
+          updatedCustomFonts = project.fonts.customFonts.map((font, index) =>
+            index === existingFontIndex ? updatedFont : font
+          );
+        } else {
+          // Create new font family
+          const projectFont = fontService.customFontFilesToProjectFont([customFontFile], customFontFile.familyName);
+
+          projectFont.isLoaded = true;
+          updatedCustomFonts = [...project.fonts.customFonts, projectFont];
+        }
+
+        const updatedProject = {
+          ...project,
+          fonts: {
+            ...project.fonts,
+            customFonts: updatedCustomFonts,
+          },
+          updatedAt: new Date().toISOString(),
+        };
+
+        set({ project: updatedProject });
+        
+        try {
+          await indexedDBService.saveProject(updatedProject);
+        } catch (error) {
+          console.error('Failed to save project with new custom font:', error);
+        }
+
+        return customFontFile;
+      } catch (error) {
+        console.error('Failed to add custom font:', error);
+        return null;
+      }
+    },
+
+    removeFont: async (fontId: string) => {
+      const { project } = get();
+
+      if (!project) return;
+
+      // Find and remove the font
+      let updatedProject = { ...project };
+      let fontRemoved = false;
+
+      // Check Google fonts
+      const googleFontIndex = project.fonts.googleFonts.findIndex(font => font.id === fontId);
+
+      if (googleFontIndex >= 0) {
+        updatedProject.fonts.googleFonts = project.fonts.googleFonts.filter(font => font.id !== fontId);
+        fontRemoved = true;
+      }
+
+      // Check custom fonts
+      const customFontIndex = project.fonts.customFonts.findIndex(font => font.id === fontId);
+
+      if (customFontIndex >= 0) {
+        const customFont = project.fonts.customFonts[customFontIndex];
+        
+        // Remove font files from IndexedDB
+        if (customFont.customFontFiles) {
+          await Promise.all(
+            customFont.customFontFiles.map(fontFile => indexedDBService.deleteFont(fontFile.blobId))
+          );
+        }
+
+        updatedProject.fonts.customFonts = project.fonts.customFonts.filter(font => font.id !== fontId);
+        fontRemoved = true;
+      }
+
+      if (fontRemoved) {
+        updatedProject.updatedAt = new Date().toISOString();
+        set({ project: updatedProject });
+        
+        try {
+          await indexedDBService.saveProject(updatedProject);
+        } catch (error) {
+          console.error('Failed to save project after removing font:', error);
+        }
+      }
+    },
+
+    getAllAvailableFonts: () => {
+      const { project } = get();
+
+      if (!project) return DEFAULT_FONTS;
+
+      return fontService.getAllAvailableFonts([
+        ...project.fonts.googleFonts,
+        ...project.fonts.customFonts,
+      ]);
+    },
+
+    ensureFontLoaded: async (font: ProjectFont) => await fontService.ensureFontLoaded(font),
   })),
 );
