@@ -78,7 +78,7 @@ export function ShapeSelectorDropdown({ isOpen, onClose, buttonRef }: ShapeSelec
 
       {/* Dropdown menu */}
       <div
-        className="fixed z-50 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[200px]"
+        className="fixed z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 min-w-[200px]"
         style={{
           top: `${position.top}px`,
           left: `${position.left}px`,
@@ -86,8 +86,8 @@ export function ShapeSelectorDropdown({ isOpen, onClose, buttonRef }: ShapeSelec
         }}
       >
         {/* Header */}
-        <div className="px-3 py-2 border-b border-gray-100">
-          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Shapes</span>
+        <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-600">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Shapes</span>
         </div>
 
         {/* Shape options */}
@@ -96,10 +96,10 @@ export function ShapeSelectorDropdown({ isOpen, onClose, buttonRef }: ShapeSelec
             <button
               key={shape.id}
               onClick={() => handleShapeSelect(shape.id)}
-              className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+              className="w-full flex items-center justify-between px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150"
             >
               <div className="flex items-center space-x-3">
-                <shape.icon className="w-4 h-4 text-gray-500" />
+                <shape.icon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <span className="font-medium">{shape.label}</span>
               </div>
             </button>

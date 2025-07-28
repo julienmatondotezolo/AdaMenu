@@ -144,13 +144,13 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl max-w-md w-full mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Upload your image</h2>
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Upload your image</h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             disabled={isLoading}
           >
             <X className="w-5 h-5" />
@@ -161,20 +161,22 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
         <div className="p-6">
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragOver ? "border-blue-400 bg-blue-50" : "border-gray-300 bg-gray-50"
+              isDragOver
+                ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20"
+                : "border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800"
             }`}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
           >
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Upload className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Upload className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
 
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Drag & drop image here to upload</h3>
-                <p className="text-sm text-gray-500 mt-1">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Drag & drop image here to upload</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   Upload an image in JPG, GIF, or PNG. The maximum upload size is 30 Mb.
                 </p>
               </div>
@@ -202,7 +204,7 @@ export function ImageUploadModal({ isOpen, onClose }: ImageUploadModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-start p-4 border-t border-gray-200">
+        <div className="flex justify-start p-4 border-t border-gray-200 dark:border-gray-700">
           <Button onClick={onClose} variant="outline" disabled={isLoading}>
             Back
           </Button>

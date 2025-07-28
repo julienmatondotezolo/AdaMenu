@@ -157,10 +157,10 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-6 min-h-screen bg-white dark:bg-[#121212]">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Menu Maker Projects</h1>
-        <p className="text-gray-600">Manage your menu design projects</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Menu Maker Projects</h1>
+        <p className="text-gray-600 dark:text-gray-300">Manage your menu design projects</p>
       </div>
 
       {/* Action Buttons */}
@@ -177,8 +177,8 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`bg-white rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg overflow-hidden ${
-                selectedProject === project.id ? "border-blue-500 shadow-lg" : "border-gray-200 hover:border-gray-300"
+              className={`bg-white dark:bg-gray-900 rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg overflow-hidden ${
+                selectedProject === project.id ? "border-blue-500 shadow-lg" : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
               }`}
               onClick={() => setSelectedProject(project.id)}
               onKeyDown={(e) => {
@@ -192,15 +192,15 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
               aria-label={`Select project: ${project.name}`}
             >
               {/* Project Thumbnail */}
-              <div className="h-64 bg-gray-100 rounded-t-lg flex items-center justify-center overflow-hidden">
+              <div className="h-64 bg-gray-100 dark:bg-gray-800 rounded-t-lg flex items-center justify-center overflow-hidden">
                 {project.firstPage ? (
                   <div className="w-full h-full">
                     <PageThumbnail page={project.firstPage} width={240} height={128} />
                   </div>
                 ) : (
                   <div className="text-center">
-                    <FileText className="w-8 h-8 text-gray-400 mx-auto mb-1" />
-                    <p className="text-xs text-gray-500">No preview</p>
+                    <FileText className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-1" />
+                    <p className="text-xs text-gray-500 dark:text-gray-400">No preview</p>
                   </div>
                 )}
               </div>
@@ -235,7 +235,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                   </div>
                 ) : (
                   <div className="mb-2 flex items-center gap-2 group">
-                    <h3 className="font-semibold text-gray-900 truncate flex-1" title={project.name}>
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate flex-1" title={project.name}>
                       {project.name}
                     </h3>
                     <Button
@@ -252,7 +252,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                   </div>
                 )}
 
-                <div className="space-y-1 text-sm text-gray-500">
+                <div className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
                   <div className="flex items-center gap-2">
                     <Folder className="w-3 h-3" />
                     <span>
@@ -291,7 +291,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                       e.stopPropagation();
                       handleDeleteProject(project.id, project.name);
                     }}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -303,9 +303,9 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
       ) : (
         /* Empty State */
         <div className="text-center py-12">
-          <Folder className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">No projects yet</h3>
-          <p className="text-gray-600 mb-6">Create your first menu design project to get started</p>
+          <Folder className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No projects yet</h3>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Create your first menu design project to get started</p>
           <Button onClick={onCreateNew} className="flex items-center gap-2 mx-auto">
             <Plus className="w-4 h-4" />
             Create Your First Project
@@ -315,7 +315,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
 
       {/* Selected Project Actions */}
       {selectedProject && (
-        <div className="fixed bottom-6 right-6 bg-white rounded-lg shadow-lg border p-4 flex gap-2">
+        <div className="fixed bottom-6 right-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-4 flex gap-2">
           <Button
             onClick={() => {
               const project = projects.find((p) => p.id === selectedProject);
@@ -337,7 +337,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                 handleDeleteProject(project.id, project.name);
               }
             }}
-            className="text-red-600 hover:text-red-700"
+            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
           >
             <Trash2 className="w-4 h-4" />
           </Button>

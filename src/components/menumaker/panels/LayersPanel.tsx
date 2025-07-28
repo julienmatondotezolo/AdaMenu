@@ -380,7 +380,7 @@ export function LayersPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Layers List */}
       <div className="flex-1 overflow-y-auto">
         {/* Render layers in reverse order (top layer first) */}
@@ -398,10 +398,10 @@ export function LayersPanel() {
             )}
 
             <div
-              className={`group border-b border-gray-100 cursor-pointer transition-colors ${
-                editorState.selectedLayerId === layer.id ? "bg-blue-50 border-blue-200" : "hover:bg-gray-50"
+              className={`group border-b border-gray-100 dark:border-gray-700 cursor-pointer transition-colors ${
+                editorState.selectedLayerId === layer.id ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700" : "hover:bg-gray-50 dark:hover:bg-gray-800"
               } ${draggedLayerId === layer.id ? "opacity-50" : ""} ${
-                dropTargetLayerId === layer.id ? "border-2 border-blue-500 bg-blue-50" : ""
+                dropTargetLayerId === layer.id ? "border-2 border-blue-500 bg-blue-50 dark:bg-blue-900/30" : ""
               }`}
               onClick={() => {
                 if (layer.locked) return;
@@ -440,7 +440,7 @@ export function LayersPanel() {
                   {/* Drag handle */}
                   <div className={`flex items-center space-x-2`}>
                     <div className="drag-handle cursor-grab active:cursor-grabbing">
-                      <GripVertical className="w-4 h-4 text-gray-400" />
+                      <GripVertical className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                     </div>
 
                     {/* Collapse toggle */}
@@ -495,7 +495,7 @@ export function LayersPanel() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-gray-900" title={layer.name}>
+                          <span className="text-sm font-medium text-gray-900 dark:text-white" title={layer.name}>
                             {layer.name}
                           </span>
                           <Button
@@ -509,7 +509,7 @@ export function LayersPanel() {
                           </Button>
                         </div>
                       )}
-                      <div className="text-xs text-gray-500">{layer.elements.length} elements</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">{layer.elements.length} elements</div>
                     </div>
                   </div>
 
@@ -539,7 +539,7 @@ export function LayersPanel() {
 
                 {/* Drop indicator when dragging element over this layer */}
                 {dropTargetLayerId === layer.id && draggedElementId && draggedFromLayerId !== layer.id && (
-                  <div className="mx-3 my-2 p-2 border-2 border-dashed border-blue-500 bg-blue-50 rounded text-center text-xs text-blue-700 font-medium">
+                  <div className="mx-3 my-2 p-2 border-2 border-dashed border-blue-500 bg-blue-50 dark:bg-blue-900/30 rounded text-center text-xs text-blue-700 dark:text-blue-300 font-medium">
                     Drop element here to move to this layer
                   </div>
                 )}
@@ -566,8 +566,8 @@ export function LayersPanel() {
                         <div
                           className={`text-xs p-1 rounded transition-colors cursor-pointer mb-1 ${layer.locked ? "opacity-25" : ""} ${
                             editorState.selectedElementIds.includes(element.id)
-                              ? "bg-blue-200 text-blue-900 font-semibold"
-                              : "text-gray-600 hover:bg-blue-200"
+                              ? "bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100 font-semibold"
+                              : "text-gray-600 dark:text-gray-300 hover:bg-blue-200 dark:hover:bg-blue-800/50"
                           } ${draggedElementId === element.id ? "opacity-50" : ""}`}
                           draggable={!layer.locked}
                           onClick={(e) => handleElementClick(element.id, layer.locked, e)}
@@ -638,7 +638,7 @@ export function LayersPanel() {
                                 )}
                               </span>
                             </div>
-                            <span className="text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">
                               {Math.round(element.x)}, {Math.round(element.y)}
                             </span>
                           </div>

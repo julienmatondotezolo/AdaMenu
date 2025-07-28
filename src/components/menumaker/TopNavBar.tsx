@@ -56,14 +56,14 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
   };
 
   return (
-    <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200">
+    <div className="flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
       {/* Left Section - File Actions */}
       <div className="flex items-center space-x-2">
         <Button variant="outline" size="sm" onClick={onNewProject}>
           Go to Dashboard
         </Button>
 
-        <div className="w-px h-6 bg-gray-300 mx-2" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
       </div>
 
       <div className="flex items-center space-x-2">
@@ -94,7 +94,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
             ) : (
               <div className="flex flex-col items-center gap-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900" title={project.name}>
+                  <span className="font-medium text-gray-900 dark:text-white" title={project.name}>
                     {project.name.length > 25 ? `${project.name.substring(0, 25)}...` : project.name}
                   </span>
                   <Button variant="ghost" size="sm" onClick={handleStartRename} className="h-6 w-6 p-0">
@@ -113,7 +113,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
                       <span>Successfully saved</span>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-1 text-gray-500">
+                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
                       <Clock className="w-3 h-3" />
                       <span>Saved: {formatSavedDate(project.updatedAt)}</span>
                     </div>
@@ -127,7 +127,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
 
       {/* Right Section - View Controls */}
       <div className="flex items-center space-x-4">
-        <div className="w-px h-6 bg-gray-300 mx-2" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
         <Button
           variant="outline"
           size="sm"
@@ -138,7 +138,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
           <Eye className="w-4 h-4 mr-1" />
           Preview
         </Button>
-        <div className="w-px h-6 bg-gray-300 mx-2" />
+        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 mx-2" />
 
         <Button variant="outline" size="sm" onClick={saveProject} disabled={isSaving}>
           {isSaving ? (

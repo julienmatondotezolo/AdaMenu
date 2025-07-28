@@ -181,21 +181,21 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Page not found</h2>
-          <p className="text-gray-600">The selected page could not be loaded</p>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Page not found</h2>
+          <p className="text-gray-600 dark:text-gray-300">The selected page could not be loaded</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-gray-100" ref={containerRef}>
+    <div className="flex flex-col h-full bg-gray-100 dark:bg-[#121212]" ref={containerRef}>
       {isPreviewMode ? (
         <PreviewMode onExit={() => setPreviewMode(false)} />
       ) : (
         <>
           {/* Top Toolbar */}
-          <div className="flex-shrink-0 border-b border-gray-300 bg-white">
+          <div className="flex-shrink-0 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
             <TopNavBar onNewProject={onNewProject} />
           </div>
 
@@ -203,7 +203,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
           <div className="flex-1 flex overflow-hidden">
             {/* Left Sidebar - Thumbnails */}
             {editorState.ui.thumbnailsPanelOpen && (
-              <div className="w-64 flex-shrink-0 border-r border-gray-300 bg-white">
+              <div className="w-64 flex-shrink-0 border-r border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
                 <ThumbnailsPanel />
               </div>
             )}
@@ -216,14 +216,14 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             </div>
 
             {/* Right Sidebar */}
-            <div className="w-80 flex-shrink-0 border-l border-gray-300 bg-white flex flex-col overflow-hidden">
+            <div className="w-80 flex-shrink-0 border-l border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-y-auto">
             {/* Layers Panel */}
             {editorState.ui.layersPanelOpen && (
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-gray-700">
                 {/* Layers Header */}
                 <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setLayersCollapsed(!layersCollapsed)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -237,7 +237,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-controls="layers-content"
                 >
                   <div className="flex items-center space-x-4">
-                  <h3 className="font-semibold text-gray-900">Layers</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Layers</h3>
                     <Button
                       variant="outline"
                       size="sm"
@@ -283,9 +283,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                       </>
                     )}
                     {layersCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </div>
                 </div>
@@ -308,7 +308,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
               <div>
                 {/* Properties Header */}
                 <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
                   onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {
@@ -321,12 +321,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-expanded={!propertiesCollapsed}
                   aria-controls="properties-content"
                 >
-                  <h3 className="font-semibold text-gray-900">Properties</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                   <div className="flex items-center">
                     {propertiesCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </div>
                 </div>
@@ -342,10 +342,10 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
             {/* Shape Properties Panel */}
             {hasSelectedShapeElement && editorState.ui.propertiesPanelOpen && (
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-gray-700">
                 {/* Shape Properties Header */}
                 <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setShapePropertiesCollapsed(!shapePropertiesCollapsed)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -358,12 +358,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-expanded={!shapePropertiesCollapsed}
                   aria-controls="shape-properties-content"
                 >
-                  <h3 className="font-semibold text-gray-900">Properties</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                   <div className="flex items-center">
                     {shapePropertiesCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </div>
                 </div>
@@ -379,10 +379,10 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
             {/* Image Properties Panel */}
             {hasSelectedImageElement && editorState.ui.propertiesPanelOpen && (
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-gray-700">
                 {/* Image Properties Header */}
                 <div
-                  className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                  className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                   onClick={() => setImagePropertiesCollapsed(!imagePropertiesCollapsed)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -395,12 +395,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                   aria-expanded={!imagePropertiesCollapsed}
                   aria-controls="image-properties-content"
                 >
-                  <h3 className="font-semibold text-gray-900">Properties</h3>
+                  <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                   <div className="flex items-center">
                     {imagePropertiesCollapsed ? (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </div>
                 </div>
@@ -416,12 +416,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
 
             {/* Data Panel - shown when data tool is selected OR when data element is selected */}
             {(editorState.tool === "data" || hasSelectedDataElement) && (
-              <div className="border-b border-gray-300">
+              <div className="border-b border-gray-300 dark:border-gray-700">
                 {hasSelectedDataElement && (
                   <>
                     {/* Data Properties Header */}
                     <div
-                      className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                      className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                       onClick={() => setPropertiesCollapsed(!propertiesCollapsed)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" || e.key === " ") {
@@ -434,12 +434,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                       aria-expanded={!propertiesCollapsed}
                       aria-controls="data-properties-content"
                     >
-                      <h3 className="font-semibold text-gray-900">Properties</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">Properties</h3>
                       <div className="flex items-center">
                         {propertiesCollapsed ? (
-                          <ChevronRight className="w-4 h-4 text-gray-500" />
+                          <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                         ) : (
-                          <ChevronDown className="w-4 h-4 text-gray-500" />
+                          <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                         )}
                       </div>
                     </div>
@@ -457,10 +457,10 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Background Panel (Removed - use Data Panel instead) */}
-            <div className="border-b border-gray-300">
+            <div className="border-b border-gray-300 dark:border-gray-700">
               {/* Background Header */}
               <div
-                className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 cursor-pointer hover:bg-gray-100"
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                 onClick={() => setBackgroundCollapsed(!backgroundCollapsed)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
@@ -473,12 +473,12 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 aria-expanded={!backgroundCollapsed}
                 aria-controls="background-content"
               >
-                <h3 className="font-semibold text-gray-900">Background</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Background</h3>
                 <div className="flex items-center">
                   {backgroundCollapsed ? (
-                    <ChevronRight className="w-4 h-4 text-gray-500" />
+                    <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
+                    <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                   )}
                 </div>
               </div>

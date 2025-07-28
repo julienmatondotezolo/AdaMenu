@@ -51,7 +51,7 @@ export function MainToolbar() {
 
   return (
     <>
-      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 backdrop-blur-sm border border-gray-200 rounded-3xl shadow-lg px-4 py-2">
+      <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-3xl shadow-lg px-4 py-2">
         <div className="flex items-center space-x-3">
           {/* Undo/Redo Section */}
           <div className="flex items-center space-x-1">
@@ -63,7 +63,7 @@ export function MainToolbar() {
             </Button>
           </div>
 
-          <div className="w-px h-6 bg-gray-300" />
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
 
           {/* Copy/Paste Section */}
           <div className="flex items-center space-x-1">
@@ -75,7 +75,7 @@ export function MainToolbar() {
             </Button>
           </div>
 
-          <div className="w-px h-6 bg-gray-300" />
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600" />
 
           {/* Tools Section */}
           <div className="flex items-center space-x-1  p-1">

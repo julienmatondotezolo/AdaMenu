@@ -29,8 +29,10 @@ export function ShapePanel() {
   if (selectedElements.length > 1) {
     return (
       <div className="p-4 space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900 mb-3">{selectedElements.length} Shape Elements</h4>
-        <div className="text-sm text-gray-500">
+        <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
+          {selectedElements.length} Shape Elements
+        </h4>
+        <div className="text-sm text-gray-500 dark:text-gray-400">
           Multi-shape editing coming soon. Select a single shape to edit its properties.
         </div>
       </div>
@@ -76,7 +78,7 @@ export function ShapePanel() {
   return (
     <div className="p-4 space-y-4">
       <div className="space-y-3">
-        <h4 className="font-medium text-gray-900 mb-3">Position & Size</h4>
+        <h4 className="font-medium text-gray-900 dark:text-white mb-3">Position & Size</h4>
         {/* Position */}
         <div className="grid grid-cols-2 gap-2">
           <div>
@@ -132,7 +134,7 @@ export function ShapePanel() {
             id="shape-type"
             value={shapeElement.shapeType}
             onChange={(e) => onUpdate({ shapeType: e.target.value as ShapeType })}
-            className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
           >
             <option value="rectangle">Rectangle</option>
             <option value="circle">Circle</option>
@@ -180,7 +182,7 @@ export function ShapePanel() {
             onChange={(e) => onUpdate({ fill: hexToRgba(fillColor, Number(e.target.value)) })}
             className="mt-1"
           />
-          <div className="text-xs text-gray-500 mt-1">{Math.round(fillOpacity * 100)}%</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Math.round(fillOpacity * 100)}%</div>
         </div>
 
         {/* Stroke Color */}
@@ -208,7 +210,7 @@ export function ShapePanel() {
             onChange={(e) => onUpdate({ stroke: hexToRgba(strokeColor, Number(e.target.value)) })}
             className="mt-1"
           />
-          <div className="text-xs text-gray-500 mt-1">{Math.round(strokeOpacity * 100)}%</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Math.round(strokeOpacity * 100)}%</div>
         </div>
 
         {/* Stroke Width */}
@@ -237,7 +239,7 @@ export function ShapePanel() {
             onChange={(e) => onUpdate({ opacity: Number(e.target.value) })}
             className="mt-1"
           />
-          <div className="text-xs text-gray-500 mt-1">{Math.round(shapeElement.opacity * 100)}%</div>
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{Math.round(shapeElement.opacity * 100)}%</div>
         </div>
       </div>
     </div>

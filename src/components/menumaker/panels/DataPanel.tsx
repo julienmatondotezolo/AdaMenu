@@ -441,54 +441,54 @@ export function DataPanel() {
   if (!project || !currentPageId) return null;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Data Selector Button */}
         <div>
-          <Label className="text-sm font-medium mb-3 block">Data Selection</Label>
+          <Label className="text-sm font-medium mb-3 block text-gray-900 dark:text-white">Data Selection</Label>
           <button
             onClick={() => setShowDataSelector(true)}
-            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all group"
+            className="w-full p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
           >
             <div className="flex items-center justify-center space-x-3">
-              <div className="w-10 h-10 bg-gray-100 group-hover:bg-blue-100 rounded-lg flex items-center justify-center">
-                <Database className="w-5 h-5 text-gray-500 group-hover:text-blue-600" />
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <Database className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
               </div>
               <div className="text-left flex-1">
-                <h3 className="font-medium text-gray-900 group-hover:text-blue-600 text-sm">
+                <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 text-sm">
                   {getDataSelectionText()}
                 </h3>
-                <p className="text-xs text-gray-500">Click to change data source</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Click to change data source</p>
               </div>
-              <Edit3 className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+              <Edit3 className="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-blue-500 dark:group-hover:text-blue-400" />
             </div>
           </button>
         </div>
 
         {/* Position & Size Section */}
-        <div className="border-t pt-4">
-          <h4 className="font-medium text-gray-900 mb-3">Position & Size</h4>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3">Position & Size</h4>
 
           {/* X and Y Position */}
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-1 block">X</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">X</Label>
               <input
                 type="number"
                 step="1"
                 value={elementX}
                 onChange={(e) => setElementX(Math.round(Number(e.target.value)))}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl text-center font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-1 block">Y</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Y</Label>
               <input
                 type="number"
                 step="1"
                 value={elementY}
                 onChange={(e) => setElementY(Math.round(Number(e.target.value)))}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl text-center font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -496,27 +496,27 @@ export function DataPanel() {
           {/* Width and Height */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-1 block">Width</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Width</Label>
               <div className="relative">
                 <input
                   type="number"
                   step="1"
                   value={elementWidth}
                   onChange={(e) => setElementWidth(Math.round(Number(e.target.value)))}
-                  className="w-full px-3 py-2 pr-8 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 pr-8 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl text-center font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col">
                   <button
                     type="button"
                     onClick={() => setElementWidth(elementWidth + 10)}
-                    className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xs leading-none"
                   >
                     ▲
                   </button>
                   <button
                     type="button"
                     onClick={() => setElementWidth(Math.max(10, elementWidth - 10))}
-                    className="text-gray-400 hover:text-gray-600 text-xs leading-none"
+                    className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 text-xs leading-none"
                   >
                     ▼
                   </button>
@@ -524,13 +524,13 @@ export function DataPanel() {
               </div>
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700 mb-1 block">Height</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">Height</Label>
               <input
                 type="number"
                 step="1"
                 value={elementHeight}
                 onChange={(e) => setElementHeight(Math.round(Number(e.target.value)))}
-                className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-2xl text-center font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-2xl text-center font-medium text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -538,18 +538,18 @@ export function DataPanel() {
 
         {/* Category/Subcategory Title Properties (only if category or subcategory is selected) */}
         {(selectedDataType === "category" || selectedDataType === "subcategory") && (
-          <div className="border-t pt-4">
-            <h4 className="font-medium text-gray-900 mb-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h4 className="font-medium text-gray-900 dark:text-white mb-3">
               {selectedDataType === "category" ? "Category" : "Subcategory"} Title Properties
             </h4>
 
             {/* Title Language */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Language</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Language</Label>
               <select
                 value={titleLanguage}
                 onChange={(e) => setTitleLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="en">English</option>
                 <option value="fr">Français</option>
@@ -560,26 +560,26 @@ export function DataPanel() {
 
             {/* Title Color */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Color</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Color</Label>
               <div className="mt-1 flex items-center gap-2">
                 <input
                   type="color"
                   value={titleTextColor}
                   onChange={(e) => setTitleTextColor(e.target.value)}
-                  className="h-8 w-16 rounded border border-gray-300"
+                  className="h-8 w-16 rounded border border-gray-300 dark:border-gray-600"
                 />
                 <input
                   type="text"
                   value={titleTextColor}
                   onChange={(e) => setTitleTextColor(e.target.value)}
-                  className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                  className="flex-1 p-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
             </div>
 
             {/* Title Font Size */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Font Size</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Font Size</Label>
               <input
                 type="range"
                 min="12"
@@ -588,16 +588,16 @@ export function DataPanel() {
                 onChange={(e) => setTitleTextFontSize(Number(e.target.value))}
                 className="w-full mt-1"
               />
-              <div className="text-xs text-gray-500 text-right">{titleTextFontSize}px</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 text-right">{titleTextFontSize}px</div>
             </div>
 
             {/* Title Font Family */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Font Family</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Font Family</Label>
               <select
                 value={titleTextFontFamily}
                 onChange={(e) => setTitleTextFontFamily(e.target.value)}
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="Poppins, sans-serif">Poppins</option>
                 <option value="Arial, sans-serif">Arial</option>
@@ -615,7 +615,7 @@ export function DataPanel() {
 
             {/* Title Font Weight */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Font Weight</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Font Weight</Label>
               <select
                 value={titleTextFontWeight}
                 onChange={(e) =>
@@ -634,7 +634,7 @@ export function DataPanel() {
                       | "900",
                   )
                 }
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="normal">Normal</option>
                 <option value="bold">Bold</option>
@@ -652,11 +652,11 @@ export function DataPanel() {
 
             {/* Title Alignment */}
             <div className="mb-3">
-              <Label className="text-sm font-medium">Title Alignment</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Alignment</Label>
               <select
                 value={titleAlign}
                 onChange={(e) => setTitleAlign(e.target.value as "left" | "center" | "right")}
-                className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               >
                 <option value="left">Left</option>
                 <option value="center">Center</option>
@@ -668,19 +668,19 @@ export function DataPanel() {
 
         {/* Menu Item Properties (only if menuitem is selected) */}
         {selectedDataType === "menuitem" && (
-          <div className="border-t pt-4">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
             {/* Menu items text properties */}
-            <div className="border-b pb-4 mb-4 space-y-4">
+            <div className="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4 space-y-4">
               {/* Menu Item Title */}
-              <h5 className="font-medium text-gray-800 mb-3">Menu Item Title</h5>
+              <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Menu Item Title</h5>
 
               {/* Item Language */}
               <section>
-                <Label className="text-sm font-medium">Item Language</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Item Language</Label>
                 <select
                   value={itemNameLanguage}
                   onChange={(e) => setItemNameLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
-                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="en">English</option>
                   <option value="fr">Français</option>
@@ -691,26 +691,26 @@ export function DataPanel() {
 
               {/* Items Color */}
               <section>
-                <Label className="text-sm font-medium">Items Color</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Color</Label>
                 <div className="mt-1 flex items-center gap-2">
                   <input
                     type="color"
                     value={textColor}
                     onChange={(e) => setTextColor(e.target.value)}
-                    className="h-8 w-16 rounded border border-gray-300"
+                    className="h-8 w-16 rounded border border-gray-300 dark:border-gray-600"
                   />
                   <input
                     type="text"
                     value={textColor}
                     onChange={(e) => setTextColor(e.target.value)}
-                    className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                    className="flex-1 p-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   />
                 </div>
               </section>
 
               {/* Font Size */}
               <section>
-                <Label className="text-sm font-medium">Items Font Size</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Font Size</Label>
                 <input
                   type="range"
                   min="12"
@@ -719,7 +719,7 @@ export function DataPanel() {
                   onChange={(e) => setFontSize(Number(e.target.value))}
                   className="w-full mt-1"
                 />
-                <div className="text-xs text-gray-500 text-right">{fontSize}px</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-right">{fontSize}px</div>
               </section>
 
               {/* Font Family */}
@@ -1489,31 +1489,31 @@ export function DataPanel() {
         )}
 
         {/* Background and Border Properties */}
-        <div className="border-t pt-4">
-          <h4 className="font-medium text-gray-900 mb-3">Section Appearance</h4>
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+          <h4 className="font-medium text-gray-900 dark:text-white mb-3">Section Appearance</h4>
 
           {/* Background Color */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Background Color</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Background Color</Label>
             <div className="mt-1 flex items-center gap-2">
               <input
                 type="color"
                 value={backgroundColor}
                 onChange={(e) => setBackgroundColor(e.target.value)}
-                className="h-8 w-16 rounded border border-gray-300"
+                className="h-8 w-16 rounded border border-gray-300 dark:border-gray-600"
               />
               <input
                 type="text"
                 value={backgroundColor}
                 onChange={(e) => setBackgroundColor(e.target.value)}
-                className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                className="flex-1 p-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
             </div>
           </div>
 
           {/* Background Opacity */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Background Opacity</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Background Opacity</Label>
             <input
               type="range"
               min="0"
@@ -1523,33 +1523,33 @@ export function DataPanel() {
               onChange={(e) => setBackgroundOpacity(Number(e.target.value))}
               className="w-full mt-1"
             />
-            <div className="text-xs text-gray-500 text-right">
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-right">
               {Math.round(backgroundOpacity * 100)}% {backgroundOpacity === 0 ? "(Transparent)" : ""}
             </div>
           </div>
 
           {/* Border Color */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Border Color</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Border Color</Label>
             <div className="mt-1 flex items-center gap-2">
               <input
                 type="color"
                 value={borderColor}
                 onChange={(e) => setBorderColor(e.target.value)}
-                className="h-8 w-16 rounded border border-gray-300"
+                className="h-8 w-16 rounded border border-gray-300 dark:border-gray-600"
               />
               <input
                 type="text"
                 value={borderColor}
                 onChange={(e) => setBorderColor(e.target.value)}
-                className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                className="flex-1 p-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
               />
             </div>
           </div>
 
           {/* Border Size */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Border Size</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Border Size</Label>
             <input
               type="range"
               min="0"
@@ -1558,16 +1558,16 @@ export function DataPanel() {
               onChange={(e) => setBorderSize(Number(e.target.value))}
               className="w-full mt-1"
             />
-            <div className="text-xs text-gray-500 text-right">{borderSize}px</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-right">{borderSize}px</div>
           </div>
 
           {/* Border Type */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Border Type</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Border Type</Label>
             <select
               value={borderType}
               onChange={(e) => setBorderType(e.target.value as "solid" | "dashed" | "dotted")}
-              className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+              className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             >
               <option value="solid">Solid</option>
               <option value="dashed">Dashed</option>
@@ -1577,7 +1577,7 @@ export function DataPanel() {
 
           {/* Border Radius */}
           <div className="mb-3">
-            <Label className="text-sm font-medium">Border Radius</Label>
+            <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Border Radius</Label>
             <input
               type="range"
               min="0"
@@ -1586,7 +1586,7 @@ export function DataPanel() {
               onChange={(e) => setBorderRadius(Number(e.target.value))}
               className="w-full mt-1"
             />
-            <div className="text-xs text-gray-500 text-right">{borderRadius}px</div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 text-right">{borderRadius}px</div>
           </div>
         </div>
       </div>

@@ -347,21 +347,21 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Database className="w-5 h-5 text-blue-600" />
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
+              <Database className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">{getStepTitle()}</h2>
-              <p className="text-sm text-gray-500">Choose the data you want to display</p>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{getStepTitle()}</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Choose the data you want to display</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
             disabled={isLoading}
           >
             <X className="w-6 h-6" />
@@ -369,14 +369,14 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         </div>
 
         {/* Progress Bar */}
-        <div className="px-6 py-4 border-b border-gray-100">
-          <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${getProgress()}%` }}
             />
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
             <span>Data Type</span>
             {selectedDataType && dataTypeOptions.find((opt) => opt.id === selectedDataType)?.requiresCategory && (
               <span>Category</span>
@@ -392,29 +392,29 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
           {/* Step 1: Data Type Selection */}
           {step === 1 && (
             <div>
-              <p className="text-gray-600 mb-6">Choose what type of data you want to display on your menu.</p>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">Choose what type of data you want to display on your menu.</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
                 {dataTypeOptions.map((option) => (
                   <button
                     key={option.id}
                     onClick={() => handleDataTypeSelect(option.id)}
-                    className={`p-4 rounded-xl border-2 transition-all text-center group hover:border-blue-300 hover:shadow-md ${
-                      selectedDataType === option.id ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                    className={`p-4 rounded-xl border-2 transition-all text-center group hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md ${
+                      selectedDataType === option.id ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30" : "border-gray-200 dark:border-gray-700"
                     }`}
                   >
                     <div className="flex flex-col items-center space-y-3">
-                      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-50 group-hover:bg-blue-50">
+                      <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30">
                         <span className="text-2xl">{option.icon}</span>
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 mb-1">{option.label}</h3>
-                        <p className="text-xs text-gray-500 leading-tight">{option.description}</p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 mb-1">{option.label}</h3>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-tight">{option.description}</p>
                       </div>
                       <div className="flex items-center justify-center space-x-2 mt-2">
-                        {selectedDataType === option.id && <Check className="w-4 h-4 text-blue-600" />}
+                        {selectedDataType === option.id && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                         {(option.requiresCategory || option.requiresSubcategory) && (
-                          <ChevronRight className="w-4 h-4 text-gray-400" />
+                          <ChevronRight className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                         )}
                       </div>
                     </div>
@@ -428,18 +428,18 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
           {step === 2 && (
             <div className="space-y-3">
               <div className="flex items-center space-x-2 mb-4">
-                <button onClick={() => setStep(1)} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <button onClick={() => setStep(1)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium">
                   ← Back to Data Types
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Select a category to {selectedDataType === "subcategory" ? "choose a subcategory from" : selectedDataType === "menuitem" ? "display menu items from" : "display"}.
               </p>
 
               {categories.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                   <p>No categories available</p>
                 </div>
               ) : (
@@ -447,22 +447,22 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left group hover:border-blue-300 hover:shadow-md ${
-                      selectedCategory === category.id ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left group hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md ${
+                      selectedCategory === category.id ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30" : "border-gray-200 dark:border-gray-700"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">
+                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                           {category.names?.en || category.name}
                         </h3>
                         {category.subCategories?.length > 0 && (
-                          <p className="text-sm text-gray-500">{category.subCategories.length} subcategories</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{category.subCategories.length} subcategories</p>
                         )}
                       </div>
                       <div className="flex items-center space-x-2">
-                        {selectedCategory === category.id && <Check className="w-5 h-5 text-blue-600" />}
-                        {(selectedDataType === "menuitem" || selectedDataType === "subcategory") && <ChevronRight className="w-5 h-5 text-gray-400" />}
+                        {selectedCategory === category.id && <Check className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                        {(selectedDataType === "menuitem" || selectedDataType === "subcategory") && <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
                       </div>
                     </div>
                   </button>
@@ -475,19 +475,19 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
           {step === 3 && (
             <div className="space-y-3">
               <div className="flex items-center space-x-2 mb-4">
-                <button onClick={() => setStep(2)} className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                <button onClick={() => setStep(2)} className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 text-sm font-medium">
                   ← Back to Categories
                 </button>
               </div>
 
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 Select a subcategory from{" "}
                 <strong>{selectedCategoryData?.names?.en || selectedCategoryData?.name}</strong>.
               </p>
 
               {availableSubcategories.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Database className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
                   <p>No subcategories available in this category</p>
                 </div>
               ) : (
@@ -495,47 +495,47 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
                   <button
                     key={subcategory.id}
                     onClick={() => handleSubcategorySelect(subcategory.id)}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left group hover:border-blue-300 hover:shadow-md ${
-                      selectedSubcategory === subcategory.id ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left group hover:border-blue-300 dark:hover:border-blue-500 hover:shadow-md ${
+                      selectedSubcategory === subcategory.id ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30" : "border-gray-200 dark:border-gray-700"
                     }`}
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-semibold text-gray-900 group-hover:text-blue-600">
+                          <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
                             {subcategory.names?.en || subcategory.name}
                           </h3>
-                          {subcategory.description && <p className="text-sm text-gray-500">{subcategory.description}</p>}
+                          {subcategory.description && <p className="text-sm text-gray-500 dark:text-gray-400">{subcategory.description}</p>}
                           {selectedDataType === "menuitem" && subcategory.menuItems?.length > 0 && (
-                            <p className="text-xs text-blue-600 mt-1">
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                               {subcategory.menuItems.length} menu item{subcategory.menuItems.length !== 1 ? 's' : ''}
                             </p>
                           )}
                         </div>
-                        {selectedSubcategory === subcategory.id && <Check className="w-5 h-5 text-blue-600" />}
+                        {selectedSubcategory === subcategory.id && <Check className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
                       </div>
                       
                       {/* Show menu items preview when this subcategory is selected and dataType is menuitem */}
                       {selectedDataType === "menuitem" && 
                        selectedSubcategory === subcategory.id && 
                        subcategory.menuItems?.length > 0 && (
-                        <div className="mt-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                          <h4 className="text-sm font-medium text-blue-900 mb-2">Menu Items Preview:</h4>
+                        <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
+                          <h4 className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-2">Menu Items Preview:</h4>
                           <div className="space-y-1 max-h-32 overflow-y-auto">
                             {subcategory.menuItems.slice(0, 5).map((item: any, index: number) => (
                               <div key={item.id || index} className="flex items-center justify-between text-xs">
-                                <span className="text-gray-700 truncate flex-1">
+                                <span className="text-gray-700 dark:text-gray-300 truncate flex-1">
                                   {item.names?.en || item.name}
                                 </span>
                                 {item.price && (
-                                  <span className="text-blue-600 font-medium ml-2">
+                                  <span className="text-blue-600 dark:text-blue-400 font-medium ml-2">
                                     €{item.price.toFixed(2)}
                                   </span>
                                 )}
                               </div>
                             ))}
                             {subcategory.menuItems.length > 5 && (
-                              <div className="text-xs text-gray-500 italic">
+                              <div className="text-xs text-gray-500 dark:text-gray-400 italic">
                                 ...and {subcategory.menuItems.length - 5} more items
                               </div>
                             )}
@@ -553,7 +553,7 @@ export function DataSelectorModal({ isOpen, onClose, onConfirm, initialSelection
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+        <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-b-2xl">
           <Button variant="outline" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>

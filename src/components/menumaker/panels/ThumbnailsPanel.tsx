@@ -68,9 +68,9 @@ export function ThumbnailsPanel() {
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-gray-900">
+          <h3 className="font-semibold text-gray-900 dark:text-white">
             {project.pages.length} {project.pages.length > 1 ? "pages" : "page"}
           </h3>
           <Button variant="outline" size="sm" onClick={handleAddPage}>
@@ -91,9 +91,13 @@ export function ThumbnailsPanel() {
             onDrop={(e) => handleDrop(e, index)}
             onDragEnd={handleDragEnd}
             className={`relative group cursor-pointer rounded-lg border-2 transition-all duration-200 ${
-              currentPageId === page.id ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-gray-300"
+              currentPageId === page.id
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/30"
+                : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
             } ${draggedIndex === index ? "opacity-50 scale-95" : ""} ${
-              dragOverIndex === index && draggedIndex !== index ? "border-green-400 bg-green-50 scale-105" : ""
+              dragOverIndex === index && draggedIndex !== index
+                ? "border-green-400 bg-green-50 dark:bg-green-900/30 scale-105"
+                : ""
             }`}
             onClick={() => handlePageClick(page.id)}
           >

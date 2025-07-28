@@ -76,10 +76,10 @@ export function BackgroundPanel() {
   ];
 
   return (
-    <div className="px-4 py-8 space-y-6">
+    <div className="px-4 py-8 space-y-6 bg-white dark:bg-gray-900">
       {/* Background Color Section */}
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Background Color</h4>
+        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Background Color</h4>
 
         {/* Color Input */}
         <div className="mb-3">
@@ -87,7 +87,7 @@ export function BackgroundPanel() {
             type="color"
             value={currentPage.backgroundColor || "#ffffff"}
             onChange={(e) => handleColorChange(e.target.value)}
-            className="w-full h-10 rounded border border-gray-300 cursor-pointer"
+            className="w-full h-10 rounded border border-gray-300 dark:border-gray-600 cursor-pointer"
             title="Select background color"
           />
         </div>
@@ -98,7 +98,9 @@ export function BackgroundPanel() {
             <button
               key={color}
               className={`w-6 h-6 rounded border-2 transition-all hover:scale-110 ${
-                currentPage.backgroundColor === color ? "border-blue-500 ring-2 ring-blue-200" : "border-gray-200"
+                currentPage.backgroundColor === color
+                  ? "border-blue-500 ring-2 ring-blue-200 dark:ring-blue-800"
+                  : "border-gray-200 dark:border-gray-600"
               }`}
               style={{ backgroundColor: color }}
               onClick={() => handleColorChange(color)}
@@ -110,7 +112,7 @@ export function BackgroundPanel() {
 
       {/* Background Image Section */}
       <div>
-        <h4 className="text-sm font-medium text-gray-900 mb-3">Background Image</h4>
+        <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Background Image</h4>
 
         {/* Current Background Image */}
         {currentPage.backgroundImage && currentPage.backgroundImage.trim() !== "" ? (
@@ -124,12 +126,12 @@ export function BackgroundPanel() {
               <img
                 src={currentPage.backgroundImage}
                 alt="Current background"
-                className="w-full h-32 object-cover rounded border border-gray-300 group-hover:opacity-80 transition-opacity"
+                className="w-full h-32 object-cover rounded border border-gray-300 dark:border-gray-600 group-hover:opacity-80 transition-opacity"
               />
               <Button
                 variant="outline"
                 size="sm"
-                className="absolute top-2 right-2 w-6 h-6 p-0 bg-white/80 hover:bg-white"
+                className="absolute top-2 right-2 w-6 h-6 p-0 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleRemoveImage();
@@ -140,19 +142,19 @@ export function BackgroundPanel() {
                 <X className="w-3 h-3" />
               </Button>
             </button>
-            <p className="text-xs text-gray-500 mt-1">Click image to replace</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Click image to replace</p>
           </div>
         ) : (
           /* Upload Area */
           <button
-            className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors"
+            className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
             onClick={handleImageClick}
             type="button"
             title="Click to upload background image"
           >
-            <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-            <p className="text-sm text-gray-600 mb-1">Click to upload image</p>
-            <p className="text-xs text-gray-400">JPG, PNG, GIF up to 5MB</p>
+            <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">Click to upload image</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">JPG, PNG, GIF up to 5MB</p>
           </button>
         )}
 
@@ -169,10 +171,10 @@ export function BackgroundPanel() {
       {/* Image Settings */}
       {currentPage.backgroundImage && currentPage.backgroundImage.trim() !== "" && (
         <div>
-          <h4 className="text-sm font-medium text-gray-900 mb-3">Image Settings</h4>
+          <h4 className="text-sm font-medium text-gray-900 dark:text-white mb-3">Image Settings</h4>
           <div className="space-y-2">
             <div>
-              <label htmlFor="bg-opacity" className="text-xs text-gray-600 mb-1 block">
+              <label htmlFor="bg-opacity" className="text-xs text-gray-600 dark:text-gray-300 mb-1 block">
                 Background Opacity
               </label>
               <div className="flex items-center space-x-2">
@@ -187,18 +189,21 @@ export function BackgroundPanel() {
                   onMouseUp={handleOpacityChangeComplete}
                   onTouchEnd={handleOpacityChangeComplete}
                   onKeyUp={handleOpacityChangeComplete}
-                  className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
                 />
-                <span className="text-xs text-gray-600 w-10 text-right">
+                <span className="text-xs text-gray-600 dark:text-gray-300 w-10 text-right">
                   {Math.round((currentPage.backgroundImageOpacity ?? 1) * 100)}%
                 </span>
               </div>
             </div>
             <div>
-              <label htmlFor="bg-size" className="text-xs text-gray-600 mb-1 block">
+              <label htmlFor="bg-size" className="text-xs text-gray-600 dark:text-gray-300 mb-1 block">
                 Background Size
               </label>
-              <select id="bg-size" className="w-full text-sm border border-gray-300 rounded px-2 py-1">
+              <select
+                id="bg-size"
+                className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
                 <option value="cover">Cover (Fill)</option>
                 <option value="contain">Contain (Fit)</option>
                 <option value="auto">Original Size</option>
@@ -206,10 +211,13 @@ export function BackgroundPanel() {
               </select>
             </div>
             <div>
-              <label htmlFor="bg-position" className="text-xs text-gray-600 mb-1 block">
+              <label htmlFor="bg-position" className="text-xs text-gray-600 dark:text-gray-300 mb-1 block">
                 Background Position
               </label>
-              <select id="bg-position" className="w-full text-sm border border-gray-300 rounded px-2 py-1">
+              <select
+                id="bg-position"
+                className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
                 <option value="center">Center</option>
                 <option value="top">Top</option>
                 <option value="bottom">Bottom</option>
@@ -222,10 +230,13 @@ export function BackgroundPanel() {
               </select>
             </div>
             <div>
-              <label htmlFor="bg-repeat" className="text-xs text-gray-600 mb-1 block">
+              <label htmlFor="bg-repeat" className="text-xs text-gray-600 dark:text-gray-300 mb-1 block">
                 Background Repeat
               </label>
-              <select id="bg-repeat" className="w-full text-sm border border-gray-300 rounded px-2 py-1">
+              <select
+                id="bg-repeat"
+                className="w-full text-sm border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
                 <option value="no-repeat">No Repeat</option>
                 <option value="repeat">Repeat</option>
                 <option value="repeat-x">Repeat X</option>

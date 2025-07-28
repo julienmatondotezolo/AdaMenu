@@ -1368,14 +1368,18 @@ export function CanvasArea() {
 
   if (!currentPage) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-50">
-        <p className="text-gray-500">No page selected</p>
+      <div className="flex items-center justify-center h-full bg-gray-50 dark:bg-gray-900">
+        <p className="text-gray-500 dark:text-gray-400">No page selected</p>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="h-full w-full bg-gray-50 overflow-auto" style={{ overscrollBehaviorX: "none" }}>
+    <div
+      ref={containerRef}
+      className="h-full w-full bg-gray-50 dark:bg-gray-900 overflow-auto"
+      style={{ overscrollBehaviorX: "none" }}
+    >
       <canvas
         ref={canvasRef}
         width={canvasSize.width}

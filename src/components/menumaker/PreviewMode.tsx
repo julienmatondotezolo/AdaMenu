@@ -130,7 +130,7 @@ export function PreviewMode({ onExit, showExitButton = true }: PreviewModeProps)
 
       {/* Preview Header */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 flex items-center space-x-4 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
           {previewImages.length === 1 ? "1 Page" : `${previewImages.length} Pages`}
         </span>
         <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
