@@ -1,12 +1,14 @@
 /* eslint-disable prettier/prettier */
-import { Calendar, Check, Clock, Edit2, FileText, Folder, Plus, Trash2, X } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Calendar, Check, Clock, Download, Edit2, FileText, Folder, Plus, Trash2, Upload, X } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { indexedDBService } from "../../lib/indexedDBService";
 import { useMenuMakerStore } from "../../stores/menumaker";
+import { MENU_PROJECT_SCHEMA, MenuProject } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { PageThumbnail } from "./PageThumbnail";
+import { SchemaViewer } from "./SchemaViewer";
 
 interface ProjectManagerProps {
   onCreateNew: () => void;
@@ -29,6 +31,8 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>("");
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load projects from IndexedDB
   useEffect(() => {
@@ -135,6 +139,143 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
     });
   };
 
+  // JSON Schema validation function
+  const validateMenuProject = (data: any): data is MenuProject => {
+    try {
+      // Basic type checking for required fields
+      if (typeof data !== 'object' || data === null) return false;
+      if (typeof data.id !== 'string') return false;
+      if (typeof data.name !== 'string') return false;
+      if (typeof data.createdAt !== 'string') return false;
+      if (typeof data.updatedAt !== 'string') return false;
+      if (!Array.isArray(data.pages)) return false;
+      if (typeof data.settings !== 'object') return false;
+
+      // Validate pages structure
+      for (const page of data.pages) {
+        if (typeof page !== 'object' || page === null) return false;
+        if (typeof page.id !== 'string') return false;
+        if (typeof page.name !== 'string') return false;
+        if (typeof page.format !== 'object') return false;
+        if (typeof page.backgroundColor !== 'string') return false;
+        if (!Array.isArray(page.layers)) return false;
+
+        // Validate layers structure
+        for (const layer of page.layers) {
+          if (typeof layer !== 'object' || layer === null) return false;
+          if (typeof layer.id !== 'string') return false;
+          if (typeof layer.name !== 'string') return false;
+          if (typeof layer.visible !== 'boolean') return false;
+          if (typeof layer.locked !== 'boolean') return false;
+          if (typeof layer.opacity !== 'number') return false;
+          if (!Array.isArray(layer.elements)) return false;
+
+          // Validate elements structure
+          for (const element of layer.elements) {
+            if (typeof element !== 'object' || element === null) return false;
+            if (typeof element.id !== 'string') return false;
+            if (!['text', 'image', 'background', 'data', 'shape'].includes(element.type)) return false;
+            if (typeof element.x !== 'number') return false;
+            if (typeof element.y !== 'number') return false;
+            if (typeof element.width !== 'number') return false;
+            if (typeof element.height !== 'number') return false;
+          }
+        }
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Validation error:', error);
+      return false;
+    }
+  };
+
+  const handleImportProject = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Reset the input
+    event.target.value = '';
+
+    if (file.type !== 'application/json') {
+      alert('Please select a JSON file.');
+      return;
+    }
+
+    setIsImporting(true);
+
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+
+      // Validate against schema
+      if (!validateMenuProject(data)) {
+        alert('Invalid menu project file. The file does not match the required schema.');
+        return;
+      }
+
+      // Generate new ID and update timestamps to avoid conflicts
+      const importedProject: MenuProject = {
+        ...data,
+        id: Math.random().toString(36).substr(2, 9),
+        name: `${data.name} (Imported)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Save to IndexedDB
+      await indexedDBService.saveProject(importedProject);
+
+      // Refresh the projects list
+      const savedProjects = await indexedDBService.getAllProjects();
+      setProjects(savedProjects);
+
+      alert(`Project "${importedProject.name}" imported successfully!`);
+    } catch (error) {
+      console.error('Import error:', error);
+      if (error instanceof SyntaxError) {
+        alert('Invalid JSON file. Please check the file format.');
+      } else {
+        alert('Failed to import project. Please try again.');
+      }
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleExportProject = async (projectId: string) => {
+    try {
+      const project = await indexedDBService.getProject(projectId);
+      if (!project) {
+        alert('Project not found.');
+        return;
+      }
+
+      // Create JSON blob
+      const jsonString = JSON.stringify(project, null, 2);
+      const blob = new Blob([jsonString], { type: 'application/json' });
+
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_menu_project.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      alert(`Project "${project.name}" exported successfully!`);
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Failed to export project. Please try again.');
+    }
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 min-h-screen">
       <div className="mb-8">
@@ -143,12 +284,42 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
       </div>
 
       {/* Action Buttons */}
-      <div className="mb-8 flex gap-4">
+      <div className="mb-8 flex flex-wrap gap-4">
         <Button onClick={onCreateNew} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Create New Project
         </Button>
+        
+        <Button 
+          onClick={handleImportProject} 
+          variant="outline" 
+          className="flex items-center gap-2"
+          disabled={isImporting}
+        >
+          <Upload className="w-4 h-4" />
+          {isImporting ? 'Importing...' : 'Import Project'}
+        </Button>
+
+        {selectedProject && (
+          <Button 
+            onClick={() => handleExportProject(selectedProject)} 
+            variant="outline" 
+            className="flex items-center gap-2"
+          >
+            <Download className="w-4 h-4" />
+            Export Selected
+          </Button>
+        )}
       </div>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
 
       {/* Projects Grid */}
       {projects.length > 0 ? (
@@ -268,6 +439,18 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleExportProject(project.id);
+                    }}
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20"
+                    title="Export Project"
+                  >
+                    <Download className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleDeleteProject(project.id, project.name);
                     }}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
@@ -309,6 +492,14 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           </Button>
           <Button
             variant="outline"
+            onClick={() => handleExportProject(selectedProject)}
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </Button>
+          <Button
+            variant="outline"
             onClick={() => {
               const project = projects.find((p) => p.id === selectedProject);
 
@@ -322,6 +513,29 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           </Button>
         </div>
       )}
+
+      {/* Import/Export Info Card */}
+      <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg p-6 border border-blue-200 dark:border-blue-800">
+        <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+          📁 Import & Export Projects
+        </h3>
+        <div className="text-sm text-blue-700 dark:text-blue-200 space-y-2">
+          <p>
+            <strong>Import:</strong> Upload JSON files that follow the Menu Project Schema. 
+            Imported projects will be validated and automatically saved to your local storage.
+          </p>
+          <p>
+            <strong>Export:</strong> Download your projects as JSON files for backup, sharing, or migration. 
+            Exported files include all pages, layers, elements, and project settings.
+          </p>
+                     <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded border border-blue-200 dark:border-blue-700">
+             <p className="text-xs text-blue-600 dark:text-blue-300">
+               💡 <strong>Tip:</strong> All imported and exported files follow the MENU_PROJECT_SCHEMA for maximum compatibility.
+             </p>
+             <SchemaViewer />
+           </div>
+        </div>
+      </div>
     </div>
   );
 }

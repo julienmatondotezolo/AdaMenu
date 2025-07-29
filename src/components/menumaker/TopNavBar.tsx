@@ -159,7 +159,7 @@ export function TopNavBar({ onNewProject }: ToolbarProps) {
           </Button>
           <Button variant="default" size="sm" onClick={exportToPDF} disabled={isExportingPDF} title="Export to PDF">
             {isExportingPDF ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
-            {isExportingPDF ? "Exporting..." : "Export"}
+            {isExportingPDF ? "Downloading..." : "Download"}
           </Button>
         </div>
       </div>
