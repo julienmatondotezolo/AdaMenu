@@ -52,6 +52,7 @@ export function CanvasArea() {
   const [shapePreviewPosition, setShapePreviewPosition] = useState<{ x: number; y: number } | null>(null);
 
   const [backgroundImageCache, setBackgroundImageCache] = useState<Map<string, HTMLImageElement>>(new Map());
+  const [failedBackgroundImages, setFailedBackgroundImages] = useState<Set<string>>(new Set());
   const [imageElementCache, setImageElementCache] = useState<Map<string, HTMLImageElement>>(new Map());
 
   const currentPage = project?.pages.find((page) => page.id === currentPageId);
@@ -252,6 +253,8 @@ export function CanvasArea() {
       pageOffset,
       backgroundImageCache,
       setBackgroundImageCache,
+      failedBackgroundImages,
+      setFailedBackgroundImages,
     });
 
     // Draw elements
@@ -343,6 +346,7 @@ export function CanvasArea() {
     tool,
     editorState.hoveredElementId,
     backgroundImageCache,
+    failedBackgroundImages,
     imageElementCache,
     tempElementPositions,
     tempElementDimensions,

@@ -724,11 +724,11 @@ export function DataPanel() {
 
               {/* Font Family */}
               <section>
-                <Label className="text-sm font-medium">Items Font Family</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Font Family</Label>
                 <select
                   value={fontFamily}
                   onChange={(e) => setFontFamily(e.target.value)}
-                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="Poppins, sans-serif">Poppins</option>
                   <option value="Arial, sans-serif">Arial</option>
@@ -746,7 +746,7 @@ export function DataPanel() {
 
               {/* Font Weight */}
               <section>
-                <Label className="text-sm font-medium">Items Font Weight</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Font Weight</Label>
                 <select
                   value={fontWeight}
                   onChange={(e) =>
@@ -765,7 +765,7 @@ export function DataPanel() {
                         | "900",
                     )
                   }
-                  className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                  className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 >
                   <option value="normal">Normal</option>
                   <option value="bold">Bold</option>
@@ -783,7 +783,7 @@ export function DataPanel() {
 
               {/* Vertical Line Spacing */}
               <section>
-                <Label className="text-sm font-medium">Items Vertical Line Spacing</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Vertical Line Spacing</Label>
                 <input
                   type="range"
                   min="0.8"
@@ -793,12 +793,12 @@ export function DataPanel() {
                   onChange={(e) => setLineSpacing(Number(e.target.value))}
                   className="w-full mt-1"
                 />
-                <div className="text-xs text-gray-500 text-right">{lineSpacing.toFixed(1)}x</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400 text-right">{lineSpacing.toFixed(1)}x</div>
               </section>
 
               {/* Start Index Selection */}
-              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <Label className="text-sm font-medium text-blue-900">Start from Menu Item</Label>
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <Label className="text-sm font-medium text-blue-900 dark:text-blue-300">Start from Menu Item</Label>
                 <div className="mt-2">
                   <div className="flex items-center gap-3">
                     <div className="flex-1">
@@ -808,7 +808,7 @@ export function DataPanel() {
                         max={Math.max(0, (selectedDataElement?.subcategoryData?.menuItems?.length || 1) - 1)}
                         value={startIndex}
                         onChange={(e) => setStartIndex(Number(e.target.value))}
-                        className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer"
+                        className="w-full h-2 bg-blue-200 dark:bg-blue-800 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -818,14 +818,14 @@ export function DataPanel() {
                         max={selectedDataElement?.subcategoryData?.menuItems?.length || 1}
                         value={startIndex + 1}
                         onChange={(e) => setStartIndex(Math.max(0, Number(e.target.value) - 1))}
-                        className="w-16 px-2 py-1 text-sm border border-blue-300 rounded-md text-center"
+                        className="w-16 px-2 py-1 text-sm border border-blue-300 dark:border-blue-600 rounded-md text-center bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       />
-                      <span className="text-sm text-blue-700">
+                      <span className="text-sm text-blue-700 dark:text-blue-300">
                         of {selectedDataElement?.subcategoryData?.menuItems?.length || 0}
                       </span>
                     </div>
                   </div>
-                  <div className="mt-2 text-xs text-blue-600">
+                  <div className="mt-2 text-xs text-blue-600 dark:text-blue-300">
                     <strong>Starting item:</strong>{" "}
                     {selectedDataElement?.subcategoryData?.menuItems?.[startIndex]?.names?.en ||
                       selectedDataElement?.subcategoryData?.menuItems?.[startIndex]?.name ||
@@ -836,7 +836,7 @@ export function DataPanel() {
                       type="button"
                       onClick={() => setStartIndex(0)}
                       className={`px-2 py-1 text-xs rounded transition-colors ${
-                        startIndex === 0 ? "bg-blue-600 text-white" : "bg-blue-200 text-blue-700 hover:bg-blue-300"
+                        startIndex === 0 ? "bg-blue-600 text-white" : "bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700"
                       }`}
                     >
                       Start
@@ -850,7 +850,7 @@ export function DataPanel() {
                         className={`px-2 py-1 text-xs rounded transition-colors ${
                           startIndex === Math.floor((selectedDataElement?.subcategoryData?.menuItems?.length || 0) / 2)
                             ? "bg-blue-600 text-white"
-                            : "bg-blue-200 text-blue-700 hover:bg-blue-300"
+                            : "bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700"
                         }`}
                       >
                         Middle
@@ -865,7 +865,7 @@ export function DataPanel() {
             <div className="border-b pb-4 mb-4">
               {/* Show Price Toggle */}
               <div className="mb-3 flex items-center justify-between">
-                <Label className="text-sm font-medium">Show Price</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Price</Label>
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -883,7 +883,7 @@ export function DataPanel() {
                   <h5 className="font-medium text-gray-800 mb-3">Menu Item Price</h5>
                   {/* Show Currency Sign Toggle */}
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">Show € Sign</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Show € Sign</Label>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
@@ -897,30 +897,30 @@ export function DataPanel() {
 
                   {/* Price Color */}
                   <div>
-                    <Label className="text-sm font-medium">Price Color</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price Color</Label>
                     <div className="mt-1 flex items-center gap-2">
                       <input
                         type="color"
                         value={priceColor}
                         onChange={(e) => setPriceColor(e.target.value)}
-                        className="h-8 w-16 rounded border border-gray-300"
+                        className="h-8 w-16 rounded border border-gray-300 dark:border-gray-600"
                       />
                       <input
                         type="text"
                         value={priceColor}
                         onChange={(e) => setPriceColor(e.target.value)}
-                        className="flex-1 p-1 text-xs border border-gray-300 rounded"
+                        className="flex-1 p-1 text-xs border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
 
                   {/* Price Font Family */}
                   <div>
-                    <Label className="text-sm font-medium">Price Font Family</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price Font Family</Label>
                     <select
                       value={priceFontFamily}
                       onChange={(e) => setPriceFontFamily(e.target.value)}
-                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value="Poppins, sans-serif">Poppins</option>
                       <option value="Arial, sans-serif">Arial</option>
@@ -938,7 +938,7 @@ export function DataPanel() {
 
                   {/* Price Font Weight */}
                   <div>
-                    <Label className="text-sm font-medium">Price Font Weight</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price Font Weight</Label>
                     <select
                       value={priceFontWeight}
                       onChange={(e) =>
@@ -957,7 +957,7 @@ export function DataPanel() {
                             | "900",
                         )
                       }
-                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value="normal">Normal</option>
                       <option value="bold">Bold</option>
@@ -975,11 +975,11 @@ export function DataPanel() {
 
                   {/* Price Separator */}
                   <div>
-                    <Label className="text-sm font-medium">Price Decimal Separator</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price Decimal Separator</Label>
                     <select
                       value={priceSeparator}
                       onChange={(e) => setPriceSeparator(e.target.value as "." | ",")}
-                      className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                     >
                       <option value=".">Dot (10.00)</option>
                       <option value=",">Comma (10,00)</option>
@@ -991,7 +991,7 @@ export function DataPanel() {
 
             {/* Show Subcategory Title Toggle */}
             <div className="mb-3 flex items-center justify-between">
-              <Label className="text-sm font-medium">Show Subcategory Title</Label>
+              <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Show Subcategory Title</Label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
@@ -1006,15 +1006,15 @@ export function DataPanel() {
             {/* Subcategory Title Properties - only show when showSubcategoryTitle is true */}
             {showSubcategoryTitle && (
               <div className="border-b pb-4 mb-4">
-                <h5 className="font-medium text-gray-800 mb-3">Subcategory Title</h5>
+                <h5 className="font-medium text-gray-800 dark:text-gray-200 mb-3">Subcategory Title</h5>
 
                 {/* Subcategory Title Language */}
                 <div className="mb-3">
-                  <Label className="text-sm font-medium">Title Language</Label>
+                  <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title Language</Label>
                   <select
                     value={subcategoryTitleLanguage}
                     onChange={(e) => setSubcategoryTitleLanguage(e.target.value as "en" | "fr" | "it" | "nl")}
-                    className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                    className="w-full mt-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   >
                     <option value="en">English</option>
                     <option value="fr">Français</option>

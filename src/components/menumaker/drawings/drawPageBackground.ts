@@ -7,6 +7,8 @@ interface DrawPageBackgroundParams {
   pageOffset: { x: number; y: number };
   backgroundImageCache: Map<string, HTMLImageElement>;
   setBackgroundImageCache: React.Dispatch<React.SetStateAction<Map<string, HTMLImageElement>>>;
+  failedBackgroundImages: Set<string>;
+  setFailedBackgroundImages: React.Dispatch<React.SetStateAction<Set<string>>>;
 }
 
 export const drawPageBackground = ({
@@ -16,6 +18,8 @@ export const drawPageBackground = ({
   pageOffset,
   backgroundImageCache,
   setBackgroundImageCache,
+  failedBackgroundImages,
+  setFailedBackgroundImages,
 }: DrawPageBackgroundParams) => {
   const pageWidth = page.format.width * canvas.zoom;
   const pageHeight = page.format.height * canvas.zoom;
@@ -29,15 +33,24 @@ export const drawPageBackground = ({
   ctx.fillRect(pageOffset.x, pageOffset.y, pageWidth, pageHeight);
 
   // Draw background image if available
-  if (page.backgroundImage) {
+  if (page.backgroundImage && !failedBackgroundImages.has(page.backgroundImage)) {
     const cachedImage = backgroundImageCache.get(page.backgroundImage);
 
-    if (cachedImage && cachedImage.complete) {
-      // Image is loaded and ready to draw
+    if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0) {
+      // Image is loaded successfully and ready to draw
       ctx.save();
       ctx.globalAlpha = page.backgroundImageOpacity ?? 1;
       ctx.drawImage(cachedImage, pageOffset.x, pageOffset.y, pageWidth, pageHeight);
       ctx.restore();
+    } else if (cachedImage && cachedImage.complete && cachedImage.naturalWidth === 0) {
+      // Image is broken, add to failed list and remove from cache
+      console.warn("Adding broken background image to failed list:", page.backgroundImage);
+      setFailedBackgroundImages((prev) => new Set(prev).add(page.backgroundImage));
+      setBackgroundImageCache((prev) => {
+        const newCache = new Map(prev);
+        newCache.delete(page.backgroundImage);
+        return newCache;
+      });
     } else if (!cachedImage) {
       // Load the image and cache it
       const img = new Image();
@@ -51,6 +64,13 @@ export const drawPageBackground = ({
       };
       img.onerror = () => {
         console.warn("Failed to load background image:", page.backgroundImage);
+        // Add to failed list and remove from cache to prevent future attempts
+        setFailedBackgroundImages((prev) => new Set(prev).add(page.backgroundImage));
+        setBackgroundImageCache((prev) => {
+          const newCache = new Map(prev);
+          newCache.delete(page.backgroundImage);
+          return newCache;
+        });
       };
       img.src = page.backgroundImage;
 

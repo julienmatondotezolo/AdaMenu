@@ -30,6 +30,8 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     project,
     editorState,
     currentPageId,
+    isPreviewMode,
+    setPreviewMode,
     setMenuData,
     setMenuLoading,
     setMenuError,
@@ -42,11 +44,10 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   } = useMenuMakerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isPreviewMode, setPreviewMode] = useState(false);
   const [layersCollapsed, setLayersCollapsed] = useState(false);
   const [propertiesCollapsed, setPropertiesCollapsed] = useState(false);
-  const [fontsCollapsed, setFontsCollapsed] = useState(false);
-  const [backgroundCollapsed, setBackgroundCollapsed] = useState(false);
+  const [fontsCollapsed, setFontsCollapsed] = useState(true);
+  const [backgroundCollapsed, setBackgroundCollapsed] = useState(true);
   const [imagesCollapsed, setImagesCollapsed] = useState(false);
   const [shapesCollapsed, setShapesCollapsed] = useState(false);
   const [dataCollapsed, setDataCollapsed] = useState(false);
@@ -184,6 +185,9 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
       .flatMap((layer) => layer.elements)
       .filter((element) => editorState.selectedElementIds.includes(element.id)) || [];
 
+  // Check if any selected element is a text element
+  const hasSelectedTextElement = selectedElements.some((element) => element.type === "text");
+
   // Check if any selected element is a data element
   const hasSelectedDataElement = selectedElements.some((element) => element.type === "data");
 
@@ -316,7 +320,7 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
             )}
 
             {/* Properties Panel */}
-            {editorState.ui.propertiesPanelOpen && (
+            {hasSelectedTextElement && editorState.ui.propertiesPanelOpen && (
               <div className="border-b border-gray-300 dark:border-gray-700">
                 {/* Properties Header */}
                 <div
@@ -351,41 +355,6 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
                 )}
               </div>
             )}
-
-            {/* Font Management Panel */}
-            <div className="border-b border-gray-300 dark:border-gray-700">
-              {/* Font Management Header */}
-              <div
-                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
-                onClick={() => setFontsCollapsed(!fontsCollapsed)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setFontsCollapsed(!fontsCollapsed);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-expanded={!fontsCollapsed}
-                aria-controls="fonts-content"
-              >
-                <h3 className="font-semibold text-gray-900 dark:text-white">Font Management</h3>
-                <div className="flex items-center">
-                  {fontsCollapsed ? (
-                    <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                  )}
-                </div>
-              </div>
-
-              {/* Font Management Content */}
-              {!fontsCollapsed && (
-                <div id="fonts-content" className="max-h-96 overflow-y-auto">
-                  <FontManagementPanel />
-                </div>
-              )}
-            </div>
 
             {/* Shape Properties Panel */}
             {hasSelectedShapeElement && editorState.ui.propertiesPanelOpen && (
@@ -534,6 +503,41 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
               {!backgroundCollapsed && (
                 <div id="background-content" className="overflow-y-auto">
                   <BackgroundPanel />
+                </div>
+              )}
+            </div>
+
+            {/* Font Management Panel */}
+            <div className="border-b border-gray-300 dark:border-gray-700">
+              {/* Font Management Header */}
+              <div
+                className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+                onClick={() => setFontsCollapsed(!fontsCollapsed)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setFontsCollapsed(!fontsCollapsed);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-expanded={!fontsCollapsed}
+                aria-controls="fonts-content"
+              >
+                <h3 className="font-semibold text-gray-900 dark:text-white">Font Management</h3>
+                <div className="flex items-center">
+                  {fontsCollapsed ? (
+                    <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  )}
+                </div>
+              </div>
+
+              {/* Font Management Content */}
+              {!fontsCollapsed && (
+                <div id="fonts-content" className="max-h-96 overflow-y-auto">
+                  <FontManagementPanel />
                 </div>
               )}
             </div>
