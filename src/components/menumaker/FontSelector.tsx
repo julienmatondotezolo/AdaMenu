@@ -43,7 +43,7 @@ export function FontSelector({
   // Refetch fonts from IndexedDB when component mounts
   React.useEffect(() => {
     refetchFontsFromIndexedDB().catch((error) => {
-      console.warn('Failed to refetch fonts from IndexedDB:', error);
+      console.warn("Failed to refetch fonts from IndexedDB:", error);
     });
   }, [refetchFontsFromIndexedDB]);
 

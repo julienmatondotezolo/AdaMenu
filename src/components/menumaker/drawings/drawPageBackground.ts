@@ -48,6 +48,7 @@ export const drawPageBackground = ({
       setFailedBackgroundImages((prev) => new Set(prev).add(page.backgroundImage));
       setBackgroundImageCache((prev) => {
         const newCache = new Map(prev);
+
         newCache.delete(page.backgroundImage);
         return newCache;
       });
@@ -68,6 +69,7 @@ export const drawPageBackground = ({
         setFailedBackgroundImages((prev) => new Set(prev).add(page.backgroundImage));
         setBackgroundImageCache((prev) => {
           const newCache = new Map(prev);
+
           newCache.delete(page.backgroundImage);
           return newCache;
         });

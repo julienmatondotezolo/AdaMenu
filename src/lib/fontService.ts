@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 import { CustomFontFile, DEFAULT_FONTS, GoogleFont, ProjectFont } from "../types/menumaker";
 import { indexedDBService } from "./indexedDBService";
 

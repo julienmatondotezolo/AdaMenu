@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable indent */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
@@ -2285,6 +2286,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
       try {
         // Get all fonts from IndexedDB
         const allFontBlobs = await indexedDBService.getAllFonts();
+
         console.log(`Retrieved ${allFontBlobs.length} fonts from IndexedDB`);
 
         // Convert FontBlob objects to CustomFontFile objects
@@ -2302,8 +2304,10 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
 
         // Group custom font files by family name to create ProjectFont objects
         const fontFamilyMap = new Map<string, CustomFontFile[]>();
+
         customFontFiles.forEach(fontFile => {
           const existing = fontFamilyMap.get(fontFile.familyName) || [];
+
           existing.push(fontFile);
           fontFamilyMap.set(fontFile.familyName, existing);
         });
@@ -2312,6 +2316,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
         const refreshedCustomFonts: ProjectFont[] = Array.from(fontFamilyMap.entries()).map(([familyName, fontFiles], index) => {
           const projectFont = fontService.customFontFilesToProjectFont(fontFiles, familyName);
           // Ensure unique ID to prevent React key conflicts
+
           projectFont.id = `custom-${familyName.toLowerCase().replace(/\s+/g, "-")}-${Date.now()}-${index}`;
           return projectFont;
         });
@@ -2324,6 +2329,7 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
             for (const fontFile of customFont.customFontFiles) {
               try {
                 const blobUrl = await indexedDBService.getFont(fontFile.blobId);
+
                 if (blobUrl) {
                   await fontService.loadCustomFontFromBlob(fontFile, blobUrl);
                 }

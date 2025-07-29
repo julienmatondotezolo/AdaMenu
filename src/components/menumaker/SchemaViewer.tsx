@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Code, FileText } from 'lucide-react';
-import { Button } from '../ui/button';
-import { MENU_PROJECT_SCHEMA } from '../../types/menumaker';
+import { ChevronDown, ChevronRight, Code, FileText } from "lucide-react";
+import React, { useState } from "react";
+
+import { MENU_PROJECT_SCHEMA } from "../../types/menumaker";
+import { Button } from "../ui/button";
 
 export function SchemaViewer() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleViewSchema = () => {
     const schemaString = JSON.stringify(MENU_PROJECT_SCHEMA, null, 2);
-    const newWindow = window.open('', '_blank');
+    const newWindow = window.open("", "_blank");
+
     if (newWindow) {
       newWindow.document.write(`
         <html>
@@ -45,15 +47,17 @@ export function SchemaViewer() {
 
       {isExpanded && (
         <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
-          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">
-            📋 MENU_PROJECT_SCHEMA Structure
-          </h4>
-          
+          <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-3">📋 MENU_PROJECT_SCHEMA Structure</h4>
+
           <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-4">
-            <p><strong>Required Fields:</strong> id, name, createdAt, updatedAt, pages, settings</p>
+            <p>
+              <strong>Required Fields:</strong> id, name, createdAt, updatedAt, pages, settings
+            </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
               <div>
-                <p><strong>📄 Pages:</strong></p>
+                <p>
+                  <strong>📄 Pages:</strong>
+                </p>
                 <ul className="ml-4 space-y-1 text-xs">
                   <li>• Page format (A4, A5, Custom)</li>
                   <li>• Background settings</li>
@@ -62,7 +66,9 @@ export function SchemaViewer() {
                 </ul>
               </div>
               <div>
-                <p><strong>🎨 Elements:</strong></p>
+                <p>
+                  <strong>🎨 Elements:</strong>
+                </p>
                 <ul className="ml-4 space-y-1 text-xs">
                   <li>• Text elements with typography</li>
                   <li>• Image elements with filters</li>
@@ -73,12 +79,7 @@ export function SchemaViewer() {
             </div>
           </div>
 
-          <Button 
-            onClick={handleViewSchema}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-          >
+          <Button onClick={handleViewSchema} variant="outline" size="sm" className="flex items-center gap-2">
             <Code className="w-4 h-4" />
             View Full Schema
           </Button>
@@ -86,4 +87,4 @@ export function SchemaViewer() {
       )}
     </div>
   );
-} 
+}

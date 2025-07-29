@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { indexedDBService } from "../../lib/indexedDBService";
 import { useMenuMakerStore } from "../../stores/menumaker";
-import { MENU_PROJECT_SCHEMA, MenuProject } from "../../types/menumaker";
+import { MenuProject } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { PageThumbnail } from "./PageThumbnail";
@@ -196,6 +196,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+
     if (!file) return;
 
     // Reset the input
@@ -232,6 +233,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
 
       // Refresh the projects list
       const savedProjects = await indexedDBService.getAllProjects();
+
       setProjects(savedProjects);
 
       alert(`Project "${importedProject.name}" imported successfully!`);
@@ -250,6 +252,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   const handleExportProject = async (projectId: string) => {
     try {
       const project = await indexedDBService.getProject(projectId);
+
       if (!project) {
         alert('Project not found.');
         return;
@@ -262,6 +265,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
       // Create download link
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
+
       link.href = url;
       link.download = `${project.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_menu_project.json`;
       document.body.appendChild(link);
@@ -528,12 +532,12 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
             <strong>Export:</strong> Download your projects as JSON files for backup, sharing, or migration. 
             Exported files include all pages, layers, elements, and project settings.
           </p>
-                     <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded border border-blue-200 dark:border-blue-700">
-             <p className="text-xs text-blue-600 dark:text-blue-300">
+          <div className="mt-3 p-3 bg-blue-100 dark:bg-blue-800/30 rounded border border-blue-200 dark:border-blue-700">
+            <p className="text-xs text-blue-600 dark:text-blue-300">
                💡 <strong>Tip:</strong> All imported and exported files follow the MENU_PROJECT_SCHEMA for maximum compatibility.
-             </p>
-             <SchemaViewer />
-           </div>
+            </p>
+            <SchemaViewer />
+          </div>
         </div>
       </div>
     </div>

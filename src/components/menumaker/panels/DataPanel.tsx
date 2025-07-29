@@ -783,7 +783,9 @@ export function DataPanel() {
 
               {/* Vertical Line Spacing */}
               <section>
-                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Items Vertical Line Spacing</Label>
+                <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Items Vertical Line Spacing
+                </Label>
                 <input
                   type="range"
                   min="0.8"
@@ -836,7 +838,9 @@ export function DataPanel() {
                       type="button"
                       onClick={() => setStartIndex(0)}
                       className={`px-2 py-1 text-xs rounded transition-colors ${
-                        startIndex === 0 ? "bg-blue-600 text-white" : "bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700"
+                        startIndex === 0
+                          ? "bg-blue-600 text-white"
+                          : "bg-blue-200 dark:bg-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700"
                       }`}
                     >
                       Start
@@ -975,7 +979,9 @@ export function DataPanel() {
 
                   {/* Price Separator */}
                   <div>
-                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">Price Decimal Separator</Label>
+                    <Label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Price Decimal Separator
+                    </Label>
                     <select
                       value={priceSeparator}
                       onChange={(e) => setPriceSeparator(e.target.value as "." | ",")}

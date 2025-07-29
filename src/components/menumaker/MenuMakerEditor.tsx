@@ -39,7 +39,6 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
     duplicateLayer,
     deleteLayer,
     selectLayer,
-    exportToPDF,
     saveProject,
   } = useMenuMakerStore();
 
@@ -50,7 +49,6 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const [backgroundCollapsed, setBackgroundCollapsed] = useState(true);
   const [imagesCollapsed, setImagesCollapsed] = useState(false);
   const [shapesCollapsed, setShapesCollapsed] = useState(false);
-  const [dataCollapsed, setDataCollapsed] = useState(false);
 
   // Fetch fresh menu data every time component loads
   useEffect(() => {

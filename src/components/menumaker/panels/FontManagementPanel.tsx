@@ -8,8 +8,15 @@ import { GoogleFont, ProjectFont } from "../../../types/menumaker";
 import { Button } from "../../ui/button";
 
 export function FontManagementPanel() {
-  const { project, getAllAvailableFonts, addGoogleFont, addCustomFont, removeFont, ensureFontLoaded, refetchFontsFromIndexedDB } =
-    useMenuMakerStore();
+  const {
+    project,
+    getAllAvailableFonts,
+    addGoogleFont,
+    addCustomFont,
+    removeFont,
+    ensureFontLoaded,
+    refetchFontsFromIndexedDB,
+  } = useMenuMakerStore();
   const [activeTab, setActiveTab] = useState<"all" | "system" | "google" | "custom">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoadingGoogleFonts, setIsLoadingGoogleFonts] = useState(false);
@@ -28,7 +35,7 @@ export function FontManagementPanel() {
       try {
         await refetchFontsFromIndexedDB();
       } catch (error) {
-        console.warn('Failed to refetch fonts from IndexedDB:', error);
+        console.warn("Failed to refetch fonts from IndexedDB:", error);
       } finally {
         setIsRefreshingFonts(false);
       }
@@ -81,7 +88,7 @@ IndexedDB Debug Info:
     try {
       await refetchFontsFromIndexedDB();
       // eslint-disable-next-line no-alert
-      alert('Fonts refreshed successfully from IndexedDB!');
+      alert("Fonts refreshed successfully from IndexedDB!");
     } catch (error) {
       // eslint-disable-next-line no-alert
       alert(`Failed to refresh fonts: ${error instanceof Error ? error.message : "Unknown error"}`);
@@ -308,7 +315,7 @@ You can now:
                 disabled={isRefreshingFonts}
                 className="text-xs text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 disabled:opacity-50"
               >
-                {isRefreshingFonts ? 'Refreshing...' : 'Refresh Fonts'}
+                {isRefreshingFonts ? "Refreshing..." : "Refresh Fonts"}
               </button>
               <button
                 onClick={handleTestFontSystem}
@@ -350,15 +357,16 @@ You can now:
               <p className="text-sm">Refreshing fonts from IndexedDB...</p>
             </div>
           )}
-          
-          {!isRefreshingFonts && filteredFonts.map((font) => (
-            <FontCard
-              key={font.id}
-              font={font}
-              onPreview={handleFontPreview}
-              onRemove={font.type !== "system" ? handleRemoveFont : undefined}
-            />
-          ))}
+
+          {!isRefreshingFonts &&
+            filteredFonts.map((font) => (
+              <FontCard
+                key={font.id}
+                font={font}
+                onPreview={handleFontPreview}
+                onRemove={font.type !== "system" ? handleRemoveFont : undefined}
+              />
+            ))}
 
           {!isRefreshingFonts && filteredFonts.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
