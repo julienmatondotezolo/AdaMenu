@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Calendar, Check, Clock, Download, Edit2, FileText, Folder, Plus, Trash2, Upload, X } from "lucide-react";
+import { Calendar, Check, Clock, Download, Edit2, FileText, Folder, Plus, Sparkles, Trash2, Upload, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 import { indexedDBService } from "../../lib/indexedDBService";
@@ -7,6 +7,7 @@ import { useMenuMakerStore } from "../../stores/menumaker";
 import { MenuProject } from "../../types/menumaker";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { AIImportModal } from "./AIImportModal";
 import { PageThumbnail } from "./PageThumbnail";
 import { SchemaViewer } from "./SchemaViewer";
 
@@ -32,6 +33,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   const [editingProject, setEditingProject] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>("");
   const [isImporting, setIsImporting] = useState(false);
+  const [showAIImport, setShowAIImport] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load projects from IndexedDB
@@ -249,6 +251,15 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
     }
   };
 
+  const refreshProjects = async () => {
+    try {
+      const savedProjects = await indexedDBService.getAllProjects();
+      setProjects(savedProjects);
+    } catch (error) {
+      console.error('Failed to refresh projects:', error);
+    }
+  };
+
   const handleExportProject = async (projectId: string) => {
     try {
       const project = await indexedDBService.getProject(projectId);
@@ -294,6 +305,14 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           Create New Project
         </Button>
         
+        <Button
+          onClick={() => setShowAIImport(true)}
+          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+        >
+          <Sparkles className="w-4 h-4" />
+          AI Import
+        </Button>
+
         <Button 
           onClick={handleImportProject} 
           variant="outline" 
@@ -540,6 +559,13 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
           </div>
         </div>
       </div>
+
+      {/* AI Import Modal */}
+      <AIImportModal
+        open={showAIImport}
+        onClose={() => setShowAIImport(false)}
+        onImported={refreshProjects}
+      />
     </div>
   );
 }

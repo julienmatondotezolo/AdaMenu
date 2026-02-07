@@ -1,0 +1,2665 @@
+{
+  "id": "xms4j7ucn",
+  "name": "Menu test",
+  "createdAt": "2026-02-07T18:43:49.953Z",
+  "updatedAt": "2026-02-07T20:35:52.829Z",
+  "pages": [
+    {
+      "id": "5codmmao5",
+      "name": "Page 1",
+      "format": {
+        "name": "A4",
+        "width": 2480,
+        "height": 3508,
+        "printWidth": 210,
+        "printHeight": 297
+      },
+      "backgroundColor": "#f0e8de",
+      "layers": [
+        {
+          "id": "i8lxi4xmx",
+          "name": "SHAPES",
+          "visible": true,
+          "locked": true,
+          "opacity": 1,
+          "elements": [
+            {
+              "type": "shape",
+              "shapeType": "rectangle",
+              "x": 110.21477222049927,
+              "y": 484.17838733176416,
+              "width": 1194.8493057344594,
+              "height": 841.859352018829,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(240, 232, 222, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "r3v0yfifx"
+            },
+            {
+              "type": "shape",
+              "shapeType": "rectangle",
+              "x": 1203.5,
+              "y": 353,
+              "width": 1276.5,
+              "height": 752,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(240, 232, 222, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "uyrnzi03k"
+            },
+            {
+              "type": "shape",
+              "shapeType": "rectangle",
+              "x": 0,
+              "y": 1105,
+              "width": 2480,
+              "height": 2403,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(255, 255, 255, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "uhk3m2coo"
+            },
+            {
+              "type": "shape",
+              "shapeType": "circle",
+              "x": 995,
+              "y": 596,
+              "width": 1172,
+              "height": 1158,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(255, 255, 255, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "609df925s"
+            },
+            {
+              "type": "shape",
+              "shapeType": "circle",
+              "x": -174,
+              "y": 484.17838733176416,
+              "width": 1172,
+              "height": 1158,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(239, 232, 222, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "oxopsukfh"
+            },
+            {
+              "type": "shape",
+              "shapeType": "triangle",
+              "x": -174,
+              "y": 2614.401521384859,
+              "width": 1169,
+              "height": 893.5984786151416,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(239, 232, 222, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "oitnyhtzf"
+            }
+          ]
+        },
+        {
+          "id": "9d64n1mkx",
+          "name": "FLAG",
+          "visible": true,
+          "locked": true,
+          "opacity": 1,
+          "elements": [
+            {
+              "type": "shape",
+              "shapeType": "rectangle",
+              "x": 444.07194314409344,
+              "y": 144.63229456001613,
+              "width": 1262.7165549993613,
+              "height": 13,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(137, 28, 47, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "as66x2ttd"
+            },
+            {
+              "type": "shape",
+              "shapeType": "rectangle",
+              "x": 0,
+              "y": 145,
+              "width": 444.07194314409344,
+              "height": 13,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "fill": "rgba(255, 255, 255, 1)",
+              "stroke": "#AF1E1EFF",
+              "strokeWidth": 0,
+              "radius": 0,
+              "id": "0r7z5ba5j"
+            }
+          ]
+        },
+        {
+          "id": "o0c7x49zx",
+          "name": "DATA",
+          "visible": true,
+          "locked": true,
+          "opacity": 1,
+          "elements": [
+            {
+              "type": "data",
+              "x": 168,
+              "y": 545,
+              "width": 990,
+              "height": 489,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 1,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "dataType": "menuitem",
+              "dataId": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+              "backgroundColor": "#f0e8de",
+              "backgroundOpacity": 0,
+              "borderColor": "#000000",
+              "borderSize": 0,
+              "borderType": "solid",
+              "borderRadius": 0,
+              "textColor": "#000000",
+              "fontSize": 45,
+              "fontFamily": "Poppins, sans-serif",
+              "fontWeight": "normal",
+              "lineSpacing": 1.6,
+              "itemNameLanguage": "nl",
+              "categoryData": {
+                "id": "1e5b59c5-bf44-45a7-8a63-9dc1d7e5202b",
+                "names": {
+                  "en": "Pizzas",
+                  "it": "Pizze",
+                  "fr": "Pizzas",
+                  "nl": "Pizza's"
+                },
+                "subCategories": [
+                  {
+                    "id": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+                    "names": {
+                      "en": "Pizze",
+                      "it": "Pizze",
+                      "fr": "Pizze",
+                      "nl": "Pizze"
+                    },
+                    "menuItems": [
+                      {
+                        "id": "d0063375-7359-484f-9f70-1e44249c3996",
+                        "names": {
+                          "en": "Margherita",
+                          "it": "Margherita",
+                          "fr": "Margherita",
+                          "nl": "Margherita"
+                        },
+                        "descriptions": {
+                          "en": "Tomato, mozzarella, and oregano",
+                          "it": "Margherita",
+                          "fr": "Tomate, mozzarella et origan ",
+                          "nl": "Tomaat, mozzarella en oregano"
+                        },
+                        "price": 15,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 1
+                      },
+                      {
+                        "id": "d60357c3-6474-47d3-a426-af89a64fa819",
+                        "names": {
+                          "en": "4 formaggi",
+                          "it": "4 formaggi",
+                          "fr": "4 formaggi",
+                          "nl": "4 formaggi"
+                        },
+                        "descriptions": {
+                          "en": "Base + 4 cheeses (mozzarella, taleggio, gorgonzola, fondina)",
+                          "it": "4 formaggi",
+                          "fr": "Base + 4 fromages (mozzarella, taleggio, gorgonzola, fondina)",
+                          "nl": "Basis + 4 kazen (mozzarella, taleggio, gorgonzola, fondina)"
+                        },
+                        "price": 22.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 2
+                      },
+                      {
+                        "id": "a5779b62-6bfe-49dc-88e2-a102c3f68974",
+                        "names": {
+                          "en": "Olive",
+                          "it": "Olive",
+                          "fr": "Olive",
+                          "nl": "Olive"
+                        },
+                        "descriptions": {
+                          "en": "Base + olives, Italian peppers",
+                          "it": "Olive",
+                          "fr": "Base + olives, poivrons italiens",
+                          "nl": "Basis + olijven, Italiaanse pepers"
+                        },
+                        "price": 19.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 3
+                      },
+                      {
+                        "id": "8666e6c1-fe1d-454f-b631-e0bb69fd7d5c",
+                        "names": {
+                          "en": "Tonno",
+                          "it": "Tonno",
+                          "fr": "Tonno",
+                          "nl": "Tonno"
+                        },
+                        "descriptions": {
+                          "en": "Base + tuna",
+                          "it": "Tonno",
+                          "fr": "Base + thon",
+                          "nl": "Basis + tonijn"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 4
+                      },
+                      {
+                        "id": "940e95a0-16d1-4bd2-ab54-e5e51868fa97",
+                        "names": {
+                          "en": "Diavola",
+                          "it": "Diavola",
+                          "fr": "Diavola",
+                          "nl": "Diavola"
+                        },
+                        "descriptions": {
+                          "en": "Base + salami, mushrooms, pili-pili",
+                          "it": "Diavola",
+                          "fr": "Base + salami, champignons, piment",
+                          "nl": "Basis + salami, champignons, pili-pili"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 5
+                      },
+                      {
+                        "id": "7b5016ab-8cde-44e0-a123-b6c82c9c9c88",
+                        "names": {
+                          "en": "Cicciolina",
+                          "it": "Cicciolina",
+                          "fr": "Cicciolina",
+                          "nl": "Cicciolina"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, egg, frankfurter sausage",
+                          "it": "Cicciolina",
+                          "fr": "Base + jambon, œuf, saucisse de Francfort",
+                          "nl": "Basis + ham, ei, frankfurterworst"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 6
+                      },
+                      {
+                        "id": "f4bed287-7e9e-42f5-bcd8-cbbd946de809",
+                        "names": {
+                          "en": "Cardinale",
+                          "it": "Cardinale",
+                          "fr": "Cardinale",
+                          "nl": "Cardinale"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms",
+                          "it": "Cardinale",
+                          "fr": "Base + jambon, champignons",
+                          "nl": "Basis + ham, champignons"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 7
+                      },
+                      {
+                        "id": "f698b65e-2122-4d75-9c3f-9b4f8d10f6f5",
+                        "names": {
+                          "en": "Capricciosa",
+                          "it": "Capricciosa",
+                          "fr": "Capricciosa",
+                          "nl": "Capricciosa"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, capers",
+                          "it": "Capricciosa",
+                          "fr": "Base + jambon, champignons, câpres",
+                          "nl": "Basis + ham, champignons, kappertjes"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 8
+                      },
+                      {
+                        "id": "c211eac9-b483-4805-88c3-6fedca146535",
+                        "names": {
+                          "en": "Bolognese",
+                          "it": "Bolognese",
+                          "fr": "Bolognese",
+                          "nl": "Bolognese"
+                        },
+                        "descriptions": {
+                          "en": "Base + Bolognese sauce, Parmesan cheese",
+                          "it": "Bolognese",
+                          "fr": "Base + sauce bolognaise, fromage parmesan",
+                          "nl": "Basis + bolognesesaus, parmesaanse kaas"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 9
+                      },
+                      {
+                        "id": "6b285d13-7045-41e1-a973-6befe8d8bdba",
+                        "names": {
+                          "en": "Scampi",
+                          "it": "Scampi",
+                          "fr": "Scampi",
+                          "nl": "Scampi"
+                        },
+                        "descriptions": {
+                          "en": "Base + shrimp",
+                          "it": "Scampi",
+                          "fr": "Base + crevettes",
+                          "nl": "Basis + scampi"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 10
+                      },
+                      {
+                        "id": "69daba69-8701-4065-ab0b-dd89c144da62",
+                        "names": {
+                          "en": "Ananas",
+                          "it": "Ananas",
+                          "fr": "Ananas",
+                          "nl": "Ananas"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, pineapple",
+                          "it": "Ananas",
+                          "fr": "Base + jambon, ananas",
+                          "nl": "Basis + ham, ananas"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 11
+                      },
+                      {
+                        "id": "d1d8aecc-c62e-44d0-b7de-1f29d5f46c14",
+                        "names": {
+                          "en": "Salmone",
+                          "it": "Salmone",
+                          "fr": "Salmone",
+                          "nl": "Salmone"
+                        },
+                        "descriptions": {
+                          "en": "Base + salmon",
+                          "it": "Salmone",
+                          "fr": "Base + saumon",
+                          "nl": "Basis + zalm"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 12
+                      },
+                      {
+                        "id": "0d8118bb-4354-4a01-a202-d9adb0cbceff",
+                        "names": {
+                          "en": "Prosciutto",
+                          "it": "Prosciutto",
+                          "fr": "Prosciutto",
+                          "nl": "Prosciutto"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham",
+                          "it": "Prosciutto",
+                          "fr": "Base + jambon",
+                          "nl": "Basis + ham"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 13
+                      },
+                      {
+                        "id": "233b3951-d4c0-414c-aeb4-fbaf3208225d",
+                        "names": {
+                          "en": "Salame piccante",
+                          "it": "Salame piccante",
+                          "fr": "Salame piccante",
+                          "nl": "Salame piccante"
+                        },
+                        "descriptions": {
+                          "en": "Base + salami",
+                          "it": "Salame piccante",
+                          "fr": "Base + salami",
+                          "nl": "Basis + salami"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 14
+                      },
+                      {
+                        "id": "d8a549ba-9c1f-4c66-bcac-1ce4b256d251",
+                        "names": {
+                          "en": "Funghi",
+                          "it": "Funghi",
+                          "fr": "Funghi",
+                          "nl": "Funghi"
+                        },
+                        "descriptions": {
+                          "en": "Base + mushrooms",
+                          "it": "Funghi",
+                          "fr": "Base + champignons",
+                          "nl": "Basis + champignons"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 15
+                      },
+                      {
+                        "id": "7619b93e-fe2a-4060-9737-1196682d994f",
+                        "names": {
+                          "en": "4 stagioni",
+                          "it": "4 stagioni",
+                          "fr": "4 stagioni",
+                          "nl": "4 stagioni"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, anchovies, capers, artichoke, peppers",
+                          "it": "4 stagioni",
+                          "fr": "Base + jambon, champignons, anchois, câpres, artichaut, poivrons",
+                          "nl": "Basis + ham, champignons, ansjovis, kappertjes, artisjok, pepers"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 16
+                      },
+                      {
+                        "id": "14d0fc55-7286-403b-bca7-d66de0fd3aa0",
+                        "names": {
+                          "en": "Frutti di mare",
+                          "it": "Frutti di mare",
+                          "fr": "Frutti di mare",
+                          "nl": "Frutti di mare"
+                        },
+                        "descriptions": {
+                          "en": "Base + seafood, anchovies",
+                          "it": "Frutti di mare",
+                          "fr": "Base + cocktail de fruits de mer, anchois",
+                          "nl": "Basis + zeevruchten, ansjovis"
+                        },
+                        "price": 23.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 17
+                      },
+                      {
+                        "id": "92438235-3907-4a51-8eda-4c6d0494454a",
+                        "names": {
+                          "en": "Provinciale",
+                          "it": "Provinciale",
+                          "fr": "Provinciale",
+                          "nl": "Provinciale"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, olives, peppers",
+                          "it": "Provinciale",
+                          "fr": "Base + jambon, champignons, olives, poivrons",
+                          "nl": "Basis + ham, champignons, olijven, pepers"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 18
+                      },
+                      {
+                        "id": "584ff849-0d96-44df-9d3f-ba7616753775",
+                        "names": {
+                          "en": "Lardo",
+                          "it": "Lardo",
+                          "fr": "Lardo",
+                          "nl": "Lardo"
+                        },
+                        "descriptions": {
+                          "en": "Base + bacon bits",
+                          "it": "Lardo",
+                          "fr": "Base + lardons",
+                          "nl": "Basis + spekrepjes"
+                        },
+                        "price": 19.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 19
+                      },
+                      {
+                        "id": "acf70f79-cac3-4ccb-8d76-1686decdcd8e",
+                        "names": {
+                          "en": "Speciale L'Osteria",
+                          "it": "Speciale L'Osteria",
+                          "fr": "Speciale L'Osteria",
+                          "nl": "Speciale L'Osteria"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, artichoke, mushrooms, frankfurter sausage, egg",
+                          "it": "Speciale L'Osteria",
+                          "fr": "Base + jambon de Parme, artichaut, champignons, saucisse de Francfort, œuf",
+                          "nl": "Basis + parmaham, artisjok, champignons, frankfurterworst, ei"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 20
+                      },
+                      {
+                        "id": "9ecbc247-8d14-4c42-abac-b156e9098585",
+                        "names": {
+                          "en": "Vegetariana",
+                          "it": "Vegetariana",
+                          "fr": "Vegetariana",
+                          "nl": "Vegetariana"
+                        },
+                        "descriptions": {
+                          "en": "Base + mushrooms, artichoke, capers, peppers, olives",
+                          "it": "Vegetariana",
+                          "fr": "Base + champignons, artichaut, câpres, poivrons, olives",
+                          "nl": "Basis + champignons, artisjok, kappertjes, pepers, olijven"
+                        },
+                        "price": 20.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 21
+                      },
+                      {
+                        "id": "f0f46a0c-6b57-428e-bfeb-4a840b8cace9",
+                        "names": {
+                          "en": "Vulcano",
+                          "it": "Vulcano",
+                          "fr": "Vulcano",
+                          "nl": "Vulcano"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, artichoke, mushrooms",
+                          "it": "Vulcano",
+                          "fr": "Base + jambon de Parme, artichaut, champignons",
+                          "nl": "Basis + parmaham, artisjok, champignons"
+                        },
+                        "price": 21,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 22
+                      },
+                      {
+                        "id": "63d5e315-94db-44ac-bd99-3e7cc0d959fb",
+                        "names": {
+                          "en": "Napoletana",
+                          "it": "Napoletana",
+                          "fr": "Napoletana",
+                          "nl": "Napoletana"
+                        },
+                        "descriptions": {
+                          "en": "Base + anchovies, capers",
+                          "it": "Napoletana",
+                          "fr": "Base + anchois, câpres",
+                          "nl": "Basis + ansjovis, kappertjes"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 23
+                      },
+                      {
+                        "id": "ad8a8200-1b41-4db4-b11c-f1b2fd069119",
+                        "names": {
+                          "en": "Carpaccio",
+                          "it": "Carpaccio",
+                          "fr": "Carpaccio",
+                          "nl": "Carpaccio"
+                        },
+                        "descriptions": {
+                          "en": "Base + thin slice of beef, walnut salad, parmesan shavings and balsamic cream",
+                          "it": "Carpaccio",
+                          "fr": "Base + fine tranche de bœuf, salade de noix, copeaux de parmesan et crème balsamique",
+                          "nl": "Basis + fijngesneden rundsvlees, notensla, parmezaanschilfers en balsamicocrème"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 24
+                      },
+                      {
+                        "id": "58a0ef17-1b8e-4fce-98f0-1a5bcf9a053c",
+                        "names": {
+                          "en": "Parma e Burrata",
+                          "it": "Parma e Burrata",
+                          "fr": "Parma e Burrata",
+                          "nl": "Parma e Burrata"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, arugula, cherry tomatoes, burrata and a basil dressing",
+                          "it": "Parma e Burrata",
+                          "fr": "Base + jambon de Parme, roquette, tomates cerises, burrata et vinaigrette au basilic",
+                          "nl": "Basis + parmaham, rucola, kerstomaatjes, burrata en een basilicumdressing"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 25
+                      }
+                    ],
+                    "hidden": false,
+                    "order": 1
+                  }
+                ],
+                "hidden": false,
+                "order": 4
+              },
+              "subcategoryData": {
+                "id": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+                "names": {
+                  "en": "Pizze",
+                  "it": "Pizze",
+                  "fr": "Pizze",
+                  "nl": "Pizze"
+                },
+                "menuItems": [
+                  {
+                    "id": "d0063375-7359-484f-9f70-1e44249c3996",
+                    "names": {
+                      "en": "Margherita",
+                      "it": "Margherita",
+                      "fr": "Margherita",
+                      "nl": "Margherita"
+                    },
+                    "descriptions": {
+                      "en": "Tomato, mozzarella, and oregano",
+                      "it": "Margherita",
+                      "fr": "Tomate, mozzarella et origan ",
+                      "nl": "Tomaat, mozzarella en oregano"
+                    },
+                    "price": 15,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 1
+                  },
+                  {
+                    "id": "d60357c3-6474-47d3-a426-af89a64fa819",
+                    "names": {
+                      "en": "4 formaggi",
+                      "it": "4 formaggi",
+                      "fr": "4 formaggi",
+                      "nl": "4 formaggi"
+                    },
+                    "descriptions": {
+                      "en": "Base + 4 cheeses (mozzarella, taleggio, gorgonzola, fondina)",
+                      "it": "4 formaggi",
+                      "fr": "Base + 4 fromages (mozzarella, taleggio, gorgonzola, fondina)",
+                      "nl": "Basis + 4 kazen (mozzarella, taleggio, gorgonzola, fondina)"
+                    },
+                    "price": 22.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 2
+                  },
+                  {
+                    "id": "a5779b62-6bfe-49dc-88e2-a102c3f68974",
+                    "names": {
+                      "en": "Olive",
+                      "it": "Olive",
+                      "fr": "Olive",
+                      "nl": "Olive"
+                    },
+                    "descriptions": {
+                      "en": "Base + olives, Italian peppers",
+                      "it": "Olive",
+                      "fr": "Base + olives, poivrons italiens",
+                      "nl": "Basis + olijven, Italiaanse pepers"
+                    },
+                    "price": 19.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 3
+                  },
+                  {
+                    "id": "8666e6c1-fe1d-454f-b631-e0bb69fd7d5c",
+                    "names": {
+                      "en": "Tonno",
+                      "it": "Tonno",
+                      "fr": "Tonno",
+                      "nl": "Tonno"
+                    },
+                    "descriptions": {
+                      "en": "Base + tuna",
+                      "it": "Tonno",
+                      "fr": "Base + thon",
+                      "nl": "Basis + tonijn"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 4
+                  },
+                  {
+                    "id": "940e95a0-16d1-4bd2-ab54-e5e51868fa97",
+                    "names": {
+                      "en": "Diavola",
+                      "it": "Diavola",
+                      "fr": "Diavola",
+                      "nl": "Diavola"
+                    },
+                    "descriptions": {
+                      "en": "Base + salami, mushrooms, pili-pili",
+                      "it": "Diavola",
+                      "fr": "Base + salami, champignons, piment",
+                      "nl": "Basis + salami, champignons, pili-pili"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 5
+                  },
+                  {
+                    "id": "7b5016ab-8cde-44e0-a123-b6c82c9c9c88",
+                    "names": {
+                      "en": "Cicciolina",
+                      "it": "Cicciolina",
+                      "fr": "Cicciolina",
+                      "nl": "Cicciolina"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, egg, frankfurter sausage",
+                      "it": "Cicciolina",
+                      "fr": "Base + jambon, œuf, saucisse de Francfort",
+                      "nl": "Basis + ham, ei, frankfurterworst"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 6
+                  },
+                  {
+                    "id": "f4bed287-7e9e-42f5-bcd8-cbbd946de809",
+                    "names": {
+                      "en": "Cardinale",
+                      "it": "Cardinale",
+                      "fr": "Cardinale",
+                      "nl": "Cardinale"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms",
+                      "it": "Cardinale",
+                      "fr": "Base + jambon, champignons",
+                      "nl": "Basis + ham, champignons"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 7
+                  },
+                  {
+                    "id": "f698b65e-2122-4d75-9c3f-9b4f8d10f6f5",
+                    "names": {
+                      "en": "Capricciosa",
+                      "it": "Capricciosa",
+                      "fr": "Capricciosa",
+                      "nl": "Capricciosa"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, capers",
+                      "it": "Capricciosa",
+                      "fr": "Base + jambon, champignons, câpres",
+                      "nl": "Basis + ham, champignons, kappertjes"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 8
+                  },
+                  {
+                    "id": "c211eac9-b483-4805-88c3-6fedca146535",
+                    "names": {
+                      "en": "Bolognese",
+                      "it": "Bolognese",
+                      "fr": "Bolognese",
+                      "nl": "Bolognese"
+                    },
+                    "descriptions": {
+                      "en": "Base + Bolognese sauce, Parmesan cheese",
+                      "it": "Bolognese",
+                      "fr": "Base + sauce bolognaise, fromage parmesan",
+                      "nl": "Basis + bolognesesaus, parmesaanse kaas"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 9
+                  },
+                  {
+                    "id": "6b285d13-7045-41e1-a973-6befe8d8bdba",
+                    "names": {
+                      "en": "Scampi",
+                      "it": "Scampi",
+                      "fr": "Scampi",
+                      "nl": "Scampi"
+                    },
+                    "descriptions": {
+                      "en": "Base + shrimp",
+                      "it": "Scampi",
+                      "fr": "Base + crevettes",
+                      "nl": "Basis + scampi"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 10
+                  },
+                  {
+                    "id": "69daba69-8701-4065-ab0b-dd89c144da62",
+                    "names": {
+                      "en": "Ananas",
+                      "it": "Ananas",
+                      "fr": "Ananas",
+                      "nl": "Ananas"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, pineapple",
+                      "it": "Ananas",
+                      "fr": "Base + jambon, ananas",
+                      "nl": "Basis + ham, ananas"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 11
+                  },
+                  {
+                    "id": "d1d8aecc-c62e-44d0-b7de-1f29d5f46c14",
+                    "names": {
+                      "en": "Salmone",
+                      "it": "Salmone",
+                      "fr": "Salmone",
+                      "nl": "Salmone"
+                    },
+                    "descriptions": {
+                      "en": "Base + salmon",
+                      "it": "Salmone",
+                      "fr": "Base + saumon",
+                      "nl": "Basis + zalm"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 12
+                  },
+                  {
+                    "id": "0d8118bb-4354-4a01-a202-d9adb0cbceff",
+                    "names": {
+                      "en": "Prosciutto",
+                      "it": "Prosciutto",
+                      "fr": "Prosciutto",
+                      "nl": "Prosciutto"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham",
+                      "it": "Prosciutto",
+                      "fr": "Base + jambon",
+                      "nl": "Basis + ham"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 13
+                  },
+                  {
+                    "id": "233b3951-d4c0-414c-aeb4-fbaf3208225d",
+                    "names": {
+                      "en": "Salame piccante",
+                      "it": "Salame piccante",
+                      "fr": "Salame piccante",
+                      "nl": "Salame piccante"
+                    },
+                    "descriptions": {
+                      "en": "Base + salami",
+                      "it": "Salame piccante",
+                      "fr": "Base + salami",
+                      "nl": "Basis + salami"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 14
+                  },
+                  {
+                    "id": "d8a549ba-9c1f-4c66-bcac-1ce4b256d251",
+                    "names": {
+                      "en": "Funghi",
+                      "it": "Funghi",
+                      "fr": "Funghi",
+                      "nl": "Funghi"
+                    },
+                    "descriptions": {
+                      "en": "Base + mushrooms",
+                      "it": "Funghi",
+                      "fr": "Base + champignons",
+                      "nl": "Basis + champignons"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 15
+                  },
+                  {
+                    "id": "7619b93e-fe2a-4060-9737-1196682d994f",
+                    "names": {
+                      "en": "4 stagioni",
+                      "it": "4 stagioni",
+                      "fr": "4 stagioni",
+                      "nl": "4 stagioni"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, anchovies, capers, artichoke, peppers",
+                      "it": "4 stagioni",
+                      "fr": "Base + jambon, champignons, anchois, câpres, artichaut, poivrons",
+                      "nl": "Basis + ham, champignons, ansjovis, kappertjes, artisjok, pepers"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 16
+                  },
+                  {
+                    "id": "14d0fc55-7286-403b-bca7-d66de0fd3aa0",
+                    "names": {
+                      "en": "Frutti di mare",
+                      "it": "Frutti di mare",
+                      "fr": "Frutti di mare",
+                      "nl": "Frutti di mare"
+                    },
+                    "descriptions": {
+                      "en": "Base + seafood, anchovies",
+                      "it": "Frutti di mare",
+                      "fr": "Base + cocktail de fruits de mer, anchois",
+                      "nl": "Basis + zeevruchten, ansjovis"
+                    },
+                    "price": 23.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 17
+                  },
+                  {
+                    "id": "92438235-3907-4a51-8eda-4c6d0494454a",
+                    "names": {
+                      "en": "Provinciale",
+                      "it": "Provinciale",
+                      "fr": "Provinciale",
+                      "nl": "Provinciale"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, olives, peppers",
+                      "it": "Provinciale",
+                      "fr": "Base + jambon, champignons, olives, poivrons",
+                      "nl": "Basis + ham, champignons, olijven, pepers"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 18
+                  },
+                  {
+                    "id": "584ff849-0d96-44df-9d3f-ba7616753775",
+                    "names": {
+                      "en": "Lardo",
+                      "it": "Lardo",
+                      "fr": "Lardo",
+                      "nl": "Lardo"
+                    },
+                    "descriptions": {
+                      "en": "Base + bacon bits",
+                      "it": "Lardo",
+                      "fr": "Base + lardons",
+                      "nl": "Basis + spekrepjes"
+                    },
+                    "price": 19.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 19
+                  },
+                  {
+                    "id": "acf70f79-cac3-4ccb-8d76-1686decdcd8e",
+                    "names": {
+                      "en": "Speciale L'Osteria",
+                      "it": "Speciale L'Osteria",
+                      "fr": "Speciale L'Osteria",
+                      "nl": "Speciale L'Osteria"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, artichoke, mushrooms, frankfurter sausage, egg",
+                      "it": "Speciale L'Osteria",
+                      "fr": "Base + jambon de Parme, artichaut, champignons, saucisse de Francfort, œuf",
+                      "nl": "Basis + parmaham, artisjok, champignons, frankfurterworst, ei"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 20
+                  },
+                  {
+                    "id": "9ecbc247-8d14-4c42-abac-b156e9098585",
+                    "names": {
+                      "en": "Vegetariana",
+                      "it": "Vegetariana",
+                      "fr": "Vegetariana",
+                      "nl": "Vegetariana"
+                    },
+                    "descriptions": {
+                      "en": "Base + mushrooms, artichoke, capers, peppers, olives",
+                      "it": "Vegetariana",
+                      "fr": "Base + champignons, artichaut, câpres, poivrons, olives",
+                      "nl": "Basis + champignons, artisjok, kappertjes, pepers, olijven"
+                    },
+                    "price": 20.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 21
+                  },
+                  {
+                    "id": "f0f46a0c-6b57-428e-bfeb-4a840b8cace9",
+                    "names": {
+                      "en": "Vulcano",
+                      "it": "Vulcano",
+                      "fr": "Vulcano",
+                      "nl": "Vulcano"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, artichoke, mushrooms",
+                      "it": "Vulcano",
+                      "fr": "Base + jambon de Parme, artichaut, champignons",
+                      "nl": "Basis + parmaham, artisjok, champignons"
+                    },
+                    "price": 21,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 22
+                  },
+                  {
+                    "id": "63d5e315-94db-44ac-bd99-3e7cc0d959fb",
+                    "names": {
+                      "en": "Napoletana",
+                      "it": "Napoletana",
+                      "fr": "Napoletana",
+                      "nl": "Napoletana"
+                    },
+                    "descriptions": {
+                      "en": "Base + anchovies, capers",
+                      "it": "Napoletana",
+                      "fr": "Base + anchois, câpres",
+                      "nl": "Basis + ansjovis, kappertjes"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 23
+                  },
+                  {
+                    "id": "ad8a8200-1b41-4db4-b11c-f1b2fd069119",
+                    "names": {
+                      "en": "Carpaccio",
+                      "it": "Carpaccio",
+                      "fr": "Carpaccio",
+                      "nl": "Carpaccio"
+                    },
+                    "descriptions": {
+                      "en": "Base + thin slice of beef, walnut salad, parmesan shavings and balsamic cream",
+                      "it": "Carpaccio",
+                      "fr": "Base + fine tranche de bœuf, salade de noix, copeaux de parmesan et crème balsamique",
+                      "nl": "Basis + fijngesneden rundsvlees, notensla, parmezaanschilfers en balsamicocrème"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 24
+                  },
+                  {
+                    "id": "58a0ef17-1b8e-4fce-98f0-1a5bcf9a053c",
+                    "names": {
+                      "en": "Parma e Burrata",
+                      "it": "Parma e Burrata",
+                      "fr": "Parma e Burrata",
+                      "nl": "Parma e Burrata"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, arugula, cherry tomatoes, burrata and a basil dressing",
+                      "it": "Parma e Burrata",
+                      "fr": "Base + jambon de Parme, roquette, tomates cerises, burrata et vinaigrette au basilic",
+                      "nl": "Basis + parmaham, rucola, kerstomaatjes, burrata en een basilicumdressing"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 25
+                  }
+                ],
+                "hidden": false,
+                "order": 1
+              },
+              "showSubcategoryTitle": false,
+              "showMenuDescription": false,
+              "showPrice": true,
+              "showCurrencySign": false,
+              "priceColor": "#000000",
+              "priceFontFamily": "Arial, sans-serif",
+              "priceFontWeight": "100",
+              "priceSeparator": ",",
+              "menuLayout": "justified",
+              "id": "2u78i359h",
+              "startIndex": 0
+            },
+            {
+              "type": "image",
+              "fileName": "img22.jpg",
+              "x": 1418,
+              "y": 1624.3604216614235,
+              "width": 1062,
+              "height": 1776,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 1,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "src": "blob:https://ada-menu.vercel.app/292f8e86-db30-4e86-98f7-8f1274637304",
+              "imageId": "img_1770495143786_s7up42k6w",
+              "originalWidth": 1062,
+              "originalHeight": 1776,
+              "id": "akbv8t96j"
+            },
+            {
+              "type": "data",
+              "x": 150,
+              "y": 1767,
+              "width": 1008,
+              "height": 539,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 1,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "dataType": "menuitem",
+              "dataId": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+              "backgroundColor": "#f0e8de",
+              "backgroundOpacity": 0,
+              "borderColor": "#000000",
+              "borderSize": 0,
+              "borderType": "solid",
+              "borderRadius": 0,
+              "textColor": "#000000",
+              "fontSize": 45,
+              "fontFamily": "Poppins, sans-serif",
+              "fontWeight": "normal",
+              "lineSpacing": 1.6,
+              "itemNameLanguage": "nl",
+              "categoryData": {
+                "id": "1e5b59c5-bf44-45a7-8a63-9dc1d7e5202b",
+                "names": {
+                  "en": "Pizzas",
+                  "it": "Pizze",
+                  "fr": "Pizzas",
+                  "nl": "Pizza's"
+                },
+                "subCategories": [
+                  {
+                    "id": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+                    "names": {
+                      "en": "Pizze",
+                      "it": "Pizze",
+                      "fr": "Pizze",
+                      "nl": "Pizze"
+                    },
+                    "menuItems": [
+                      {
+                        "id": "d0063375-7359-484f-9f70-1e44249c3996",
+                        "names": {
+                          "en": "Margherita",
+                          "it": "Margherita",
+                          "fr": "Margherita",
+                          "nl": "Margherita"
+                        },
+                        "descriptions": {
+                          "en": "Tomato, mozzarella, and oregano",
+                          "it": "Margherita",
+                          "fr": "Tomate, mozzarella et origan ",
+                          "nl": "Tomaat, mozzarella en oregano"
+                        },
+                        "price": 15,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 1
+                      },
+                      {
+                        "id": "d60357c3-6474-47d3-a426-af89a64fa819",
+                        "names": {
+                          "en": "4 formaggi",
+                          "it": "4 formaggi",
+                          "fr": "4 formaggi",
+                          "nl": "4 formaggi"
+                        },
+                        "descriptions": {
+                          "en": "Base + 4 cheeses (mozzarella, taleggio, gorgonzola, fondina)",
+                          "it": "4 formaggi",
+                          "fr": "Base + 4 fromages (mozzarella, taleggio, gorgonzola, fondina)",
+                          "nl": "Basis + 4 kazen (mozzarella, taleggio, gorgonzola, fondina)"
+                        },
+                        "price": 22.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 2
+                      },
+                      {
+                        "id": "a5779b62-6bfe-49dc-88e2-a102c3f68974",
+                        "names": {
+                          "en": "Olive",
+                          "it": "Olive",
+                          "fr": "Olive",
+                          "nl": "Olive"
+                        },
+                        "descriptions": {
+                          "en": "Base + olives, Italian peppers",
+                          "it": "Olive",
+                          "fr": "Base + olives, poivrons italiens",
+                          "nl": "Basis + olijven, Italiaanse pepers"
+                        },
+                        "price": 19.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 3
+                      },
+                      {
+                        "id": "8666e6c1-fe1d-454f-b631-e0bb69fd7d5c",
+                        "names": {
+                          "en": "Tonno",
+                          "it": "Tonno",
+                          "fr": "Tonno",
+                          "nl": "Tonno"
+                        },
+                        "descriptions": {
+                          "en": "Base + tuna",
+                          "it": "Tonno",
+                          "fr": "Base + thon",
+                          "nl": "Basis + tonijn"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 4
+                      },
+                      {
+                        "id": "940e95a0-16d1-4bd2-ab54-e5e51868fa97",
+                        "names": {
+                          "en": "Diavola",
+                          "it": "Diavola",
+                          "fr": "Diavola",
+                          "nl": "Diavola"
+                        },
+                        "descriptions": {
+                          "en": "Base + salami, mushrooms, pili-pili",
+                          "it": "Diavola",
+                          "fr": "Base + salami, champignons, piment",
+                          "nl": "Basis + salami, champignons, pili-pili"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 5
+                      },
+                      {
+                        "id": "7b5016ab-8cde-44e0-a123-b6c82c9c9c88",
+                        "names": {
+                          "en": "Cicciolina",
+                          "it": "Cicciolina",
+                          "fr": "Cicciolina",
+                          "nl": "Cicciolina"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, egg, frankfurter sausage",
+                          "it": "Cicciolina",
+                          "fr": "Base + jambon, œuf, saucisse de Francfort",
+                          "nl": "Basis + ham, ei, frankfurterworst"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 6
+                      },
+                      {
+                        "id": "f4bed287-7e9e-42f5-bcd8-cbbd946de809",
+                        "names": {
+                          "en": "Cardinale",
+                          "it": "Cardinale",
+                          "fr": "Cardinale",
+                          "nl": "Cardinale"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms",
+                          "it": "Cardinale",
+                          "fr": "Base + jambon, champignons",
+                          "nl": "Basis + ham, champignons"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 7
+                      },
+                      {
+                        "id": "f698b65e-2122-4d75-9c3f-9b4f8d10f6f5",
+                        "names": {
+                          "en": "Capricciosa",
+                          "it": "Capricciosa",
+                          "fr": "Capricciosa",
+                          "nl": "Capricciosa"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, capers",
+                          "it": "Capricciosa",
+                          "fr": "Base + jambon, champignons, câpres",
+                          "nl": "Basis + ham, champignons, kappertjes"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 8
+                      },
+                      {
+                        "id": "c211eac9-b483-4805-88c3-6fedca146535",
+                        "names": {
+                          "en": "Bolognese",
+                          "it": "Bolognese",
+                          "fr": "Bolognese",
+                          "nl": "Bolognese"
+                        },
+                        "descriptions": {
+                          "en": "Base + Bolognese sauce, Parmesan cheese",
+                          "it": "Bolognese",
+                          "fr": "Base + sauce bolognaise, fromage parmesan",
+                          "nl": "Basis + bolognesesaus, parmesaanse kaas"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 9
+                      },
+                      {
+                        "id": "6b285d13-7045-41e1-a973-6befe8d8bdba",
+                        "names": {
+                          "en": "Scampi",
+                          "it": "Scampi",
+                          "fr": "Scampi",
+                          "nl": "Scampi"
+                        },
+                        "descriptions": {
+                          "en": "Base + shrimp",
+                          "it": "Scampi",
+                          "fr": "Base + crevettes",
+                          "nl": "Basis + scampi"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 10
+                      },
+                      {
+                        "id": "69daba69-8701-4065-ab0b-dd89c144da62",
+                        "names": {
+                          "en": "Ananas",
+                          "it": "Ananas",
+                          "fr": "Ananas",
+                          "nl": "Ananas"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, pineapple",
+                          "it": "Ananas",
+                          "fr": "Base + jambon, ananas",
+                          "nl": "Basis + ham, ananas"
+                        },
+                        "price": 20,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 11
+                      },
+                      {
+                        "id": "d1d8aecc-c62e-44d0-b7de-1f29d5f46c14",
+                        "names": {
+                          "en": "Salmone",
+                          "it": "Salmone",
+                          "fr": "Salmone",
+                          "nl": "Salmone"
+                        },
+                        "descriptions": {
+                          "en": "Base + salmon",
+                          "it": "Salmone",
+                          "fr": "Base + saumon",
+                          "nl": "Basis + zalm"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 12
+                      },
+                      {
+                        "id": "0d8118bb-4354-4a01-a202-d9adb0cbceff",
+                        "names": {
+                          "en": "Prosciutto",
+                          "it": "Prosciutto",
+                          "fr": "Prosciutto",
+                          "nl": "Prosciutto"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham",
+                          "it": "Prosciutto",
+                          "fr": "Base + jambon",
+                          "nl": "Basis + ham"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 13
+                      },
+                      {
+                        "id": "233b3951-d4c0-414c-aeb4-fbaf3208225d",
+                        "names": {
+                          "en": "Salame piccante",
+                          "it": "Salame piccante",
+                          "fr": "Salame piccante",
+                          "nl": "Salame piccante"
+                        },
+                        "descriptions": {
+                          "en": "Base + salami",
+                          "it": "Salame piccante",
+                          "fr": "Base + salami",
+                          "nl": "Basis + salami"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 14
+                      },
+                      {
+                        "id": "d8a549ba-9c1f-4c66-bcac-1ce4b256d251",
+                        "names": {
+                          "en": "Funghi",
+                          "it": "Funghi",
+                          "fr": "Funghi",
+                          "nl": "Funghi"
+                        },
+                        "descriptions": {
+                          "en": "Base + mushrooms",
+                          "it": "Funghi",
+                          "fr": "Base + champignons",
+                          "nl": "Basis + champignons"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 15
+                      },
+                      {
+                        "id": "7619b93e-fe2a-4060-9737-1196682d994f",
+                        "names": {
+                          "en": "4 stagioni",
+                          "it": "4 stagioni",
+                          "fr": "4 stagioni",
+                          "nl": "4 stagioni"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, anchovies, capers, artichoke, peppers",
+                          "it": "4 stagioni",
+                          "fr": "Base + jambon, champignons, anchois, câpres, artichaut, poivrons",
+                          "nl": "Basis + ham, champignons, ansjovis, kappertjes, artisjok, pepers"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 16
+                      },
+                      {
+                        "id": "14d0fc55-7286-403b-bca7-d66de0fd3aa0",
+                        "names": {
+                          "en": "Frutti di mare",
+                          "it": "Frutti di mare",
+                          "fr": "Frutti di mare",
+                          "nl": "Frutti di mare"
+                        },
+                        "descriptions": {
+                          "en": "Base + seafood, anchovies",
+                          "it": "Frutti di mare",
+                          "fr": "Base + cocktail de fruits de mer, anchois",
+                          "nl": "Basis + zeevruchten, ansjovis"
+                        },
+                        "price": 23.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 17
+                      },
+                      {
+                        "id": "92438235-3907-4a51-8eda-4c6d0494454a",
+                        "names": {
+                          "en": "Provinciale",
+                          "it": "Provinciale",
+                          "fr": "Provinciale",
+                          "nl": "Provinciale"
+                        },
+                        "descriptions": {
+                          "en": "Base + ham, mushrooms, olives, peppers",
+                          "it": "Provinciale",
+                          "fr": "Base + jambon, champignons, olives, poivrons",
+                          "nl": "Basis + ham, champignons, olijven, pepers"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 18
+                      },
+                      {
+                        "id": "584ff849-0d96-44df-9d3f-ba7616753775",
+                        "names": {
+                          "en": "Lardo",
+                          "it": "Lardo",
+                          "fr": "Lardo",
+                          "nl": "Lardo"
+                        },
+                        "descriptions": {
+                          "en": "Base + bacon bits",
+                          "it": "Lardo",
+                          "fr": "Base + lardons",
+                          "nl": "Basis + spekrepjes"
+                        },
+                        "price": 19.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 19
+                      },
+                      {
+                        "id": "acf70f79-cac3-4ccb-8d76-1686decdcd8e",
+                        "names": {
+                          "en": "Speciale L'Osteria",
+                          "it": "Speciale L'Osteria",
+                          "fr": "Speciale L'Osteria",
+                          "nl": "Speciale L'Osteria"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, artichoke, mushrooms, frankfurter sausage, egg",
+                          "it": "Speciale L'Osteria",
+                          "fr": "Base + jambon de Parme, artichaut, champignons, saucisse de Francfort, œuf",
+                          "nl": "Basis + parmaham, artisjok, champignons, frankfurterworst, ei"
+                        },
+                        "price": 21.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 20
+                      },
+                      {
+                        "id": "9ecbc247-8d14-4c42-abac-b156e9098585",
+                        "names": {
+                          "en": "Vegetariana",
+                          "it": "Vegetariana",
+                          "fr": "Vegetariana",
+                          "nl": "Vegetariana"
+                        },
+                        "descriptions": {
+                          "en": "Base + mushrooms, artichoke, capers, peppers, olives",
+                          "it": "Vegetariana",
+                          "fr": "Base + champignons, artichaut, câpres, poivrons, olives",
+                          "nl": "Basis + champignons, artisjok, kappertjes, pepers, olijven"
+                        },
+                        "price": 20.5,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 21
+                      },
+                      {
+                        "id": "f0f46a0c-6b57-428e-bfeb-4a840b8cace9",
+                        "names": {
+                          "en": "Vulcano",
+                          "it": "Vulcano",
+                          "fr": "Vulcano",
+                          "nl": "Vulcano"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, artichoke, mushrooms",
+                          "it": "Vulcano",
+                          "fr": "Base + jambon de Parme, artichaut, champignons",
+                          "nl": "Basis + parmaham, artisjok, champignons"
+                        },
+                        "price": 21,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 22
+                      },
+                      {
+                        "id": "63d5e315-94db-44ac-bd99-3e7cc0d959fb",
+                        "names": {
+                          "en": "Napoletana",
+                          "it": "Napoletana",
+                          "fr": "Napoletana",
+                          "nl": "Napoletana"
+                        },
+                        "descriptions": {
+                          "en": "Base + anchovies, capers",
+                          "it": "Napoletana",
+                          "fr": "Base + anchois, câpres",
+                          "nl": "Basis + ansjovis, kappertjes"
+                        },
+                        "price": 19,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 23
+                      },
+                      {
+                        "id": "ad8a8200-1b41-4db4-b11c-f1b2fd069119",
+                        "names": {
+                          "en": "Carpaccio",
+                          "it": "Carpaccio",
+                          "fr": "Carpaccio",
+                          "nl": "Carpaccio"
+                        },
+                        "descriptions": {
+                          "en": "Base + thin slice of beef, walnut salad, parmesan shavings and balsamic cream",
+                          "it": "Carpaccio",
+                          "fr": "Base + fine tranche de bœuf, salade de noix, copeaux de parmesan et crème balsamique",
+                          "nl": "Basis + fijngesneden rundsvlees, notensla, parmezaanschilfers en balsamicocrème"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 24
+                      },
+                      {
+                        "id": "58a0ef17-1b8e-4fce-98f0-1a5bcf9a053c",
+                        "names": {
+                          "en": "Parma e Burrata",
+                          "it": "Parma e Burrata",
+                          "fr": "Parma e Burrata",
+                          "nl": "Parma e Burrata"
+                        },
+                        "descriptions": {
+                          "en": "Base + Parma ham, arugula, cherry tomatoes, burrata and a basil dressing",
+                          "it": "Parma e Burrata",
+                          "fr": "Base + jambon de Parme, roquette, tomates cerises, burrata et vinaigrette au basilic",
+                          "nl": "Basis + parmaham, rucola, kerstomaatjes, burrata en een basilicumdressing"
+                        },
+                        "price": 25,
+                        "allergens": [],
+                        "sideDishes": [],
+                        "supplements": [],
+                        "hidden": false,
+                        "order": 25
+                      }
+                    ],
+                    "hidden": false,
+                    "order": 1
+                  }
+                ],
+                "hidden": false,
+                "order": 4
+              },
+              "subcategoryData": {
+                "id": "c7537eb0-1690-44c0-bf55-b9bbd85765bc",
+                "names": {
+                  "en": "Pizze",
+                  "it": "Pizze",
+                  "fr": "Pizze",
+                  "nl": "Pizze"
+                },
+                "menuItems": [
+                  {
+                    "id": "d0063375-7359-484f-9f70-1e44249c3996",
+                    "names": {
+                      "en": "Margherita",
+                      "it": "Margherita",
+                      "fr": "Margherita",
+                      "nl": "Margherita"
+                    },
+                    "descriptions": {
+                      "en": "Tomato, mozzarella, and oregano",
+                      "it": "Margherita",
+                      "fr": "Tomate, mozzarella et origan ",
+                      "nl": "Tomaat, mozzarella en oregano"
+                    },
+                    "price": 15,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 1
+                  },
+                  {
+                    "id": "d60357c3-6474-47d3-a426-af89a64fa819",
+                    "names": {
+                      "en": "4 formaggi",
+                      "it": "4 formaggi",
+                      "fr": "4 formaggi",
+                      "nl": "4 formaggi"
+                    },
+                    "descriptions": {
+                      "en": "Base + 4 cheeses (mozzarella, taleggio, gorgonzola, fondina)",
+                      "it": "4 formaggi",
+                      "fr": "Base + 4 fromages (mozzarella, taleggio, gorgonzola, fondina)",
+                      "nl": "Basis + 4 kazen (mozzarella, taleggio, gorgonzola, fondina)"
+                    },
+                    "price": 22.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 2
+                  },
+                  {
+                    "id": "a5779b62-6bfe-49dc-88e2-a102c3f68974",
+                    "names": {
+                      "en": "Olive",
+                      "it": "Olive",
+                      "fr": "Olive",
+                      "nl": "Olive"
+                    },
+                    "descriptions": {
+                      "en": "Base + olives, Italian peppers",
+                      "it": "Olive",
+                      "fr": "Base + olives, poivrons italiens",
+                      "nl": "Basis + olijven, Italiaanse pepers"
+                    },
+                    "price": 19.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 3
+                  },
+                  {
+                    "id": "8666e6c1-fe1d-454f-b631-e0bb69fd7d5c",
+                    "names": {
+                      "en": "Tonno",
+                      "it": "Tonno",
+                      "fr": "Tonno",
+                      "nl": "Tonno"
+                    },
+                    "descriptions": {
+                      "en": "Base + tuna",
+                      "it": "Tonno",
+                      "fr": "Base + thon",
+                      "nl": "Basis + tonijn"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 4
+                  },
+                  {
+                    "id": "940e95a0-16d1-4bd2-ab54-e5e51868fa97",
+                    "names": {
+                      "en": "Diavola",
+                      "it": "Diavola",
+                      "fr": "Diavola",
+                      "nl": "Diavola"
+                    },
+                    "descriptions": {
+                      "en": "Base + salami, mushrooms, pili-pili",
+                      "it": "Diavola",
+                      "fr": "Base + salami, champignons, piment",
+                      "nl": "Basis + salami, champignons, pili-pili"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 5
+                  },
+                  {
+                    "id": "7b5016ab-8cde-44e0-a123-b6c82c9c9c88",
+                    "names": {
+                      "en": "Cicciolina",
+                      "it": "Cicciolina",
+                      "fr": "Cicciolina",
+                      "nl": "Cicciolina"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, egg, frankfurter sausage",
+                      "it": "Cicciolina",
+                      "fr": "Base + jambon, œuf, saucisse de Francfort",
+                      "nl": "Basis + ham, ei, frankfurterworst"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 6
+                  },
+                  {
+                    "id": "f4bed287-7e9e-42f5-bcd8-cbbd946de809",
+                    "names": {
+                      "en": "Cardinale",
+                      "it": "Cardinale",
+                      "fr": "Cardinale",
+                      "nl": "Cardinale"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms",
+                      "it": "Cardinale",
+                      "fr": "Base + jambon, champignons",
+                      "nl": "Basis + ham, champignons"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 7
+                  },
+                  {
+                    "id": "f698b65e-2122-4d75-9c3f-9b4f8d10f6f5",
+                    "names": {
+                      "en": "Capricciosa",
+                      "it": "Capricciosa",
+                      "fr": "Capricciosa",
+                      "nl": "Capricciosa"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, capers",
+                      "it": "Capricciosa",
+                      "fr": "Base + jambon, champignons, câpres",
+                      "nl": "Basis + ham, champignons, kappertjes"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 8
+                  },
+                  {
+                    "id": "c211eac9-b483-4805-88c3-6fedca146535",
+                    "names": {
+                      "en": "Bolognese",
+                      "it": "Bolognese",
+                      "fr": "Bolognese",
+                      "nl": "Bolognese"
+                    },
+                    "descriptions": {
+                      "en": "Base + Bolognese sauce, Parmesan cheese",
+                      "it": "Bolognese",
+                      "fr": "Base + sauce bolognaise, fromage parmesan",
+                      "nl": "Basis + bolognesesaus, parmesaanse kaas"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 9
+                  },
+                  {
+                    "id": "6b285d13-7045-41e1-a973-6befe8d8bdba",
+                    "names": {
+                      "en": "Scampi",
+                      "it": "Scampi",
+                      "fr": "Scampi",
+                      "nl": "Scampi"
+                    },
+                    "descriptions": {
+                      "en": "Base + shrimp",
+                      "it": "Scampi",
+                      "fr": "Base + crevettes",
+                      "nl": "Basis + scampi"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 10
+                  },
+                  {
+                    "id": "69daba69-8701-4065-ab0b-dd89c144da62",
+                    "names": {
+                      "en": "Ananas",
+                      "it": "Ananas",
+                      "fr": "Ananas",
+                      "nl": "Ananas"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, pineapple",
+                      "it": "Ananas",
+                      "fr": "Base + jambon, ananas",
+                      "nl": "Basis + ham, ananas"
+                    },
+                    "price": 20,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 11
+                  },
+                  {
+                    "id": "d1d8aecc-c62e-44d0-b7de-1f29d5f46c14",
+                    "names": {
+                      "en": "Salmone",
+                      "it": "Salmone",
+                      "fr": "Salmone",
+                      "nl": "Salmone"
+                    },
+                    "descriptions": {
+                      "en": "Base + salmon",
+                      "it": "Salmone",
+                      "fr": "Base + saumon",
+                      "nl": "Basis + zalm"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 12
+                  },
+                  {
+                    "id": "0d8118bb-4354-4a01-a202-d9adb0cbceff",
+                    "names": {
+                      "en": "Prosciutto",
+                      "it": "Prosciutto",
+                      "fr": "Prosciutto",
+                      "nl": "Prosciutto"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham",
+                      "it": "Prosciutto",
+                      "fr": "Base + jambon",
+                      "nl": "Basis + ham"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 13
+                  },
+                  {
+                    "id": "233b3951-d4c0-414c-aeb4-fbaf3208225d",
+                    "names": {
+                      "en": "Salame piccante",
+                      "it": "Salame piccante",
+                      "fr": "Salame piccante",
+                      "nl": "Salame piccante"
+                    },
+                    "descriptions": {
+                      "en": "Base + salami",
+                      "it": "Salame piccante",
+                      "fr": "Base + salami",
+                      "nl": "Basis + salami"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 14
+                  },
+                  {
+                    "id": "d8a549ba-9c1f-4c66-bcac-1ce4b256d251",
+                    "names": {
+                      "en": "Funghi",
+                      "it": "Funghi",
+                      "fr": "Funghi",
+                      "nl": "Funghi"
+                    },
+                    "descriptions": {
+                      "en": "Base + mushrooms",
+                      "it": "Funghi",
+                      "fr": "Base + champignons",
+                      "nl": "Basis + champignons"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 15
+                  },
+                  {
+                    "id": "7619b93e-fe2a-4060-9737-1196682d994f",
+                    "names": {
+                      "en": "4 stagioni",
+                      "it": "4 stagioni",
+                      "fr": "4 stagioni",
+                      "nl": "4 stagioni"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, anchovies, capers, artichoke, peppers",
+                      "it": "4 stagioni",
+                      "fr": "Base + jambon, champignons, anchois, câpres, artichaut, poivrons",
+                      "nl": "Basis + ham, champignons, ansjovis, kappertjes, artisjok, pepers"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 16
+                  },
+                  {
+                    "id": "14d0fc55-7286-403b-bca7-d66de0fd3aa0",
+                    "names": {
+                      "en": "Frutti di mare",
+                      "it": "Frutti di mare",
+                      "fr": "Frutti di mare",
+                      "nl": "Frutti di mare"
+                    },
+                    "descriptions": {
+                      "en": "Base + seafood, anchovies",
+                      "it": "Frutti di mare",
+                      "fr": "Base + cocktail de fruits de mer, anchois",
+                      "nl": "Basis + zeevruchten, ansjovis"
+                    },
+                    "price": 23.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 17
+                  },
+                  {
+                    "id": "92438235-3907-4a51-8eda-4c6d0494454a",
+                    "names": {
+                      "en": "Provinciale",
+                      "it": "Provinciale",
+                      "fr": "Provinciale",
+                      "nl": "Provinciale"
+                    },
+                    "descriptions": {
+                      "en": "Base + ham, mushrooms, olives, peppers",
+                      "it": "Provinciale",
+                      "fr": "Base + jambon, champignons, olives, poivrons",
+                      "nl": "Basis + ham, champignons, olijven, pepers"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 18
+                  },
+                  {
+                    "id": "584ff849-0d96-44df-9d3f-ba7616753775",
+                    "names": {
+                      "en": "Lardo",
+                      "it": "Lardo",
+                      "fr": "Lardo",
+                      "nl": "Lardo"
+                    },
+                    "descriptions": {
+                      "en": "Base + bacon bits",
+                      "it": "Lardo",
+                      "fr": "Base + lardons",
+                      "nl": "Basis + spekrepjes"
+                    },
+                    "price": 19.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 19
+                  },
+                  {
+                    "id": "acf70f79-cac3-4ccb-8d76-1686decdcd8e",
+                    "names": {
+                      "en": "Speciale L'Osteria",
+                      "it": "Speciale L'Osteria",
+                      "fr": "Speciale L'Osteria",
+                      "nl": "Speciale L'Osteria"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, artichoke, mushrooms, frankfurter sausage, egg",
+                      "it": "Speciale L'Osteria",
+                      "fr": "Base + jambon de Parme, artichaut, champignons, saucisse de Francfort, œuf",
+                      "nl": "Basis + parmaham, artisjok, champignons, frankfurterworst, ei"
+                    },
+                    "price": 21.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 20
+                  },
+                  {
+                    "id": "9ecbc247-8d14-4c42-abac-b156e9098585",
+                    "names": {
+                      "en": "Vegetariana",
+                      "it": "Vegetariana",
+                      "fr": "Vegetariana",
+                      "nl": "Vegetariana"
+                    },
+                    "descriptions": {
+                      "en": "Base + mushrooms, artichoke, capers, peppers, olives",
+                      "it": "Vegetariana",
+                      "fr": "Base + champignons, artichaut, câpres, poivrons, olives",
+                      "nl": "Basis + champignons, artisjok, kappertjes, pepers, olijven"
+                    },
+                    "price": 20.5,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 21
+                  },
+                  {
+                    "id": "f0f46a0c-6b57-428e-bfeb-4a840b8cace9",
+                    "names": {
+                      "en": "Vulcano",
+                      "it": "Vulcano",
+                      "fr": "Vulcano",
+                      "nl": "Vulcano"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, artichoke, mushrooms",
+                      "it": "Vulcano",
+                      "fr": "Base + jambon de Parme, artichaut, champignons",
+                      "nl": "Basis + parmaham, artisjok, champignons"
+                    },
+                    "price": 21,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 22
+                  },
+                  {
+                    "id": "63d5e315-94db-44ac-bd99-3e7cc0d959fb",
+                    "names": {
+                      "en": "Napoletana",
+                      "it": "Napoletana",
+                      "fr": "Napoletana",
+                      "nl": "Napoletana"
+                    },
+                    "descriptions": {
+                      "en": "Base + anchovies, capers",
+                      "it": "Napoletana",
+                      "fr": "Base + anchois, câpres",
+                      "nl": "Basis + ansjovis, kappertjes"
+                    },
+                    "price": 19,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 23
+                  },
+                  {
+                    "id": "ad8a8200-1b41-4db4-b11c-f1b2fd069119",
+                    "names": {
+                      "en": "Carpaccio",
+                      "it": "Carpaccio",
+                      "fr": "Carpaccio",
+                      "nl": "Carpaccio"
+                    },
+                    "descriptions": {
+                      "en": "Base + thin slice of beef, walnut salad, parmesan shavings and balsamic cream",
+                      "it": "Carpaccio",
+                      "fr": "Base + fine tranche de bœuf, salade de noix, copeaux de parmesan et crème balsamique",
+                      "nl": "Basis + fijngesneden rundsvlees, notensla, parmezaanschilfers en balsamicocrème"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 24
+                  },
+                  {
+                    "id": "58a0ef17-1b8e-4fce-98f0-1a5bcf9a053c",
+                    "names": {
+                      "en": "Parma e Burrata",
+                      "it": "Parma e Burrata",
+                      "fr": "Parma e Burrata",
+                      "nl": "Parma e Burrata"
+                    },
+                    "descriptions": {
+                      "en": "Base + Parma ham, arugula, cherry tomatoes, burrata and a basil dressing",
+                      "it": "Parma e Burrata",
+                      "fr": "Base + jambon de Parme, roquette, tomates cerises, burrata et vinaigrette au basilic",
+                      "nl": "Basis + parmaham, rucola, kerstomaatjes, burrata en een basilicumdressing"
+                    },
+                    "price": 25,
+                    "allergens": [],
+                    "sideDishes": [],
+                    "supplements": [],
+                    "hidden": false,
+                    "order": 25
+                  }
+                ],
+                "hidden": false,
+                "order": 1
+              },
+              "showSubcategoryTitle": false,
+              "showMenuDescription": false,
+              "showPrice": true,
+              "showCurrencySign": false,
+              "priceColor": "#000000",
+              "priceFontFamily": "Arial, sans-serif",
+              "priceFontWeight": "100",
+              "priceSeparator": ",",
+              "menuLayout": "justified",
+              "startIndex": 8,
+              "id": "pz3e4lbrm"
+            }
+          ]
+        },
+        {
+          "id": "26chxpy4p",
+          "name": "TEXT",
+          "visible": true,
+          "locked": false,
+          "opacity": 1,
+          "elements": [
+            {
+              "type": "text",
+              "x": 222.03597157204672,
+              "y": 1175,
+              "width": 1570.5664406594988,
+              "height": 497.89381940935175,
+              "rotation": 0,
+              "scaleX": 1,
+              "scaleY": 1,
+              "zIndex": 0,
+              "locked": false,
+              "visible": true,
+              "opacity": 1,
+              "content": "Osteria deerlijk here you can eat with love.",
+              "fontSize": 128,
+              "fontFamily": "Trebuchet MS",
+              "fontStyle": "normal",
+              "textDecoration": "none",
+              "fill": "#000000",
+              "stroke": "",
+              "strokeWidth": 0,
+              "align": "left",
+              "verticalAlign": "top",
+              "lineHeight": 1.2,
+              "letterSpacing": 0.7,
+              "padding": 5,
+              "id": "ap2sbkrsp",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      ],
+      "backgroundImage": "blob:https://ada-menu.vercel.app/da9ef449-8e68-48ed-a40f-2b8bd89ddf0d",
+      "backgroundImageId": "bg_1770493783683_021jqdl4c",
+      "backgroundImageOpacity": 1
+    }
+  ],
+  "fonts": {
+    "defaultFonts": [
+      {
+        "id": "arial",
+        "type": "system",
+        "familyName": "Arial",
+        "displayName": "Arial",
+        "category": "sans-serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "helvetica",
+        "type": "system",
+        "familyName": "Helvetica",
+        "displayName": "Helvetica",
+        "category": "sans-serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "times-new-roman",
+        "type": "system",
+        "familyName": "Times New Roman",
+        "displayName": "Times New Roman",
+        "category": "serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "georgia",
+        "type": "system",
+        "familyName": "Georgia",
+        "displayName": "Georgia",
+        "category": "serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "verdana",
+        "type": "system",
+        "familyName": "Verdana",
+        "displayName": "Verdana",
+        "category": "sans-serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "tahoma",
+        "type": "system",
+        "familyName": "Tahoma",
+        "displayName": "Tahoma",
+        "category": "sans-serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "trebuchet-ms",
+        "type": "system",
+        "familyName": "Trebuchet MS",
+        "displayName": "Trebuchet MS",
+        "category": "sans-serif",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "impact",
+        "type": "system",
+        "familyName": "Impact",
+        "displayName": "Impact",
+        "category": "sans-serif",
+        "variants": [
+          "400"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "comic-sans-ms",
+        "type": "system",
+        "familyName": "Comic Sans MS",
+        "displayName": "Comic Sans MS",
+        "category": "handwriting",
+        "variants": [
+          "400"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      },
+      {
+        "id": "courier-new",
+        "type": "system",
+        "familyName": "Courier New",
+        "displayName": "Courier New",
+        "category": "monospace",
+        "variants": [
+          "400",
+          "700"
+        ],
+        "isLoaded": true,
+        "isLoading": false
+      }
+    ],
+    "customFonts": [],
+    "googleFonts": [],
+    "loadedFonts": {}
+  },
+  "settings": {
+    "defaultFormat": "A4",
+    "zoom": 1
+  }
+}
