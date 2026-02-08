@@ -24,7 +24,8 @@ export function AppLayout({ children }: AppLayoutProps) {
     <div className="flex h-screen overflow-hidden bg-[#EFF4F8] dark:bg-gray-950">
       <Sidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-y-auto pb-16 md:pb-0">{children}</div>
+        {/* pb-bottom-nav adds bottom padding on mobile for the bottom navigation */}
+        <div className="flex-1 overflow-y-auto pb-bottom-nav md:pb-0 scroll-touch">{children}</div>
       </main>
     </div>
   );

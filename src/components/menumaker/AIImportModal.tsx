@@ -4,7 +4,6 @@ import {
   Check,
   Download,
   FileImage,
-  Loader2,
   Sparkles,
   Upload,
   X,
@@ -42,6 +41,7 @@ function validateMenuProject(data: unknown): data is MenuProject {
   try {
     if (typeof data !== "object" || data === null) return false;
     const d = data as Record<string, unknown>;
+
     if (typeof d.id !== "string") return false;
     if (typeof d.name !== "string") return false;
     if (typeof d.createdAt !== "string") return false;
@@ -176,12 +176,26 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
   }, [step]);
 
   // File handling
+  const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+  const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
   const handleFile = useCallback((f: File) => {
-    if (!f.type.startsWith("image/")) return;
+    if (!ACCEPTED_TYPES.includes(f.type)) {
+      setErrorMsg("Unsupported file type. Please upload a JPG, PNG, or WEBP image.");
+      setStep("error");
+      return;
+    }
+    if (f.size > MAX_FILE_SIZE) {
+      setErrorMsg(`File is too large (${formatFileSize(f.size)}). Maximum size is 20 MB.`);
+      setStep("error");
+      return;
+    }
+    // Revoke previous preview URL to prevent memory leak
+    if (preview) URL.revokeObjectURL(preview);
     setFile(f);
     const url = URL.createObjectURL(f);
     setPreview(url);
-  }, []);
+  }, [preview]);
 
   const removeFile = useCallback(() => {
     if (preview) URL.revokeObjectURL(preview);
@@ -192,6 +206,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
+
     if (f) handleFile(f);
   };
 
@@ -201,6 +216,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
     e.preventDefault();
     setIsDragging(false);
     const f = e.dataTransfer.files?.[0];
+
     if (f) handleFile(f);
   };
 
@@ -208,11 +224,13 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
   const handleGenerate = async () => {
     if (!file) return;
     const controller = new AbortController();
+
     abortRef.current = controller;
     setStep("processing");
 
     try {
       const form = new FormData();
+
       form.append("photo", file);
       if (restaurantName.trim()) form.append("restaurantName", restaurantName.trim());
       form.append("pageFormat", pageFormat);
@@ -229,11 +247,13 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
       }
 
       const json = await res.json();
+
       if (!json.success || !json.data) {
         throw new Error(json.error || "Invalid response from server.");
       }
 
       const project: MenuProject = json.data;
+
       if (!validateMenuProject(project)) {
         throw new Error("The generated template has an invalid structure. Please try again.");
       }
@@ -279,6 +299,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
     const blob = new Blob([jsonStr], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = `${(result.name || "ai-menu").replace(/[^a-z0-9]/gi, "_").toLowerCase()}_template.json`;
     document.body.appendChild(a);
@@ -321,16 +342,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
               <div
                 role="button"
                 tabIndex={0}
-                className={`
-                  relative flex flex-col items-center justify-center
-                  w-full rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer
-                  ${isDragging
-                    ? "border-[#4D6AFF] bg-[#4D6AFF]/5"
-                    : file
-                      ? "border-[#4D6AFF]/40 bg-[#4D6AFF]/[0.02]"
-                      : "border-gray-200 dark:border-gray-700 hover:border-[#4D6AFF]/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                  }
-                `}
+                className={`relative flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed transition-all duration-200 cursor-pointer ${isDragging ? "border-[#4D6AFF] bg-[#4D6AFF]/5" : file ? "border-[#4D6AFF]/40 bg-[#4D6AFF]/[0.02]" : "border-gray-200 dark:border-gray-700 hover:border-[#4D6AFF]/50 hover:bg-gray-50 dark:hover:bg-gray-800/50"}`}
                 onClick={() => !file && fileInputRef.current?.click()}
                 onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !file) fileInputRef.current?.click(); }}
                 onDragOver={onDragOver}
@@ -388,15 +400,17 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
                 accept="image/*"
                 onChange={onInputChange}
                 className="hidden"
+                id="ai-import-file"
               />
 
               {/* Restaurant name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label htmlFor="ai-restaurant-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Restaurant Name
                   <span className="text-gray-400 font-normal ml-1">(optional)</span>
                 </label>
                 <Input
+                  id="ai-restaurant-name"
                   value={restaurantName}
                   onChange={(e) => setRestaurantName(e.target.value)}
                   placeholder="e.g. Chez Marie"
@@ -406,10 +420,10 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
 
               {/* Page format */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <span id="ai-page-format-label" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                   Page Format
-                </label>
-                <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                </span>
+                <div role="group" aria-labelledby="ai-page-format-label" className="inline-flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
                   {(["A4", "A5"] as const).map((fmt) => (
                     <button
                       key={fmt}
@@ -493,7 +507,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
                     {result.name || "AI Generated Menu"}
                   </p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {result.pages.length} page{result.pages.length !== 1 ? "s" : ""} · {result.settings?.format || pageFormat} · {counts.total} elements
+                    {result.pages.length} page{result.pages.length !== 1 ? "s" : ""} · {(result.settings as any)?.defaultFormat || pageFormat} · {counts.total} elements
                   </p>
                 </div>
               </div>

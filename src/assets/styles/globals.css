@@ -3,33 +3,173 @@
 @import "tailwindcss/utilities";
 
 @layer base {
-    :root {
-        --primary-color: #4D6AFF;
-        --primary-foreground: #FCFBFF;
-        --secondary-color: #8B98FF;
-        --secondary-foreground: #33373B;
-        --tertiary-color: #FF66CC;
-        --tertiary-foreground: #FCFBFF;
-        --background: #EFF4F8;
-        --foreground: #33373B;
-    }
+  :root {
+    --primary-color: #4d6aff;
+    --primary-foreground: #fcfbff;
+    --secondary-color: #8b98ff;
+    --secondary-foreground: #33373b;
+    --tertiary-color: #ff66cc;
+    --tertiary-foreground: #fcfbff;
+    --background: #eff4f8;
+    --foreground: #33373b;
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --bottom-nav-height: 64px;
+  }
 
-    .dark {
-        --background: 224 71.4% 4.1%;
-        --foreground: 210 20% 98%;
-    }
+  .dark {
+    --background: 224 71.4% 4.1%;
+    --foreground: 210 20% 98%;
+  }
 
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%;
-        overflow: hidden; /* Prevents scrolling */
-        overscroll-behavior-x: none; /* Prevents browser back/forward gestures */
-      }
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevents scrolling */
+    overscroll-behavior-x: none; /* Prevents browser back/forward gestures */
+    overscroll-behavior-y: contain; /* Prevents pull-to-refresh on main page */
+  }
 
-    .bg-card  {
-        border-color: #1a202c;
-        background-color: #1a202c;
-    }
+  /* Mobile touch optimizations */
+  button,
+  a,
+  input,
+  select,
+  textarea,
+  [role="button"] {
+    touch-action: manipulation; /* Prevents double-tap zoom */
+  }
+
+  .bg-card {
+    border-color: #1a202c;
+    background-color: #1a202c;
+  }
+}
+
+@layer utilities {
+  /* Safe area padding for bottom nav */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Bottom nav spacer for content */
+  .pb-bottom-nav {
+    padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Smooth momentum scrolling for scrollable containers */
+  .scroll-touch {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Prevent text selection on interactive elements */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Mobile sheet animations */
+  .sheet-slide-up {
+    animation: sheetSlideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+  .sheet-slide-down {
+    animation: sheetSlideDown 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+
+  /* Drawer animations */
+  .drawer-slide-in {
+    animation: drawerSlideIn 0.3s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+  .drawer-slide-out {
+    animation: drawerSlideOut 0.2s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+
+  /* Overlay animations */
+  .overlay-fade-in {
+    animation: overlayFadeIn 0.2s ease-out forwards;
+  }
+  .overlay-fade-out {
+    animation: overlayFadeOut 0.15s ease-in forwards;
+  }
+}
+
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheetSlideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes drawerSlideOut {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-slide-up,
+  .sheet-slide-down,
+  .drawer-slide-in,
+  .drawer-slide-out,
+  .overlay-fade-in,
+  .overlay-fade-out {
+    animation-duration: 0.01ms !important;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
 }

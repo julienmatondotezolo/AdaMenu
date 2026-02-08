@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { X } from "lucide-react";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type DialogProps = {
   open: boolean;
@@ -11,21 +11,26 @@ type DialogProps = {
 function Dialog({ open, setIsOpen, children }: DialogProps) {
   const modalRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const [closing, setClosing] = useState(false);
 
   const handleClose = () => {
-    setIsOpen(false);
+    setClosing(true);
+    setTimeout(() => {
+      setClosing(false);
+      setIsOpen(false);
+    }, 200);
   };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
+        handleClose();
       }
     };
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsOpen(false);
+        handleClose();
       }
     };
 
@@ -40,38 +45,32 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
-  }, [open, setIsOpen]);
+  }, [open]);
 
-  if (!open) return null;
+  if (!open && !closing) return null;
 
   return (
     <>
       {/* Backdrop */}
       <div
         ref={backdropRef}
-        className={`fixed inset-0 z-40 transition-all duration-300 ${
-          open
-            ? "bg-black/50 backdrop-blur-sm opacity-100"
-            : "bg-black/0 backdrop-blur-none opacity-0 pointer-events-none"
+        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm ${
+          closing ? "overlay-fade-out" : "overlay-fade-in"
         }`}
       />
 
-      {/* Modal */}
-      <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-300 ${
-          open ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-        }`}
-      >
+      {/* ═══ Desktop: centered modal ═══ */}
+      <div className="hidden md:flex fixed inset-0 z-50 items-center justify-center p-4">
         <div
           ref={modalRef}
           className={`
-            relative w-full max-w-4xl max-h-[90vh] 
-            bg-white dark:bg-gray-900 
-            rounded-2xl shadow-2xl 
+            relative w-full max-w-4xl max-h-[90vh]
+            bg-white dark:bg-gray-900
+            rounded-2xl shadow-2xl
             border border-gray-200 dark:border-gray-700
             overflow-hidden flex flex-col
             transform transition-all duration-300
-            ${open ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"}
+            ${open && !closing ? "translate-y-0 opacity-100 scale-100" : "translate-y-4 opacity-0 scale-95"}
           `}
           style={{
             background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)",
@@ -88,6 +87,37 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
           </button>
 
           {/* Content */}
+          <div className="flex-1 overflow-hidden">{children}</div>
+        </div>
+      </div>
+
+      {/* ═══ Mobile: full-screen bottom sheet ═══ */}
+      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
+        <div
+          ref={modalRef}
+          className={`
+            relative w-full h-[95vh]
+            bg-white dark:bg-gray-900
+            rounded-t-3xl shadow-2xl
+            overflow-hidden flex flex-col
+            ${closing ? "sheet-slide-down" : "sheet-slide-up"}
+          `}
+        >
+          {/* Mobile drag handle + close */}
+          <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
+            <div className="flex-1 flex justify-center">
+              <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+            </div>
+            <button
+              onClick={handleClose}
+              className="absolute right-3 top-3 p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors z-10"
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            </button>
+          </div>
+
+          {/* Content — full height scrollable */}
           <div className="flex-1 overflow-hidden">{children}</div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { CanvasArea } from "./CanvasArea";
 import { CenterToolbar } from "./CenterToolbar";
 import { ExportLoader } from "./ExportLoader";
 import { MainToolbar } from "./MainToolbar";
+import { MobileMenuMaker } from "./mobile/MobileMenuMaker";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { DataPanel } from "./panels/DataPanel";
 import { FontManagementPanel } from "./panels/FontManagementPanel";
@@ -21,11 +22,43 @@ import { ThumbnailsPanel } from "./panels/ThumbnailsPanel";
 import { PreviewMode } from "./PreviewMode";
 import { TopNavBar } from "./TopNavBar";
 
+// Hook to detect mobile viewport
+function useIsMobile(breakpoint: number = 768): boolean {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+
+    // Check on mount
+    checkMobile();
+
+    // Listen for resize events
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [breakpoint]);
+
+  return isMobile;
+}
+
 interface MenuMakerEditorProps {
   onNewProject: () => void;
 }
 
 export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
+  const isMobile = useIsMobile();
+
+  // Render mobile Quick Edit mode on small screens
+  if (isMobile) {
+    return <MobileMenuMaker onBack={onNewProject} />;
+  }
+
+  // Desktop full editor
+  return <DesktopMenuMakerEditor onNewProject={onNewProject} />;
+}
+
+function DesktopMenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   const {
     project,
     editorState,
@@ -128,31 +161,22 @@ export function MenuMakerEditor({ onNewProject }: MenuMakerEditorProps) {
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't intercept shortcuts when user is typing in an input or textarea
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        // Only intercept Ctrl+S for save even in inputs
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+          saveProject();
+        }
+        return;
+      }
+
       if (e.ctrlKey || e.metaKey) {
         switch (e.key) {
           case "s":
             e.preventDefault();
             saveProject();
-            break;
-          case "z":
-            e.preventDefault();
-            if (e.shiftKey) {
-              // Redo
-            } else {
-              // Undo
-            }
-            break;
-          case "c":
-            e.preventDefault();
-            // Copy
-            break;
-          case "v":
-            e.preventDefault();
-            // Paste
-            break;
-          case "x":
-            e.preventDefault();
-            // Cut
             break;
         }
       }

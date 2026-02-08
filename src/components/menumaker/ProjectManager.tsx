@@ -254,6 +254,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
   const refreshProjects = async () => {
     try {
       const savedProjects = await indexedDBService.getAllProjects();
+
       setProjects(savedProjects);
     } catch (error) {
       console.error('Failed to refresh projects:', error);

@@ -1,5 +1,5 @@
 import { Label } from "@radix-ui/react-label";
-import { ChevronDown, ChevronUp, Edit, Eye, Loader2, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronUp, Edit, Eye, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
@@ -329,10 +329,14 @@ function Categories() {
 
   return (
     <>
-      <div className="flex w-full h-[calc(100vh-56px)]">
+      <div className="flex w-full h-[calc(100vh-56px)] md:h-[calc(100vh-56px)]">
         {/* Left sidebar with fixed header and scrollable categories */}
+        {/* On mobile: full-width when no category selected, hidden when category selected */}
         <div
-          className={`h-full ${isRightPanelExpanded ? "w-1/4" : "w-1/5"} flex flex-col border-r-2 dark:border-gray-800 transition-all duration-200`}
+          className={`h-full flex flex-col border-r-2 dark:border-gray-800 transition-all duration-200
+            ${categoryId && category ? "hidden md:flex" : "w-full md:w-auto"}
+            ${isRightPanelExpanded ? "md:w-1/4" : "md:w-1/5"}
+          `}
         >
           {/* Fixed header */}
           <div className="flex-none p-4 border-b dark:border-gray-800 space-y-4">
@@ -362,13 +366,16 @@ function Categories() {
         </div>
 
         {/* Main content area */}
-        <div className="flex-1 h-full flex flex-col transition-all duration-200">
+        {/* On mobile: full-width when category is selected, hidden when no category */}
+        <div className={`flex-1 h-full flex flex-col transition-all duration-200 ${
+          !categoryId || !category ? "hidden md:flex" : "flex"
+        }`}>
           {category && category.names && (
             <>
               {/* Collapsible category details */}
               <div className="flex-none">
                 <div className="border-b dark:border-gray-800">
-                  {/* Collapsible header */}
+                  {/* Collapsible header — with mobile back button */}
                   <button
                     className="w-full flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                     onClick={() => setIsCategoryDetailsExpanded(!isCategoryDetailsExpanded)}
@@ -376,7 +383,23 @@ function Categories() {
                     aria-controls="category-details-content"
                   >
                     <div className="flex items-center justify-between w-full pr-6">
-                      <h2 className="text-xl font-semibold">{category.names[locale]}</h2>
+                      <div className="flex items-center gap-2">
+                        {/* Mobile back button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCategoryId(undefined);
+                            setCategory(undefined);
+                            setSubCategoryId("");
+                            setSelectedMenuId("");
+                          }}
+                          className="md:hidden p-1.5 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                          aria-label="Back to categories"
+                        >
+                          <ChevronLeft className="w-5 h-5 text-gray-500" />
+                        </button>
+                        <h2 className="text-lg md:text-xl font-semibold">{category.names[locale]}</h2>
+                      </div>
                       {!isEditMode && (
                         <Button
                           type="button"
@@ -537,8 +560,8 @@ function Categories() {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center space-x-6">
-                        <section className="space-x-6">
+                      <div className="flex items-center gap-2 sm:gap-6">
+                        <section className="flex items-center gap-2 sm:gap-6">
                           {subCategoryId && (
                             <Button
                               variant={"outline"}
@@ -546,10 +569,15 @@ function Categories() {
                                 e.stopPropagation();
                                 openUpdateSubCategory();
                               }}
+                              size="sm"
+                              className="text-xs sm:text-sm"
                             >
                               <Edit className="w-4 h-4" />
-                              {text("edit")} sub category{" "}
-                              {category?.subCategories.find((sc: any) => sc.id === subCategoryId)?.names[locale]}
+                              <span className="hidden sm:inline">
+                                {text("edit")} sub category{" "}
+                                {category?.subCategories.find((sc: any) => sc.id === subCategoryId)?.names[locale]}
+                              </span>
+                              <span className="sm:hidden">{text("edit")}</span>
                             </Button>
                           )}
                           {isSubcategoriesExpanded && (
@@ -559,8 +587,11 @@ function Categories() {
                                 setDialogMode("addSubCat");
                                 setOpenDialog(true);
                               }}
+                              size="sm"
+                              className="text-xs sm:text-sm"
                             >
-                              + {text("add")} sub category
+                              + <span className="hidden sm:inline">{text("add")} sub category</span>
+                              <span className="sm:hidden">{text("add")}</span>
                             </Button>
                           )}
                         </section>
@@ -614,9 +645,9 @@ function Categories() {
           )}
         </div>
 
-        {/* Right menu preview */}
+        {/* Right menu preview — hidden on mobile */}
         <div
-          className={`${isRightPanelExpanded ? "w-[30%]" : "w-36"} h-full flex flex-col border-l-2 dark:border-gray-800 transition-all duration-200`}
+          className={`hidden md:flex ${isRightPanelExpanded ? "w-[30%]" : "w-36"} h-full flex-col border-l-2 dark:border-gray-800 transition-all duration-200`}
         >
           {/* Right panel header */}
           <div className="flex-none border-b dark:border-gray-800">

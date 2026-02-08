@@ -329,14 +329,20 @@ export const useMenuMakerStore = create<MenuMakerStore>()(
     },
 
     saveProject: async () => {
+      const state = get();
+
+      // Prevent concurrent saves (mutex)
+      if (state.isSaving) {
+        console.warn('Save already in progress, skipping');
+        return;
+      }
+
+      // Re-read project AFTER mutex check to get the latest state
       const { project } = get();
 
       if (project) {
         // Set saving state to true and reset success state
         set({ isSaving: true, saveSuccess: false });
-
-        // Simulate 1 seconds of saving time
-        await new Promise(resolve => setTimeout(resolve, 1000));
 
         const updatedProject = {
           ...project,
