@@ -307,7 +307,7 @@ export function ProjectManager({ onCreateNew, onOpenProject }: ProjectManagerPro
         
         <Button
           onClick={() => setShowAIImport(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
+          className="flex items-center gap-2 bg-[#4D6AFF] hover:bg-[#3d56d9] text-white"
         >
           <Sparkles className="w-4 h-4" />
           AI Import

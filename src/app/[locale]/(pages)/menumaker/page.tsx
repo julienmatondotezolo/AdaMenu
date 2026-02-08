@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 
-import { AdaHeader } from "@/components";
 import { MenuMakerEditor, PageFormatSelector, ProjectManager } from "@/components/menumaker";
 import { useMenuMakerStore } from "@/stores/menumaker";
 
@@ -37,23 +36,20 @@ export default function MenuMakerPage() {
   }, [project, currentView]);
 
   return (
-    <main className="relative h-screen overflow-hidden">
-      <AdaHeader />
-      <div className="h-[calc(100vh-48px)] bg-white dark:bg-[#121212]">
-        {currentView === "projects" && (
-          <div className="h-full overflow-auto">
-            <ProjectManager onCreateNew={handleCreateNew} onOpenProject={handleOpenProject} />
-          </div>
-        )}
+    <div className="h-full bg-white dark:bg-[#121212]">
+      {currentView === "projects" && (
+        <div className="h-full overflow-auto">
+          <ProjectManager onCreateNew={handleCreateNew} onOpenProject={handleOpenProject} />
+        </div>
+      )}
 
-        {currentView === "format" && (
-          <div className="h-full overflow-auto">
-            <PageFormatSelector onFormatSelected={handleFormatSelected} onReturn={handleNewProject} />
-          </div>
-        )}
+      {currentView === "format" && (
+        <div className="h-full overflow-auto">
+          <PageFormatSelector onFormatSelected={handleFormatSelected} onReturn={handleNewProject} />
+        </div>
+      )}
 
-        {currentView === "editor" && <MenuMakerEditor onNewProject={handleNewProject} />}
-      </div>
-    </main>
+      {currentView === "editor" && <MenuMakerEditor onNewProject={handleNewProject} />}
+    </div>
   );
 }

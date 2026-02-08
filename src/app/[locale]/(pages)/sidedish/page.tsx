@@ -1,12 +1,7 @@
 "use client";
 
-import { AdaHeader, Sidedish } from "@/components";
+import { Sidedish } from "@/components";
 
-export default function Index() {
-  return (
-    <main className="relative h-screen overflow-hidden">
-      <AdaHeader />
-      <Sidedish />
-    </main>
-  );
+export default function SidedishPage() {
+  return <Sidedish />;
 }

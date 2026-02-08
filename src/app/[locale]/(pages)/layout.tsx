@@ -3,6 +3,8 @@
 import React from "react";
 import { Toaster } from "sonner";
 
+import { AppLayout } from "@/components/layout";
+
 import Providers from "../providers";
 
 export default function PagesLayout({
@@ -14,7 +16,7 @@ export default function PagesLayout({
 }) {
   return (
     <Providers locale={locale}>
-      {children}
+      <AppLayout>{children}</AppLayout>
       <Toaster richColors position="bottom-right" />
     </Providers>
   );
