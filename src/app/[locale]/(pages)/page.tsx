@@ -61,6 +61,8 @@ export default function DashboardPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadStats() {
       try {
         const [categories, menu, allergens, sidedishes] = await Promise.allSettled([
@@ -69,6 +71,8 @@ export default function DashboardPage() {
           fetchAllergen(),
           fetchSidedish(),
         ]);
+
+        if (!isMounted) return; // Prevent state updates if component unmounted
 
         setStats({
           categories:
@@ -95,10 +99,10 @@ export default function DashboardPage() {
           const items: QuickMenuItem[] = [];
           for (const cat of menu.value) {
             const catName = cat.names?.[locale] || cat.name || "Unknown";
-            if (cat.menuItems) {
+            if (cat.menuItems && Array.isArray(cat.menuItems)) {
               for (const item of cat.menuItems) {
                 items.push({
-                  id: item.id,
+                  id: item.id || `item-${Math.random()}`,
                   name: item.names?.[locale] || item.name || "Unknown",
                   hidden: item.hidden || false,
                   categoryName: catName,
@@ -106,13 +110,13 @@ export default function DashboardPage() {
                 });
               }
             }
-            if (cat.subCategories) {
+            if (cat.subCategories && Array.isArray(cat.subCategories)) {
               for (const sub of cat.subCategories) {
                 const subName = sub.names?.[locale] || sub.name || catName;
-                if (sub.menuItems) {
+                if (sub.menuItems && Array.isArray(sub.menuItems)) {
                   for (const item of sub.menuItems) {
                     items.push({
-                      id: item.id,
+                      id: item.id || `item-${Math.random()}`,
                       name: item.names?.[locale] || item.name || "Unknown",
                       hidden: item.hidden || false,
                       categoryName: subName,
@@ -123,33 +127,53 @@ export default function DashboardPage() {
               }
             }
           }
-          setAllItems(items);
+          if (isMounted) {
+            setAllItems(items);
+          }
         }
       } catch (e) {
         console.error("Failed to load stats:", e);
+        // Set safe defaults on error
+        if (isMounted) {
+          setStats({ categories: 0, menuItems: 0, allergens: 0, sideDishes: 0 });
+          setAllItems([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     }
 
-    loadStats();
+    loadStats().catch((error) => {
+      console.error("Unhandled loadStats error:", error);
+      if (isMounted) {
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [locale]);
 
   // Quick 86 toggle
   const handleQuick86Toggle = useCallback(
     async (item: QuickMenuItem) => {
       if (togglingId) return;
-      setTogglingId(item.id);
-
-      // Optimistic update
-      setAllItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, hidden: !i.hidden } : i)));
-
+      
       try {
+        setTogglingId(item.id);
+
+        // Optimistic update
+        setAllItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, hidden: !i.hidden } : i)));
+
         await toggleMenuItemVisibility({
           menuId: item.id,
           hidden: !item.hidden,
         });
-      } catch {
+      } catch (error) {
+        console.error("Failed to toggle menu item visibility:", error);
         // Revert on error
         setAllItems((prev) => prev.map((i) => (i.id === item.id ? { ...i, hidden: item.hidden } : i)));
       } finally {
@@ -162,7 +186,15 @@ export default function DashboardPage() {
   // Focus search when Quick 86 opens
   useEffect(() => {
     if (quick86Open) {
-      setTimeout(() => searchInputRef.current?.focus(), 100);
+      const timeoutId = setTimeout(() => {
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 100);
+      
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
   }, [quick86Open]);
 
