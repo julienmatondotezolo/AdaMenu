@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useLocale } from "next-intl";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 
 import {
   fetchAllergen,
@@ -44,7 +44,8 @@ interface QuickMenuItem {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const locale = useLocale();
+  const localeValue = useLocale();
+  const locale = useMemo(() => localeValue, [localeValue]);
   const [stats, setStats] = useState<StatsData>({
     categories: 0,
     menuItems: 0,
@@ -52,6 +53,7 @@ export default function DashboardPage() {
     sideDishes: 0,
   });
   const [loading, setLoading] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   // Quick 86 state
   const [quick86Open, setQuick86Open] = useState(false);
@@ -61,10 +63,15 @@ export default function DashboardPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Prevent multiple loads - only load once on mount or when locale actually changes
+    if (hasLoadedRef.current && locale === hasLoadedRef.current) return;
+    
     let isMounted = true;
 
     async function loadStats() {
       try {
+        console.log("Loading stats with locale:", locale);
+        
         const [categories, menu, allergens, sidedishes] = await Promise.allSettled([
           fetchCategories(),
           fetchCompleteMenu(),
@@ -74,63 +81,74 @@ export default function DashboardPage() {
 
         if (!isMounted) return; // Prevent state updates if component unmounted
 
-        setStats({
-          categories:
-            categories.status === "fulfilled" && Array.isArray(categories.value) ? categories.value.length : 0,
-          menuItems:
-            menu.status === "fulfilled" && Array.isArray(menu.value)
-              ? menu.value.reduce((count: number, cat: any) => {
-                  let total = cat.menuItems?.length || 0;
-                  if (cat.subCategories) {
-                    for (const sub of cat.subCategories) {
-                      total += sub.menuItems?.length || 0;
-                    }
-                  }
-                  return count + total;
-                }, 0)
-              : 0,
-          allergens: allergens.status === "fulfilled" && Array.isArray(allergens.value) ? allergens.value.length : 0,
-          sideDishes:
-            sidedishes.status === "fulfilled" && Array.isArray(sidedishes.value) ? sidedishes.value.length : 0,
-        });
-
-        // Build quick menu item list for Quick 86
-        if (menu.status === "fulfilled" && Array.isArray(menu.value)) {
-          const items: QuickMenuItem[] = [];
-          for (const cat of menu.value) {
-            const catName = cat.names?.[locale] || cat.name || "Unknown";
-            if (cat.menuItems && Array.isArray(cat.menuItems)) {
-              for (const item of cat.menuItems) {
-                items.push({
-                  id: item.id || `item-${Math.random()}`,
-                  name: item.names?.[locale] || item.name || "Unknown",
-                  hidden: item.hidden || false,
-                  categoryName: catName,
-                  price: item.price,
-                });
+        // Process menu data safely
+        let menuItemCount = 0;
+        let menuItems: QuickMenuItem[] = [];
+        
+        if (menu.status === "fulfilled" && menu.value) {
+          // Handle new backend structure: { restaurant: {...}, categories: [...] }
+          const menuData = Array.isArray(menu.value) ? menu.value : (menu.value.categories || []);
+          
+          if (Array.isArray(menuData)) {
+            menuItemCount = menuData.reduce((count: number, cat: any) => {
+              let total = cat.menuItems?.length || 0;
+              if (cat.subCategories) {
+                for (const sub of cat.subCategories) {
+                  total += sub.menuItems?.length || 0;
+                }
               }
-            }
-            if (cat.subCategories && Array.isArray(cat.subCategories)) {
-              for (const sub of cat.subCategories) {
-                const subName = sub.names?.[locale] || sub.name || catName;
-                if (sub.menuItems && Array.isArray(sub.menuItems)) {
-                  for (const item of sub.menuItems) {
-                    items.push({
-                      id: item.id || `item-${Math.random()}`,
-                      name: item.names?.[locale] || item.name || "Unknown",
-                      hidden: item.hidden || false,
-                      categoryName: subName,
-                      price: item.price,
-                    });
+              return count + total;
+            }, 0);
+
+            // Build quick menu item list for Quick 86
+            for (const cat of menuData) {
+              const catName = cat.names?.[locale] || cat.name || "Unknown";
+              if (cat.menuItems && Array.isArray(cat.menuItems)) {
+                for (const item of cat.menuItems) {
+                  menuItems.push({
+                    id: item.id || `item-${Math.random()}`,
+                    name: item.names?.[locale] || item.name || "Unknown",
+                    hidden: item.hidden || false,
+                    categoryName: catName,
+                    price: item.price,
+                  });
+                }
+              }
+              if (cat.subCategories && Array.isArray(cat.subCategories)) {
+                for (const sub of cat.subCategories) {
+                  const subName = sub.names?.[locale] || sub.name || catName;
+                  if (sub.menuItems && Array.isArray(sub.menuItems)) {
+                    for (const item of sub.menuItems) {
+                      menuItems.push({
+                        id: item.id || `item-${Math.random()}`,
+                        name: item.names?.[locale] || item.name || "Unknown",
+                        hidden: item.hidden || false,
+                        categoryName: subName,
+                        price: item.price,
+                      });
+                    }
                   }
                 }
               }
             }
           }
-          if (isMounted) {
-            setAllItems(items);
-          }
         }
+
+        setStats({
+          categories: categories.status === "fulfilled" && Array.isArray(categories.value) ? categories.value.length : 0,
+          menuItems: menuItemCount,
+          allergens: allergens.status === "fulfilled" && Array.isArray(allergens.value) ? allergens.value.length : 0,
+          sideDishes: sidedishes.status === "fulfilled" && Array.isArray(sidedishes.value) ? sidedishes.value.length : 0,
+        });
+
+        if (isMounted) {
+          setAllItems(menuItems);
+        }
+        
+        // Mark as loaded with current locale
+        hasLoadedRef.current = locale;
+        console.log("Stats loaded successfully");
+        
       } catch (e) {
         console.error("Failed to load stats:", e);
         // Set safe defaults on error
