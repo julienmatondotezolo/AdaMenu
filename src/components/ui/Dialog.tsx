@@ -10,7 +10,6 @@ type DialogProps = {
 
 function Dialog({ open, setIsOpen, children }: DialogProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
   const [closing, setClosing] = useState(false);
 
   const handleClose = () => {
@@ -22,27 +21,6 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // Ensure we have a valid target and modalRef
-      if (!event.target || !modalRef.current) return;
-      
-      // Don't close if clicking on form elements or interactive elements
-      const target = event.target as HTMLElement;
-      const isFormElement = target.tagName === 'INPUT' || 
-                           target.tagName === 'TEXTAREA' || 
-                           target.tagName === 'SELECT' || 
-                           target.tagName === 'BUTTON' ||
-                           target.isContentEditable ||
-                           target.closest('input, textarea, select, button, [contenteditable]');
-      
-      if (isFormElement) return;
-      
-      // If click is outside the modal, close it
-      if (!modalRef.current.contains(target)) {
-        handleClose();
-      }
-    };
-
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         handleClose();
@@ -50,24 +28,12 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
     };
 
     if (open) {
-      // Only use click event (not mousedown) to avoid conflicts with form interactions
-      // Use a slight delay to ensure form elements have processed their events first
-      const timeoutId = setTimeout(() => {
-        document.addEventListener("click", handleClickOutside, false);
-      }, 100);
-      
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
-
-      return () => {
-        clearTimeout(timeoutId);
-        document.removeEventListener("click", handleClickOutside, false);
-        document.removeEventListener("keydown", handleEscape);
-        document.body.style.overflow = "unset";
-      };
     }
 
     return () => {
+      document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
   }, [open]);
@@ -76,16 +42,10 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        ref={backdropRef}
-        className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm ${
-          closing ? "overlay-fade-out" : "overlay-fade-in"
-        }`}
-      />
-
       {/* ═══ Desktop: centered modal ═══ */}
-      <div className="hidden md:flex fixed inset-0 z-50 items-center justify-center p-4">
+      <div className={`hidden md:flex fixed inset-0 z-50 items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+        closing ? "opacity-0" : "opacity-100"
+      }`} onClick={handleClose}>
         <div
           ref={modalRef}
           className={`
@@ -102,14 +62,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             backdropFilter: "blur(10px)",
           }}
           onClick={(e) => {
-            e.stopPropagation();
-            // Don't prevent default - let form elements work normally
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent backdrop close when clicking inside modal
           }}
         >
           {/* Close Button */}
@@ -127,7 +80,9 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
       </div>
 
       {/* ═══ Mobile: full-screen bottom sheet ═══ */}
-      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
+      <div className={`md:hidden fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+        closing ? "opacity-0" : "opacity-100"
+      }`} onClick={handleClose}>
         <div
           ref={modalRef}
           className={`
@@ -138,14 +93,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             ${closing ? "sheet-slide-down" : "sheet-slide-up"}
           `}
           onClick={(e) => {
-            e.stopPropagation();
-            // Don't prevent default - let form elements work normally
-          }}
-          onMouseDown={(e) => {
-            e.stopPropagation();
-          }}
-          onTouchStart={(e) => {
-            e.stopPropagation();
+            e.stopPropagation(); // Prevent backdrop close when clicking inside modal
           }}
         >
           {/* Mobile drag handle + close */}
