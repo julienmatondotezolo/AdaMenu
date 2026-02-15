@@ -26,8 +26,19 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
       // Ensure we have a valid target and modalRef
       if (!event.target || !modalRef.current) return;
       
+      // Don't close if clicking on form elements or interactive elements
+      const target = event.target as HTMLElement;
+      const isFormElement = target.tagName === 'INPUT' || 
+                           target.tagName === 'TEXTAREA' || 
+                           target.tagName === 'SELECT' || 
+                           target.tagName === 'BUTTON' ||
+                           target.isContentEditable ||
+                           target.closest('input, textarea, select, button, [contenteditable]');
+      
+      if (isFormElement) return;
+      
       // If click is outside the modal, close it
-      if (!modalRef.current.contains(event.target as Node)) {
+      if (!modalRef.current.contains(target)) {
         handleClose();
       }
     };
@@ -39,17 +50,24 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
     };
 
     if (open) {
-      // Use both mousedown and click for better coverage
-      document.addEventListener("mousedown", handleClickOutside, true);
-      document.addEventListener("click", handleClickOutside, true);
+      // Only use click event (not mousedown) to avoid conflicts with form interactions
+      // Use a slight delay to ensure form elements have processed their events first
+      const timeoutId = setTimeout(() => {
+        document.addEventListener("click", handleClickOutside, false);
+      }, 100);
+      
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
+
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener("click", handleClickOutside, false);
+        document.removeEventListener("keydown", handleEscape);
+        document.body.style.overflow = "unset";
+      };
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside, true);
-      document.removeEventListener("click", handleClickOutside, true);
-      document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
   }, [open]);
@@ -83,8 +101,16 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)",
             backdropFilter: "blur(10px)",
           }}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Don't prevent default - let form elements work normally
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
         >
           {/* Close Button */}
           <button
@@ -111,8 +137,16 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             overflow-hidden flex flex-col
             ${closing ? "sheet-slide-down" : "sheet-slide-up"}
           `}
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            // Don't prevent default - let form elements work normally
+          }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
         >
           {/* Mobile drag handle + close */}
           <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
