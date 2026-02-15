@@ -29,6 +29,7 @@ interface Category {
 export default function MenuItemsPage() {
   const locale = useLocale();
   const [items, setItems] = useState<MenuItem[]>([]);
+  // eslint-disable-next-line no-unused-vars
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -69,6 +70,7 @@ export default function MenuItemsPage() {
             if (cat.subCategories) {
               for (const sub of cat.subCategories) {
                 const subName = sub.names?.[locale] || sub.name || catName;
+
                 if (sub.menuItems) {
                   for (const item of sub.menuItems) {
                     allItems.push({

@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { useMenuMakerStore } from "../../../stores/menumaker";
-import { DataElement, ImageElement, MenuElement, ShapeElement, TextElement } from "../../../types/menumaker";
+import { MenuElement } from "../../../types/menumaker";
 import { useMobileGestures } from "./useMobileGestures";
 
 interface MobileCanvasPreviewProps {
