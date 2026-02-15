@@ -10,6 +10,9 @@ const { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } = require("next/const
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // 🚨 EMERGENCY: Disable React Strict Mode to prevent infinite loops
+  reactStrictMode: false,
+  
   async redirects() {
     return [
       {
