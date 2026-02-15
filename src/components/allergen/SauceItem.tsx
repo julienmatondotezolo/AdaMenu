@@ -94,8 +94,8 @@ function SauceItem({ items, selectedItemId, onClick, onPointerDown }: sauceProps
         </section>
         <div className="h-full overflow-y-scroll pb-60">
           <div className="w-full">
-            {items
-              ?.sort((a: any, b: any) => a.order - b.order)
+            {Array.isArray(items) 
+              ? items.sort((a: any, b: any) => a.order - b.order)
               .map((item: any, index: any) => {
                 const bgColor =
                   selectedItemId === item.id
@@ -128,7 +128,8 @@ function SauceItem({ items, selectedItemId, onClick, onPointerDown }: sauceProps
                     <div>{item.hidden == true ? <EyeOff size={16} /> : <Eye size={16} />}</div>
                   </section>
                 );
-              })}
+              })
+              : null}
           </div>
         </div>
       </div>
