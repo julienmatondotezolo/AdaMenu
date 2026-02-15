@@ -6,7 +6,10 @@ const adaMenuUrl: string | undefined = process.env.NEXT_PUBLIC_API_URL;
 
 export async function fetchCategories(): Promise<any> {
   try {
-    const responseCategories: Response = await fetch(adaMenuUrl + `/category/parents`, {
+    const url = adaMenuUrl + `/category/parents`;
+    console.log("Fetching categories from:", url);
+    
+    const responseCategories: Response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -18,10 +21,12 @@ export async function fetchCategories(): Promise<any> {
     if (responseCategories.ok) {
       return responseCategories.json();
     } else {
-      throw responseCategories;
+      console.error("Categories fetch failed:", responseCategories.status, responseCategories.statusText);
+      return [];
     }
   } catch (error) {
     console.error("Impossible to fetch categories:", error);
+    return [];
   }
 }
 
@@ -118,7 +123,10 @@ export const toggleCategoryVisibility = async ({ categoryId, hidden }: { categor
 
 export async function fetchCompleteMenu(): Promise<any> {
   try {
-    const responseMenu: Response = await fetch(adaMenuUrl + `/menu`, {
+    const url = adaMenuUrl + `/menu`;
+    console.log("Fetching complete menu from:", url);
+    
+    const responseMenu: Response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -128,13 +136,16 @@ export async function fetchCompleteMenu(): Promise<any> {
     });
 
     if (responseMenu.ok) {
-      return responseMenu.json();
+      const data = await responseMenu.json();
+      console.log("Complete menu data:", data);
+      return data;
     } else {
-      throw new Error(`HTTP error! status: ${responseMenu.status}`);
+      console.error("Complete menu fetch failed:", responseMenu.status, responseMenu.statusText);
+      return { restaurant: { name: "Unknown" }, categories: [] };
     }
   } catch (error) {
     console.error("Impossible to fetch complete menu:", error);
-    throw error; // Re-throw the error so it can be handled by the caller
+    return { restaurant: { name: "Unknown" }, categories: [] };
   }
 }
 
@@ -274,7 +285,10 @@ export async function toggleMenuItemVisibility({ menuId, hidden }: { menuId: str
 
 export async function fetchAllergen(): Promise<any> {
   try {
-    const responseAllergen: Response = await fetch(adaMenuUrl + `/allergen`, {
+    const url = adaMenuUrl + `/allergen`;
+    console.log("Fetching allergen from:", url);
+    
+    const responseAllergen: Response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -286,10 +300,12 @@ export async function fetchAllergen(): Promise<any> {
     if (responseAllergen.ok) {
       return responseAllergen.json();
     } else {
-      return responseAllergen;
+      console.error("Allergen fetch failed:", responseAllergen.status, responseAllergen.statusText);
+      return [];
     }
   } catch (error) {
     console.error("Impossible to fetch allergen:", error);
+    return [];
   }
 }
 
@@ -390,7 +406,10 @@ export async function deleteSauceItem({ itemId }: { itemId: string }): Promise<a
 
 export async function fetchSidedish(): Promise<any> {
   try {
-    const responseSidedish: Response = await fetch(adaMenuUrl + `/sidedish`, {
+    const url = adaMenuUrl + `/sidedish`;
+    console.log("Fetching sidedish from:", url);
+    
+    const responseSidedish: Response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -402,10 +421,12 @@ export async function fetchSidedish(): Promise<any> {
     if (responseSidedish.ok) {
       return responseSidedish.json();
     } else {
-      return responseSidedish;
+      console.error("Sidedish fetch failed:", responseSidedish.status, responseSidedish.statusText);
+      return [];
     }
   } catch (error) {
     console.error("Impossible to fetch sidedish:", error);
+    return [];
   }
 }
 
