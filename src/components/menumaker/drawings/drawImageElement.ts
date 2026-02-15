@@ -43,8 +43,8 @@ export const drawImageElement = ({
   if (element.src) {
     const cachedImage = imageElementCache.get(element.src);
 
-    if (cachedImage && cachedImage.complete) {
-      // Image is loaded and ready to draw
+    if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0 && cachedImage.naturalHeight > 0) {
+      // Image is loaded successfully and ready to draw
       ctx.save();
       ctx.globalAlpha = element.opacity ?? 1;
 
@@ -52,6 +52,21 @@ export const drawImageElement = ({
       ctx.drawImage(cachedImage, x, y, width, height);
 
       ctx.restore();
+    } else if (cachedImage && cachedImage.complete && cachedImage.naturalWidth === 0) {
+      // Image failed to load (broken state)
+      ctx.fillStyle = "#ffebee";
+      ctx.fillRect(x, y, width, height);
+      ctx.strokeStyle = "#f44336";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(x, y, width, height);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "#f44336";
+      ctx.font = "14px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("❌ Image Error", x + width / 2, y + height / 2 - 8);
+      ctx.font = "12px Arial";
+      ctx.fillText("Failed to load", x + width / 2, y + height / 2 + 8);
     } else if (!cachedImage) {
       // Load the image and cache it
       const img = new Image();
@@ -59,11 +74,24 @@ export const drawImageElement = ({
       img.crossOrigin = "anonymous"; // Enable CORS to prevent canvas tainting
 
       img.onload = () => {
-        setImageElementCache((prev) => new Map(prev.set(element.src, img)));
-        // Trigger a full canvas redraw when image loads
+        // Double-check the image loaded successfully
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          setImageElementCache((prev) => new Map(prev.set(element.src, img)));
+          // Trigger a full canvas redraw when image loads successfully
+        } else {
+          console.warn("Image loaded but has no dimensions:", element.src);
+          // Mark as failed by setting naturalWidth to 0 explicitly
+          Object.defineProperty(img, 'naturalWidth', { value: 0 });
+          Object.defineProperty(img, 'naturalHeight', { value: 0 });
+          setImageElementCache((prev) => new Map(prev.set(element.src, img)));
+        }
       };
       img.onerror = () => {
         console.warn("Failed to load image element:", element.src);
+        // Mark as failed by setting naturalWidth to 0 explicitly
+        Object.defineProperty(img, 'naturalWidth', { value: 0 });
+        Object.defineProperty(img, 'naturalHeight', { value: 0 });
+        setImageElementCache((prev) => new Map(prev.set(element.src, img)));
       };
       img.src = element.src;
 

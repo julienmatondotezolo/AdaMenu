@@ -211,8 +211,8 @@ export function PageThumbnail({ page, width, height }: PageThumbnailProps) {
               if (imageSrc) {
                 const cachedImage = imageCacheRef.current.get(imageSrc);
 
-                if (cachedImage && cachedImage.complete) {
-                  // Image is loaded and ready to draw
+                if (cachedImage && cachedImage.complete && cachedImage.naturalWidth > 0 && cachedImage.naturalHeight > 0) {
+                  // Image is loaded successfully and ready to draw
                   ctx.save();
                   ctx.globalAlpha = (element.opacity ?? 1) * layer.opacity;
 
