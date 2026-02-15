@@ -23,7 +23,11 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+      // Ensure we have a valid target and modalRef
+      if (!event.target || !modalRef.current) return;
+      
+      // If click is outside the modal, close it
+      if (!modalRef.current.contains(event.target as Node)) {
         handleClose();
       }
     };
@@ -35,13 +39,16 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
     };
 
     if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
+      // Use both mousedown and click for better coverage
+      document.addEventListener("mousedown", handleClickOutside, true);
+      document.addEventListener("click", handleClickOutside, true);
       document.addEventListener("keydown", handleEscape);
       document.body.style.overflow = "hidden";
     }
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside, true);
+      document.removeEventListener("click", handleClickOutside, true);
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "unset";
     };
@@ -57,7 +64,6 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
         className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm ${
           closing ? "overlay-fade-out" : "overlay-fade-in"
         }`}
-        onClick={handleClose}
       />
 
       {/* ═══ Desktop: centered modal ═══ */}
@@ -78,6 +84,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             backdropFilter: "blur(10px)",
           }}
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
@@ -94,7 +101,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
       </div>
 
       {/* ═══ Mobile: full-screen bottom sheet ═══ */}
-      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end" onClick={handleClose}>
+      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
         <div
           ref={modalRef}
           className={`
@@ -105,6 +112,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             ${closing ? "sheet-slide-down" : "sheet-slide-up"}
           `}
           onClick={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         >
           {/* Mobile drag handle + close */}
           <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">
