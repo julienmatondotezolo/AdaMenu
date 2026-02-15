@@ -57,6 +57,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
         className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-sm ${
           closing ? "overlay-fade-out" : "overlay-fade-in"
         }`}
+        onClick={handleClose}
       />
 
       {/* ═══ Desktop: centered modal ═══ */}
@@ -76,6 +77,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             background: "linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.95) 100%)",
             backdropFilter: "blur(10px)",
           }}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Close Button */}
           <button
@@ -92,7 +94,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
       </div>
 
       {/* ═══ Mobile: full-screen bottom sheet ═══ */}
-      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end">
+      <div className="md:hidden fixed inset-0 z-50 flex flex-col justify-end" onClick={handleClose}>
         <div
           ref={modalRef}
           className={`
@@ -102,6 +104,7 @@ function Dialog({ open, setIsOpen, children }: DialogProps) {
             overflow-hidden flex flex-col
             ${closing ? "sheet-slide-down" : "sheet-slide-up"}
           `}
+          onClick={(e) => e.stopPropagation()}
         >
           {/* Mobile drag handle + close */}
           <div className="flex-shrink-0 flex items-center justify-between px-4 pt-3 pb-2">

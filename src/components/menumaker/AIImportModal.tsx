@@ -312,7 +312,7 @@ export function AIImportModal({ open, onClose, onImported }: AIImportModalProps)
 
   return (
     <Dialog open={open} setIsOpen={(v) => !v && onClose()}>
-      <div className="flex flex-col max-h-[85vh]">
+      <div className="flex flex-col max-h-[85vh]" onClick={(e) => e.stopPropagation()}>
         {/* ── Header ── */}
         <div className="flex items-start justify-between px-6 pt-6 pb-2">
           <div className="flex items-center gap-3">

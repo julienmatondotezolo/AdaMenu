@@ -21,7 +21,7 @@ function SauceItem({ items, selectedItemId, onClick, onPointerDown }: sauceProps
   const locale = useLocale();
   const [orderedItems, setOrderedItems] = useState<any[]>([]);
   const queryClient = useQueryClient();
-  const visibleCount = items?.filter((items: any) => !items.hidden).length;
+  const visibleCount = Array.isArray(items) ? items.filter((item: any) => !item.hidden).length : 0;
   const textItem = "Sauce";
 
   useEffect(() => {
