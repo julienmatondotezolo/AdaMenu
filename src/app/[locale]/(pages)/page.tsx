@@ -63,10 +63,11 @@ export default function DashboardPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Prevent multiple loads - only load once on mount or when locale actually changes
-    if (hasLoadedRef.current && locale === hasLoadedRef.current) return;
+    // AGGRESSIVE: Only load once on mount, ignore locale changes to prevent infinite loops
+    if (hasLoadedRef.current) return;
     
     let isMounted = true;
+    hasLoadedRef.current = true;
 
     async function loadStats() {
       try {
@@ -145,8 +146,6 @@ export default function DashboardPage() {
           setAllItems(menuItems);
         }
         
-        // Mark as loaded with current locale
-        hasLoadedRef.current = locale;
         console.log("Stats loaded successfully");
         
       } catch (e) {
@@ -173,7 +172,7 @@ export default function DashboardPage() {
     return () => {
       isMounted = false;
     };
-  }, [locale]);
+  }, []); // Empty dependency array - only run once on mount
 
   // Quick 86 toggle
   const handleQuick86Toggle = useCallback(
