@@ -231,8 +231,8 @@ const DigitalMenu: React.FC = () => {
 
       {/* Mobile Dialog */}
       {isDialogOpen && (
-        <div className="dialog fixed inset-0 z-[9999] bg-[#f7f2e6] shadow-lg p-8 lg:hidden">
-          <div className="dialog-content max-h-[calc(100vh-4rem)] overflow-y-auto">
+        <div className="dialog fixed inset-0 z-[9999] bg-[#f7f2e6] shadow-lg p-8 lg:hidden" onClick={() => setIsDialogOpen(false)}>
+          <div className="dialog-content max-h-[calc(100vh-4rem)] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="space-y-2">
               {categories.map((category) => (
                 <button
