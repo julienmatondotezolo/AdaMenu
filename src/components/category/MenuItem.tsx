@@ -2,7 +2,8 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
-import { Edit, Eye, EyeOff, LoaderCircle, MoveDown, MoveUp, Plus, ShoppingBag } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { Edit, Eye, EyeOff, GripVertical, LoaderCircle, Plus, ShoppingBag } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "react-query";
@@ -67,47 +68,41 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
     },
   });
 
-  const moveCategory = (index: number, direction: "up" | "down") => {
-    if (updateMenuMutation.isLoading) {
-      alert("Wait still loading...");
-      return;
-    }
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination || result.source.index === result.destination.index) return;
+    if (updateMenuMutation.isLoading) return;
 
-    const newMenuItems = [...orderedMenuItems];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    const sorted = [...orderedMenuItems].sort((a: any, b: any) => a.order - b.order);
+    const [moved] = sorted.splice(result.source.index, 1);
 
-    if (targetIndex >= 0 && targetIndex < newMenuItems.length) {
-      const tempOrder = newMenuItems[index].order;
+    sorted.splice(result.destination.index, 0, moved);
 
-      newMenuItems[index].order = newMenuItems[targetIndex].order;
-      newMenuItems[targetIndex].order = tempOrder;
+    // Reassign order values based on new positions
+    const reordered = sorted.map((item: any, i: number) => ({ ...item, order: i }));
 
-      setOrderedMenuItems(newMenuItems);
+    setOrderedMenuItems(reordered);
 
-      const menuObject = mapMenu(newMenuItems);
+    const menuObject = mapMenu(reordered);
 
-      updateMenuMutation.mutate({
-        menuObject,
-      }, {
-        onSuccess: () => {
-          showActionToast({
-            type: 'success',
-            action: 'update',
-            itemName: newMenuItems[index].names[locale],
-            locale,
-          });
-        },
-        onError: (error: unknown) => {
-          showActionToast({
-            type: 'error',
-            action: 'update',
-            itemName: newMenuItems[index].names[locale],
-            locale,
-            error: error instanceof Error ? error : new Error('Unknown error'),
-          });
-        },
-      });
-    }
+    updateMenuMutation.mutate({ menuObject }, {
+      onSuccess: () => {
+        showActionToast({
+          type: 'success',
+          action: 'update',
+          itemName: moved.names[locale],
+          locale,
+        });
+      },
+      onError: (error: unknown) => {
+        showActionToast({
+          type: 'error',
+          action: 'update',
+          itemName: moved.names[locale],
+          locale,
+          error: error instanceof Error ? error : new Error('Unknown error'),
+        });
+      },
+    });
   };
 
   const handleToggleVisibility = (menuItem: any, event: React.MouseEvent) => {
@@ -216,143 +211,138 @@ function MenuItem({ items, selectedMenuId, onClick, onPointerDown, viewMode = 'g
       {/* Content */}
       <div className="flex-1 overflow-hidden px-6 py-4">
         <div className="h-full overflow-y-auto space-y-3 pb-12">
-          <div className={viewMode === 'grid' ? 
-            "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" : 
-            "flex flex-col space-y-3"
-          }>
-            {items
-              ?.sort((a: any, b: any) => a.order - b.order)
-              .map((menu: any, index: any) => (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="menu-items" direction={viewMode === 'grid' ? 'horizontal' : 'vertical'}>
+              {(provided) => (
                 <div
-                  key={menu.id}
-                  onClick={() => onPointerDown(menu.id)}
-                  className={`
-                    group relative cursor-pointer p-4 rounded-xl border transition-all duration-300
-                    ${menu.hidden ? "opacity-60" : "opacity-100"}
-                    ${
-                selectedMenuId === menu.id
-                  ? "bg-blue-50 border-blue-200 shadow-md shadow-blue-500/10 dark:bg-blue-900/20 dark:border-blue-700"
-                  : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600"
-                }
-                    ${viewMode === 'list' ? 'flex items-center justify-between' : ''}
-                  `}
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={viewMode === 'grid' ?
+                    "grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4" :
+                    "flex flex-col space-y-3"
+                  }
                 >
-                  {/* Header */}
-                  <div className={`flex items-start justify-between ${viewMode === 'list' ? 'flex-1 mr-4' : 'mb-3'}`}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                        #{index + 1}
-                      </span>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          menu.hidden
-                            ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                            : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                        }`}
-                      >
-                        {menu.hidden ? "Hidden" : "Visible"}
-                      </span>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center space-x-1">
-                      {selectedMenuId === menu.id && (
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onClick("editMenu");
-                          }}
-                          variant="outline"
-                          size="sm"
-                          className="flex items-center space-x-2"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span>{text("edit")}</span>
-                        </Button>
-                      )}
-                      <button
-                        onClick={(e) => handleToggleVisibility(menu, e)}
-                        className={`p-1.5 rounded-lg transition-colors duration-200 ${
-                          menu.hidden
-                            ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
-                        }`}
-                        title={menu.hidden ? "Show item" : "Hide item"}
-                        disabled={toggleLoadingId === menu.id}
-                      >
-                        {toggleLoadingId === menu.id ? (
-                          <LoaderCircle className="w-4 h-4 animate-spin" />
-                        ) : menu.hidden ? (
-                          <EyeOff className="w-4 h-4" />
-                        ) : (
-                          <Eye className="w-4 h-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className={viewMode === 'list' ? 'flex-1' : 'space-y-2'}>
-                    <h4 className="font-medium text-gray-900 dark:text-white line-clamp-2">{menu.names[locale]}</h4>
-                    {viewMode === 'grid' && (
-                      <p
-                        className={`text-sm line-clamp-2 ${
-                          menu.descriptions && menu.descriptions[locale]
-                            ? "text-gray-600 dark:text-gray-400"
-                            : "text-orange-500 dark:text-orange-400 italic"
-                        }`}
-                      >
-                        {menu.descriptions && menu.descriptions[locale]
-                          ? menu.descriptions[locale]
-                          : text("no_description")}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div className={`${viewMode === 'list' ? 'flex items-center ml-4' : 'flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700'}`}>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg font-semibold text-gray-900 dark:text-white">{menu.price} EUR</span>
-                    </div>
-
-                    {/* Order Controls - Only show for selected item */}
-                    {selectedMenuId === menu.id && (
-                      <div className="flex items-center space-x-1">
-                        {updateMenuMutation.isLoading ? (
-                          <LoaderCircle className="w-4 h-4 animate-spin text-blue-600" />
-                        ) : (
-                          <>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                moveCategory(index, "up");
-                              }}
-                              disabled={index === 0}
-                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                              aria-label="Move up"
+                  {items
+                    ?.sort((a: any, b: any) => a.order - b.order)
+                    .map((menu: any, index: any) => (
+                      <Draggable key={menu.id} draggableId={menu.id} index={index}>
+                        {(dragProvided, snapshot) => (
+                          <div
+                            ref={dragProvided.innerRef}
+                            {...dragProvided.draggableProps}
+                            onClick={() => onPointerDown(menu.id)}
+                            className={`
+                              group relative cursor-pointer p-4 rounded-xl border transition-all duration-300
+                              ${menu.hidden ? "opacity-60" : "opacity-100"}
+                              ${snapshot.isDragging
+                                ? "shadow-xl border-blue-400 bg-blue-50 dark:bg-blue-900/30 ring-2 ring-blue-400/30"
+                                : selectedMenuId === menu.id
+                                  ? "bg-blue-50 border-blue-200 shadow-md shadow-blue-500/10 dark:bg-blue-900/20 dark:border-blue-700"
+                                  : "bg-white border-gray-200 hover:shadow-md hover:border-gray-300 dark:bg-gray-800 dark:border-gray-700 dark:hover:border-gray-600"
+                              }
+                              ${viewMode === 'list' ? 'flex items-center justify-between' : ''}
+                            `}
+                          >
+                            {/* Drag Handle */}
+                            <div
+                              {...dragProvided.dragHandleProps}
+                              className={`flex-shrink-0 ${viewMode === 'list' ? 'mr-3' : 'absolute top-3 left-3'} p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing`}
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <MoveUp className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                moveCategory(index, "down");
-                              }}
-                              disabled={index === items.length - 1}
-                              className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                              aria-label="Move down"
-                            >
-                              <MoveDown className="w-4 h-4" />
-                            </button>
-                          </>
+                              <GripVertical className="w-4 h-4" />
+                            </div>
+
+                            {/* Header */}
+                            <div className={`flex items-start justify-between ${viewMode === 'list' ? 'flex-1 mr-4' : `mb-3 ${viewMode === 'grid' ? 'ml-6' : ''}`}`}>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                                  #{index + 1}
+                                </span>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-full ${
+                                    menu.hidden
+                                      ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+                                      : "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+                                  }`}
+                                >
+                                  {menu.hidden ? "Hidden" : "Visible"}
+                                </span>
+                              </div>
+
+                              {/* Actions */}
+                              <div className="flex items-center space-x-1">
+                                {selectedMenuId === menu.id && (
+                                  <Button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onClick("editMenu");
+                                    }}
+                                    variant="outline"
+                                    size="sm"
+                                    className="flex items-center space-x-2"
+                                  >
+                                    <Edit className="w-4 h-4" />
+                                    <span>{text("edit")}</span>
+                                  </Button>
+                                )}
+                                <button
+                                  onClick={(e) => handleToggleVisibility(menu, e)}
+                                  className={`p-1.5 rounded-lg transition-colors duration-200 ${
+                                    menu.hidden
+                                      ? "text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                      : "text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                                  }`}
+                                  title={menu.hidden ? "Show item" : "Hide item"}
+                                  disabled={toggleLoadingId === menu.id}
+                                >
+                                  {toggleLoadingId === menu.id ? (
+                                    <LoaderCircle className="w-4 h-4 animate-spin" />
+                                  ) : menu.hidden ? (
+                                    <EyeOff className="w-4 h-4" />
+                                  ) : (
+                                    <Eye className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Content */}
+                            <div className={viewMode === 'list' ? 'flex-1' : 'space-y-2'}>
+                              <h4 className="font-medium text-gray-900 dark:text-white line-clamp-2">{menu.names[locale]}</h4>
+                              {viewMode === 'grid' && (
+                                <p
+                                  className={`text-sm line-clamp-2 ${
+                                    menu.descriptions && menu.descriptions[locale]
+                                      ? "text-gray-600 dark:text-gray-400"
+                                      : "text-orange-500 dark:text-orange-400 italic"
+                                  }`}
+                                >
+                                  {menu.descriptions && menu.descriptions[locale]
+                                    ? menu.descriptions[locale]
+                                    : text("no_description")}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Footer */}
+                            <div className={`${viewMode === 'list' ? 'flex items-center ml-4' : 'flex items-center justify-between mt-4 pt-3 border-t border-gray-100 dark:border-gray-700'}`}>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-lg font-semibold text-gray-900 dark:text-white">{menu.price} EUR</span>
+                              </div>
+                              {updateMenuMutation.isLoading && selectedMenuId === menu.id && (
+                                <LoaderCircle className="w-4 h-4 animate-spin text-blue-600" />
+                              )}
+                            </div>
+                          </div>
                         )}
-                      </div>
-                    )}
-                  </div>
+                      </Draggable>
+                    ))}
+                  {provided.placeholder}
+                  <div className="h-10"></div>
                 </div>
-              ))}
-            <div className="h-10"></div>
-          </div>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       </div>
     </div>
